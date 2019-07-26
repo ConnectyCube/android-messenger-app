@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              style="@style/ListItem"
+              tools:ignore="RtlHardcoded">
+
+    <ImageView
+            android:id="@+id/image_user"
+            style="@style/UserIconLoginStyle" />
+
+    <TextView
+            android:id="@+id/text_user_login"
+            style="@style/UserTitleLoginStyle" />
+
+    <CheckBox
+            android:id="@+id/checkbox_user"
+            style="@style/UserLoginCheckboxStyle" />
+
+</LinearLayout>
