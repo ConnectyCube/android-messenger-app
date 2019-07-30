@@ -14,7 +14,7 @@
             android:indeterminate="true"
             android:max="100"
             android:backgroundTint="@color/white"
-            android:indeterminateTint="#1a09d6"
+            android:indeterminateTint="@color/colorAccent"
             android:layout_marginTop="-7dp"
             android:visibility="gone"
             tools:ignore="MissingConstraints"/>

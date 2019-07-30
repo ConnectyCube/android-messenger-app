@@ -25,4 +25,7 @@ interface ChatDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAll(chats: List<Chat>)
+
+    @Query("SELECT * FROM chats LIMIT :limit OFFSET :offset")
+    fun getChatsByPage(limit: Int, offset: Int): LiveData<List<Chat>>
 }
