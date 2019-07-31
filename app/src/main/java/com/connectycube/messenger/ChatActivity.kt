@@ -3,7 +3,6 @@ package com.connectycube.messenger
 import android.graphics.Rect
 import android.os.Bundle
 import android.view.View
-import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
 import androidx.lifecycle.Observer
 import androidx.paging.PagedList
@@ -18,7 +17,6 @@ import com.connectycube.chat.model.ConnectycubeDialogType
 import com.connectycube.messenger.adapters.ChatMessageAdapter
 import com.connectycube.messenger.adapters.ClickListener
 import com.connectycube.messenger.api.ConnectycubeMessageSender
-import com.connectycube.messenger.paging.NetworkState
 import com.connectycube.messenger.paging.Status
 import com.connectycube.messenger.utilities.InjectorUtils
 import com.connectycube.messenger.viewmodels.ChatMessageViewModel

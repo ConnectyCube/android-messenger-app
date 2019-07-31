@@ -11,7 +11,6 @@ import com.connectycube.chat.model.ConnectycubeChatDialog
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.connectycube.chat.model.ConnectycubeChatDialog
 import com.connectycube.messenger.utilities.InjectorUtils
 import com.connectycube.messenger.viewmodels.ChatListViewModel
 import com.connectycube.messenger.vo.Status
