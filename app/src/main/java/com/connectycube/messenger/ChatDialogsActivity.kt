@@ -3,14 +3,14 @@ package com.connectycube.messenger
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
 import androidx.lifecycle.observe
-import com.connectycube.chat.model.ConnectycubeChatDialog
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.connectycube.chat.model.ConnectycubeChatDialog
+import com.connectycube.messenger.adapters.ChatDialogAdapter
 import com.connectycube.messenger.utilities.InjectorUtils
 import com.connectycube.messenger.viewmodels.ChatListViewModel
 import com.connectycube.messenger.vo.Status
@@ -73,7 +73,6 @@ class ChatDialogsActivity : ComponentActivity(), ChatDialogAdapter.ChatDialogAda
     }
 
     override fun onChatDialogSelected(chatDialog: ConnectycubeChatDialog) {
-        Toast.makeText(this, "Selected dialog " + chatDialog.dialogId, Toast.LENGTH_SHORT).show()
         startChatActivity(chatDialog)
     }
 

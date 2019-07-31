@@ -18,3 +18,17 @@ fun getPrettyDate(context: Context, date: Long): String {
         else -> DateFormat.getDateInstance(DateFormat.MEDIUM).format(date)
     }
 }
+
+fun getPrettyLastActivityDate(context: Context, date: Date): String {
+    val lastRequestAt = Calendar.getInstance().apply { time = date }
+    val currentDate = Calendar.getInstance().apply { time = Date() }
+
+    val lastRequestAtDay = lastRequestAt.get(Calendar.DAY_OF_YEAR)
+    val currentDay = currentDate.get(Calendar.DAY_OF_YEAR)
+
+    return when (currentDay - lastRequestAtDay) {
+        0 -> context.getString(R.string.today) + " at " + DateFormat.getTimeInstance(DateFormat.SHORT).format(date)
+        1 -> context.getString(R.string.yesterday) + " at " + DateFormat.getTimeInstance(DateFormat.SHORT).format(date)
+        else -> DateFormat.getDateInstance(DateFormat.MEDIUM).format(date)
+    }
+}
