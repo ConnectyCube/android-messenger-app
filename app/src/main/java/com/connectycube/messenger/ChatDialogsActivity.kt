@@ -1,11 +1,13 @@
 package com.connectycube.messenger
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
 import androidx.lifecycle.observe
+import com.connectycube.chat.model.ConnectycubeChatDialog
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -15,6 +17,7 @@ import com.connectycube.messenger.viewmodels.ChatListViewModel
 import com.connectycube.messenger.vo.Status
 import timber.log.Timber
 
+const val EXTRA_CHAT = "chat_dialog"
 class ChatDialogsActivity : ComponentActivity(), ChatDialogAdapter.ChatDialogAdapterCallback {
 
     val chatViewModel: ChatListViewModel by viewModels {
@@ -72,10 +75,17 @@ class ChatDialogsActivity : ComponentActivity(), ChatDialogAdapter.ChatDialogAda
 
     override fun onChatDialogSelected(chatDialog: ConnectycubeChatDialog) {
         Toast.makeText(this, "Selected dialog " + chatDialog.dialogId, Toast.LENGTH_SHORT).show()
+        startChatActivity(chatDialog)
     }
 
     override fun onChatDialogsListUpdated(currentList: List<ConnectycubeChatDialog>) {
         emptyListView.visibility = if(currentList.isEmpty()) View.VISIBLE else View.GONE
+    }
+
+    private fun startChatActivity(chat : ConnectycubeChatDialog) {
+        val intent = Intent(this, ChatActivity::class.java)
+        intent.putExtra(EXTRA_CHAT, chat);
+        startActivity(intent)
     }
 
     override fun onBackPressed() {

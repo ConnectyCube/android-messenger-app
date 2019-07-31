@@ -15,9 +15,13 @@
     <string name="title_current_user">Logged in as %1$s</string>
     <string name="action_start_logout">Logout</string>
 
-    <!--Dialogs-->
+    <!--ChatDialogs-->
     <string name="chat_login">Login…</string>
     <string name="chat_list_empty">There are no any chats yet</string>
+
+    <!--Chats-->
+    <string name="chat_text_hint">Message</string>
+    <string name="message_attachment">Attachment</string>
 
     <!-- Errors -->
     <string name="error_credentials_empty">The App class should contain ConnectyCube credentials. Register new account and application at https://admin.connectycube.com

@@ -11,6 +11,9 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
 import androidx.lifecycle.observe
+import com.connectycube.auth.session.ConnectycubeSessionManager
+import com.connectycube.auth.session.ConnectycubeSessionParameters
+import com.connectycube.auth.session.ConnectycubeSettings
 import com.connectycube.chat.ConnectycubeChatService
 import com.connectycube.core.EntityCallback
 import com.connectycube.core.exception.ResponseException
@@ -27,7 +30,7 @@ import kotlinx.android.synthetic.main.activity_login.*
 import timber.log.Timber
 
 
-class LoginActivity : ComponentActivity() {
+class LoginActivity : BaseChatActivity() {
     private lateinit var users: ArrayList<ConnectycubeUser>
     private lateinit var adapter: ArrayAdapter<String>
     val isSignedIn:Boolean = false
@@ -44,7 +47,7 @@ class LoginActivity : ComponentActivity() {
     }
 
     fun loginTo(user: ConnectycubeUser) {
-        showProgress()
+        showProgress(progressbar)
         Timber.d("called loginTo user = $user")
         val usersLogins = ArrayList<String>()
         users.forEach { usersLogins.add(it.login) }
@@ -63,9 +66,13 @@ class LoginActivity : ComponentActivity() {
         }
     }
 
+    fun isSignedIn(user: ConnectycubeUser) = ConnectycubeSessionManager.getInstance().sessionParameters?.userId == user.id ?: false
+
     fun signInRestIdNeed(user: ConnectycubeUser) {
-        if(!isSignedIn) {
+        if(!isSignedIn(user)) {
             signInRest(user)
+        } else {
+            loginToChat(user)
         }
     }
 
@@ -76,7 +83,7 @@ class LoginActivity : ComponentActivity() {
             }
 
             override fun onError(ex: ResponseException) {
-                hideProgress()
+                hideProgress(progressbar)
                 Toast.makeText(applicationContext, getString(R.string.login_chat_login_error, ex.message), Toast.LENGTH_SHORT).show()
             }
         })
@@ -87,12 +94,12 @@ class LoginActivity : ComponentActivity() {
         if (!isLoggedIn) {
             ConnectycubeChatService.getInstance().login(user, object : EntityCallback<Void> {
                 override fun onSuccess(void: Void?, bundle: Bundle?) {
-                    hideProgress()
+                    hideProgress(progressbar)
                     startDialogs()
                 }
 
                 override fun onError(ex: ResponseException) {
-                    hideProgress()
+                    hideProgress(progressbar)
                     Toast.makeText(
                         applicationContext,
                         getString(R.string.login_chat_login_error, ex.message),
@@ -101,7 +108,7 @@ class LoginActivity : ComponentActivity() {
                 }
             })
         } else {
-            hideProgress()
+            hideProgress(progressbar)
             startDialogs()
         }
     }
@@ -129,20 +136,6 @@ class LoginActivity : ComponentActivity() {
         list_users.onItemClickListener = AdapterView.OnItemClickListener { _, _, position, _ ->
             loginTo(users[position])
         }
-    }
-
-    private fun hideProgress() {
-        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-        progressbar.visibility = View.GONE;
-    }
-
-    private fun showProgress() {
-        getWindow().setFlags(
-            WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
-            WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
-        );
-
-        progressbar.visibility = View.VISIBLE;
     }
 
     override fun onBackPressed() {

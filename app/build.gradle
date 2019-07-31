@@ -21,7 +21,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'),
                     'proguard-rules.pro',
                     'proguard-glide.pro'
-            
+
         }
     }
     // work-runtime-ktx 2.1.0 and above now requires Java 8
@@ -36,6 +36,8 @@ ext {
     lifecycleVersion = '2.2.0-alpha02'
     workVersion = '2.1.0'
     materialVersion = '1.0.0'
+    archPagingVersion = "1.0.1"
+    paging_version = "2.1.0"
     glideVersion = '4.9.0'
     recyclerViewVersion = '1.1.0-beta01'
 }
@@ -48,6 +50,8 @@ dependencies { configuration ->
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion"
     implementation "androidx.activity:activity-ktx:1.1.0-alpha01"
     implementation "androidx.work:work-runtime-ktx:$workVersion"
+    implementation "android.arch.paging:runtime:$archPagingVersion"
+    implementation "androidx.paging:paging-runtime-ktx:$paging_version"
     implementation "androidx.recyclerview:recyclerview:$recyclerViewVersion"
     implementation 'com.android.support:multidex:1.0.3'
     implementation "com.google.android.material:material:$materialVersion"

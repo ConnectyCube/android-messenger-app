@@ -6,6 +6,8 @@
 
     <color name="white">#fff</color>
     <color name="dark_grey">#6e6e6e</color>
+    <color name="blue_light">#acc3e8</color>
+    <color name="pink_light">#debbf0</color>
 
     <color name="unread_messages_budge">#43A238</color>
     <color name="unread_messages_date">@color/unread_messages_budge</color>
