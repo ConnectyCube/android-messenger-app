@@ -2,14 +2,15 @@ package com.connectycube.messenger.api
 
 import androidx.lifecycle.LiveData
 import com.connectycube.chat.ConnectycubeRestChatService
+import com.connectycube.chat.Consts
 import com.connectycube.chat.model.ConnectycubeChatDialog
+import com.connectycube.core.request.RequestGetBuilder
 import com.connectycube.messenger.data.Chat
 import com.connectycube.messenger.data.User
 import com.connectycube.messenger.utilities.Converter
 import com.connectycube.messenger.utilities.InjectorUtils
 import com.connectycube.users.ConnectycubeUsers
 import com.connectycube.users.model.ConnectycubeUser
-import kotlin.collections.ArrayList
 
 class ConnectycubeService {
 
@@ -34,10 +35,13 @@ class ConnectycubeService {
 
 
     fun loadChats(): LiveData<ApiResponse<List<Chat>>> {
+        val requestBuilder = RequestGetBuilder()
+            .sortDesc(Consts.DIALOG_LAST_MESSAGE_DATE_SENT_FIELD_NAME)
+            .`in`(Consts.DIALOG_TYPE, 2, 3)
 
         return InjectorUtils.provideConnectycubeServiceForType<ArrayList<ConnectycubeChatDialog>, List<Chat>>()
             .perform(
-                ConnectycubeRestChatService.getChatDialogs(null, null),
+                ConnectycubeRestChatService.getChatDialogs(null, requestBuilder),
                 object : Converter<List<Chat>, ArrayList<ConnectycubeChatDialog>>() {
                     override fun convertTo(response: ArrayList<ConnectycubeChatDialog>): List<Chat> {
                         return wrapChats(response)

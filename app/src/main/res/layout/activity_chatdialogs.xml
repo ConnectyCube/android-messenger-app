@@ -7,6 +7,14 @@
         android:layout_height="match_parent"
         android:layout_width="match_parent">
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/chatsRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:listitem="@layout/list_item_chat_dialog"
+        tools:itemCount="4">
+    </androidx.recyclerview.widget.RecyclerView>
+
 
     <LinearLayout
             android:id="@+id/layout_chat_empty"
@@ -14,7 +22,6 @@
             android:layout_gravity="center"
             android:gravity="center"
             android:orientation="vertical"
-            android:visibility="gone"
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
             tools:visibility="visible">
