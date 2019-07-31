@@ -33,6 +33,17 @@ class ConnectycubeService {
         return users
     }
 
+    fun loadChatsSlice(): LiveData<ApiResponse<List<Chat>>> {
+        val requestGetBuilder = RequestGetBuilder().apply { limit = 10 }
+        return InjectorUtils.provideConnectycubeServiceForType<ArrayList<ConnectycubeChatDialog>, List<Chat>>()
+            .perform(
+                ConnectycubeRestChatService.getChatDialogs(null, requestGetBuilder),
+                object : Converter<List<Chat>, ArrayList<ConnectycubeChatDialog>>() {
+                    override fun convertTo(response: ArrayList<ConnectycubeChatDialog>): List<Chat> {
+                        return wrapChats(response)
+                    }
+                })
+    }
 
     fun loadChats(): LiveData<ApiResponse<List<Chat>>> {
         val requestBuilder = RequestGetBuilder()
@@ -51,7 +62,7 @@ class ConnectycubeService {
 
     private fun wrapChats(list: ArrayList<ConnectycubeChatDialog>): List<Chat> {
         val chats = ArrayList<Chat>()
-        list.forEach { chats.add(Chat(it.dialogId, it.lastMessageDateSent, it.name, it)) }
+        list.forEach { chats.add(Chat(it.dialogId, it.lastMessageDateSent, it.unreadMessageCount, it.name, it)) }
         return chats
     }
 }

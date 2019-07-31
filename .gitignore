@@ -59,7 +59,6 @@ build
 *.ipr
 *~
 *.swp
-app/src/main/assets
 
 # Mac
 .DS_Store

@@ -27,7 +27,7 @@ class ChatActivity : BaseChatActivity() {
 
     private val clickListener: ClickListener = this::onMessageClicked
     private val messageListener: ChatDialogMessageListener = ChatMessageListener()
-    private val chatAdapter = ChatMessageAdapter(this, clickListener)
+    private lateinit var chatAdapter: ChatMessageAdapter
     private lateinit var chatDialog: ConnectycubeChatDialog
     private lateinit var model: ChatMessageViewModel
     private lateinit var messageSender: ConnectycubeMessageSender
@@ -50,6 +50,7 @@ class ChatActivity : BaseChatActivity() {
     }
 
     private fun initChatAdapter() {
+        chatAdapter = ChatMessageAdapter(this, chatDialog, clickListener)
         val layoutManager = LinearLayoutManager(this)
         layoutManager.stackFromEnd = false
         layoutManager.reverseLayout = true
@@ -115,6 +116,7 @@ class ChatActivity : BaseChatActivity() {
 
     internal inner class ChatMessageListener : ChatDialogMessageListener {
         override fun processMessage(s: String, chatMessage: ConnectycubeChatMessage, integer: Int?) {
+            Timber.d("ChatMessageListener processMessage " + chatMessage.body)
             submitMessage(chatMessage)
         }
         override fun processError(s: String, e: ChatException, chatMessage: ConnectycubeChatMessage, integer: Int?) {

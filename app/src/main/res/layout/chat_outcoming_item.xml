@@ -17,7 +17,7 @@
             android:layout_marginStart="@dimen/margin_tiny">
 
         <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:paddingRight="@dimen/margin_small">
@@ -27,9 +27,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="end"
-                    android:paddingRight="@dimen/margin_small"
+                    android:paddingLeft="@dimen/margin_small"
                     tools:text="Yesterday"
-                    android:paddingEnd="@dimen/margin_small"
                     tools:ignore="RtlSymmetry"/>
 
             <TextView
@@ -37,18 +36,11 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="end"
-                    android:paddingRight="@dimen/margin_small"
+                    android:paddingLeft="@dimen/margin_small"
                     tools:text="text message example"
-                    android:paddingEnd="@dimen/margin_small"
                     tools:ignore="RtlSymmetry"/>
         </LinearLayout>
 
     </LinearLayout>
-
-    <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="avatar"/>
-    <!--CustomCircleView for avatar-->
 
 </LinearLayout>

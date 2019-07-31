@@ -12,6 +12,7 @@ data class Chat(
     @NonNull
     @ColumnInfo(name = "id") val chatId: String,
     val lastMessageDateSent: Long,
+    val unreadMessageCount: Int,
     val name: String,
     val conChat: ConnectycubeChatDialog
 ) {
