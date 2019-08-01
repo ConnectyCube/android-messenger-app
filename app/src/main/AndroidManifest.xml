@@ -23,6 +23,7 @@
         </activity>
         <activity android:name=".ChatDialogsActivity"/>
         <activity android:name=".ChatActivity"/>
+        <activity android:name=".CreateChatDialogActivity" />
     </application>
 
 </manifest>

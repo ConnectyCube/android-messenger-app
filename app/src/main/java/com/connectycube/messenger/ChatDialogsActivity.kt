@@ -69,7 +69,8 @@ class ChatDialogsActivity : ComponentActivity(), ChatDialogAdapter.ChatDialogAda
     }
 
     fun onCreateNewChatClick(view: View) {
-
+        val intent = Intent(this, CreateChatDialogActivity::class.java)
+        startActivity(intent)
     }
 
     override fun onChatDialogSelected(chatDialog: ConnectycubeChatDialog) {

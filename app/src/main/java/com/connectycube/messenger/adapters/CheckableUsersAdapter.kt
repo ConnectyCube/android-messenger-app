@@ -19,7 +19,7 @@ class CheckableUsersAdapter(
     private val callback: CheckableUsersAdapterCallback
 ) : RecyclerView.Adapter<CheckableUsersAdapter.CheckableUserViewHolder>() {
 
-    private lateinit var items: List<ConnectycubeUser>
+    private var items: List<ConnectycubeUser> = mutableListOf()
 
     override fun getItemCount(): Int {
         return items.size

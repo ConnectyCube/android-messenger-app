@@ -6,9 +6,7 @@ import com.connectycube.messenger.data.AppDatabase
 import com.connectycube.messenger.data.ChatMessageRepository
 import com.connectycube.messenger.data.ChatRepository
 import com.connectycube.messenger.data.UserRepository
-import com.connectycube.messenger.viewmodels.ChatListViewModelFactory
-import com.connectycube.messenger.viewmodels.MessageListViewModelFactory
-import com.connectycube.messenger.viewmodels.UserListViewModelFactory
+import com.connectycube.messenger.viewmodels.*
 
 object InjectorUtils {
 
@@ -45,5 +43,9 @@ object InjectorUtils {
 
     fun <T, R> provideConnectycubeServiceForType(): LiveDataResponsePerformer<T, R> {
         return LiveDataResponsePerformer()
+    }
+
+    fun provideCreateChatDialogViewModelFactory(userListViewModel: UserListViewModel): CreateChatDialogViewModelFactory {
+        return CreateChatDialogViewModelFactory(userListViewModel)
     }
 }
