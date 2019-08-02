@@ -56,9 +56,10 @@ class ChatDialogAdapter(private val context: Context) :
 
             txtName.text = chatDialog.name
             txtLastMessage.text = chatDialog.lastMessage
-            txtLastMessageDate.text = getPrettyDate(activityContext, chatDialog.lastMessageDateSent * 1000)
 
-            if (chatDialog.unreadMessageCount > 0) {
+            setLastMessageDate(activityContext, txtLastMessageDate, chatDialog)
+
+            if (chatDialog.unreadMessageCount != null && chatDialog.unreadMessageCount > 0) {
                 txtUnreadMessagesCount.visibility = View.VISIBLE
                 txtUnreadMessagesCount.text = chatDialog.unreadMessageCount.toString()
                 setTextColor(activityContext, txtLastMessageDate, R.color.unread_messages_date)
@@ -68,6 +69,18 @@ class ChatDialogAdapter(private val context: Context) :
             }
 
             itemView.setOnClickListener(clickListener)
+        }
+
+        private fun setLastMessageDate(
+            activityContext: Context,
+            textView: TextView,
+            chatDialog: ConnectycubeChatDialog
+        ) {
+            var lastMessageDateSent: Long = chatDialog.lastMessageDateSent * 1000
+
+            if (lastMessageDateSent == 0L) lastMessageDateSent = chatDialog.createdAt.time
+
+            textView.text = getPrettyDate(activityContext, lastMessageDateSent)
         }
 
         private fun setTextColor(context: Context, textView: TextView, @ColorRes color: Int){

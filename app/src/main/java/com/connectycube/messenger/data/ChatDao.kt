@@ -18,7 +18,7 @@ interface ChatDao {
     fun getChats(): LiveData<List<Chat>>
 
     @Query("SELECT * FROM chats WHERE id = :chatId")
-    fun getChat(chatId: Int): LiveData<Chat>
+    fun getChat(chatId: String?): LiveData<Chat>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(chat: Chat)

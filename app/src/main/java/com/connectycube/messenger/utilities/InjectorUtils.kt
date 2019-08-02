@@ -45,7 +45,9 @@ object InjectorUtils {
         return LiveDataResponsePerformer()
     }
 
-    fun provideCreateChatDialogViewModelFactory(userListViewModel: UserListViewModel): CreateChatDialogViewModelFactory {
-        return CreateChatDialogViewModelFactory(userListViewModel)
+    fun provideCreateChatDialogViewModelFactory(context: Context): CreateChatDialogViewModelFactory {
+        val usersRepository = getUserRepository(context)
+        val chatRepository = getChatRepository(context)
+        return CreateChatDialogViewModelFactory(usersRepository, chatRepository)
     }
 }

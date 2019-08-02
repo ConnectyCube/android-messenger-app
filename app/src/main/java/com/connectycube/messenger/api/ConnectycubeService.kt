@@ -54,4 +54,17 @@ class ConnectycubeService {
         list.forEach { chats.add(Chat(it.dialogId, it.lastMessageDateSent, it.name, it)) }
         return chats
     }
+
+    fun createChatDialog(chat: Chat): LiveData<ApiResponse<Chat>> {
+        val chatDialog: ConnectycubeChatDialog = chat.conChat
+
+        return InjectorUtils.provideConnectycubeServiceForType<ConnectycubeChatDialog, Chat>()
+            .perform(
+                ConnectycubeRestChatService.createChatDialog(chatDialog),
+                object : Converter<Chat, ConnectycubeChatDialog>() {
+                    override fun convertTo(response: ConnectycubeChatDialog): Chat {
+                        return Chat(response.dialogId, response.lastMessageDateSent, response.name, response)
+                    }
+                })
+    }
 }
