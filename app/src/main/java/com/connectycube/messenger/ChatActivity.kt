@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.connectycube.chat.ConnectycubeChatService
 import com.connectycube.chat.exception.ChatException
 import com.connectycube.chat.listeners.ChatDialogMessageListener
+import com.connectycube.chat.listeners.MessageStatusListener
 import com.connectycube.chat.model.ConnectycubeChatDialog
 import com.connectycube.chat.model.ConnectycubeChatMessage
 import com.connectycube.chat.model.ConnectycubeDialogType
@@ -27,6 +28,7 @@ class ChatActivity : BaseChatActivity() {
 
     private val clickListener: ClickListener = this::onMessageClicked
     private val messageListener: ChatDialogMessageListener = ChatMessageListener()
+    private val messageStatusListener: MessageStatusListener = ChatMessagesStatusListener()
     private lateinit var chatAdapter: ChatMessageAdapter
     private lateinit var chatDialog: ConnectycubeChatDialog
     private lateinit var model: ChatMessageViewModel
@@ -45,7 +47,7 @@ class ChatActivity : BaseChatActivity() {
             InjectorUtils.provideMessageListViewModelFactory(this, chatDialog)
         }
         model = chatViewModel
-
+        initManagers()
         initChatAdapter()
     }
 
@@ -61,20 +63,39 @@ class ChatActivity : BaseChatActivity() {
                 resources.getDimension(R.dimen.margin_normal).toInt()
             )
         )
-        model.networkState.observe(this, Observer {
-            Timber.d("networkState= $it")
-            if(it.status.equals(Status.RUNNING)) {
+        model.refreshState.observe(this, Observer {
+            Timber.d("refreshState= $it")
+            if (it.status == Status.RUNNING && chatAdapter.itemCount == 0) {
                 showProgress(progressbar)
-            } else if(it.status == Status.SUCCESS) {
+            } else if (it.status == Status.SUCCESS) {
                 hideProgress(progressbar)
             }
+        })
 
+        model.networkState.observe(this, Observer {
+            Timber.d("networkState= $it")
         })
-        model.messages.observe(this, Observer<PagedList<ConnectycubeChatMessage>> {
-            Timber.d("submitList= $it")
-            chatAdapter.submitList(it)
-            scrollDown()
+
+
+        model.messages.observe(this, Observer {
+            Timber.d("submitList= ${it.second}")
+            chatAdapter.submitList(it.first)
+            scrollDownIfNeed(it.second)
         })
+    }
+
+    fun initManagers() {
+        ConnectycubeChatService.getInstance().messageStatusesManager.addMessageStatusListener(messageStatusListener)
+    }
+
+    fun unregisterChatManagers() {
+        ConnectycubeChatService.getInstance().messageStatusesManager.messageStatusListeners?.forEach {
+            ConnectycubeChatService.getInstance().messageStatusesManager.removeMessageStatusListener(it)}
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterChatManagers()
     }
 
     fun onAttachClick(view: View) {
@@ -105,8 +126,14 @@ class ChatActivity : BaseChatActivity() {
     }
 
     fun submitMessage(message: ConnectycubeChatMessage) {
-        Timber.d("submitMessage model.messages.value?= " + model.messages.value)
-        model.messages.value?.dataSource?.invalidate()
+        Timber.d("submitMessage model.messages.value")
+        model.refresh(true)
+    }
+
+    fun scrollDownIfNeed(scroll: Boolean) {
+        if (scroll) {
+            scrollDown()
+        }
     }
 
     fun scrollDown() {
@@ -138,5 +165,17 @@ class ChatActivity : BaseChatActivity() {
                 bottom = spaceHeight
             }
         }
+    }
+
+    inner class ChatMessagesStatusListener: MessageStatusListener{
+        override fun processMessageRead(messageID: String, dialogId: String, userId: Int) {
+            Timber.d("processMessageRead messageID= $messageID")
+            model.refresh()
+         }
+
+        override fun processMessageDelivered(messageID: String, dialogId: String, userId: Int) {
+            Timber.d("processMessageDelivered messageID= $messageID")
+         }
+
     }
 }

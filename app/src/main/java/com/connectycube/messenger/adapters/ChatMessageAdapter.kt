@@ -52,7 +52,7 @@ class ChatMessageAdapter(
             markAsReadMessage(chatMessage)
         }
         when (this.getItemViewType(position)) {
-            TEXT_OUTCOMING, TEXT_INCOMING -> onBindTextViewHolder(holder as BaseChatMessageViewHolder, position)
+            TEXT_OUTCOMING, TEXT_INCOMING -> onBindTextViewHolder(holder, position)
             ATTACH_IMAGE_OUTCOMING, ATTACH_IMAGE_INCOMING -> onBindAttachViewHolder(holder as ChatAttachViewHolderChatMessageViewHolder, position)
         }
 
@@ -134,8 +134,16 @@ class ChatMessageAdapter(
                 oldItem: ConnectycubeChatMessage,
                 newItem: ConnectycubeChatMessage
             ): Boolean =
-                oldItem == newItem
+                oldItem.id == newItem.id && oldItem.readIds == newItem.readIds
         }
+    }
+
+    private fun messageIsRead(message: ConnectycubeChatMessage): Boolean {
+        return message.readIds != null && message.readIds.contains(message.recipientId)
+    }
+
+    private fun messageIsDelivered(message: ConnectycubeChatMessage): Boolean {
+        return message.deliveredIds != null && message.deliveredIds.contains(message.recipientId)
     }
 
     open inner class BaseChatMessageViewHolder(@NonNull itemView: View) : RecyclerView.ViewHolder(
@@ -176,7 +184,15 @@ class ChatMessageAdapter(
         }
     }
 
-    inner class ChatMessageOutComingViewHolder(parent: ViewGroup, @LayoutRes chatItem: Int) : BaseChatMessageTextViewHolder(parent, chatItem)
+    inner class ChatMessageOutComingViewHolder(parent: ViewGroup, @LayoutRes chatItem: Int) : BaseChatMessageTextViewHolder(parent, chatItem) {
+        private val imgStatus: ImageView = itemView.findViewById(R.id.message_status_image_view)
+        override fun bindTo(message: ConnectycubeChatMessage) {
+            super.bindTo(message)
+            if (messageIsRead(message)) imgStatus.setImageResource(R.drawable.ic_check_double_16)
+            else if (messageIsDelivered(message)) imgStatus.setImageResource(R.drawable.ic_check_black_16dp)
+            else imgStatus.setImageResource(android.R.color.transparent)
+        }
+    }
 
     inner class ChatAttachViewHolderChatMessageViewHolder(parent: ViewGroup, @LayoutRes chatItem: Int) : BaseChatMessageViewHolder(
         LayoutInflater.from(parent.context).inflate(chatItem, parent, false)

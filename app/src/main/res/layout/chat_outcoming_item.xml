@@ -39,6 +39,15 @@
                     android:paddingLeft="@dimen/margin_small"
                     tools:text="text message example"
                     tools:ignore="RtlSymmetry"/>
+
+            <ImageView
+                    android:id="@+id/message_status_image_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:scaleType="fitCenter"
+                    tools:src="@drawable/ic_check_black_16dp"
+                    android:layout_gravity="end"/>
+
         </LinearLayout>
 
     </LinearLayout>
