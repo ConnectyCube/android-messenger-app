@@ -8,4 +8,7 @@
     <dimen name="list_item_margin">@dimen/margin_normal</dimen>
 
     <dimen name="chat_fab_margin">16dp</dimen>
+
+    <dimen name="attach_image_width">150dp</dimen>
+    <dimen name="attach_image_height">150dp</dimen>
 </resources>
