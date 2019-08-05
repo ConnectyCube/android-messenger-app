@@ -62,7 +62,7 @@ class ConnectycubeService {
 
     private fun wrapChats(list: ArrayList<ConnectycubeChatDialog>): List<Chat> {
         val chats = ArrayList<Chat>()
-        list.forEach { chats.add(Chat(it.dialogId, it.lastMessageDateSent, it.unreadMessageCount, it.name, it)) }
+        list.forEach { chats.add(Chat(it.dialogId, it.lastMessageDateSent, it.createdAt.time, it.unreadMessageCount, it.name, it)) }
         return chats
     }
 }
