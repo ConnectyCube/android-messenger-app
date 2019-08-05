@@ -14,7 +14,8 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme"
             tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".LoginActivity">
+        <activity android:name=".LoginActivity"
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -23,6 +24,7 @@
         </activity>
         <activity android:name=".ChatDialogsActivity"/>
         <activity android:name=".ChatActivity"/>
+        <activity android:name=".CreateChatDialogActivity" />
     </application>
 
 </manifest>

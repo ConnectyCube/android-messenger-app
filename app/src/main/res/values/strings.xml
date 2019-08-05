@@ -10,10 +10,15 @@
     <!--DialogsActivity-->
     <string name="yesterday">Yesterday</string>
 
+    <!--CreateDialogActivity-->
+    <string name="last_activity">Last activity:</string>
+    <string name="new_chat">New Chat</string>
+
     <!--Action bar-->
     <string name="title_login_activity">Login</string>
     <string name="title_current_user">Logged in as %1$s</string>
     <string name="action_start_logout">Logout</string>
+    <string name="action_create">Create</string>
 
     <!--ChatDialogs-->
     <string name="chat_login">Login…</string>
@@ -27,4 +32,7 @@
     <string name="error_credentials_empty">The App class should contain ConnectyCube credentials. Register new account and application at https://admin.connectycube.com
         then put Application credentials from Overview page + Account key from https://admin.connectycube.com/account/settings</string>
     <string name="error_users_empty">The user_config.json file should contain at least 2 and max 4 users with format [\"login\":\"password\"]. Please go to https://admin.connectycube.com and create users in \'Users\' module.</string>
+    <string name="select_users_choose_users">Please, choose at least one participant</string>
+
+    <string name="today">Today</string>
 </resources>

@@ -1,6 +1,8 @@
 package com.connectycube.messenger.data
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.MutableLiveData
 import com.connectycube.messenger.api.ConnectycubeService
 import com.connectycube.messenger.vo.AppExecutors
 import com.connectycube.messenger.vo.NetworkBoundResource
@@ -17,7 +19,7 @@ class ChatRepository private constructor(private val chatDao: ChatDao, private v
         }
     }
 
-    fun getChat(chatId: Int) = chatDao.getChat(chatId)
+    fun getChat(chatId: String) = chatDao.getChat(chatId)
 
     fun loadChats(): LiveData<Resource<List<Chat>>> {
         return object : NetworkBoundResource<List<Chat>, List<Chat>>(appExecutors) {
@@ -31,6 +33,23 @@ class ChatRepository private constructor(private val chatDao: ChatDao, private v
             override fun loadFromDb() = chatDao.getChats()
 
             override fun createCall() = service.loadChats()
+        }.asLiveData()
+    }
+
+    fun createChatDialog(chat: Chat): LiveData<Resource<Chat>> {
+        return object : NetworkBoundResource<Chat, Chat>(appExecutors) {
+            var newChatDialogId: String? = null
+
+            override fun saveCallResult(item: Chat) {
+                newChatDialogId = item.chatId
+                chatDao.insert(item)
+            }
+
+            override fun shouldFetch(data: Chat?) = data == null
+
+            override fun loadFromDb() = chatDao.getChat(newChatDialogId)
+
+            override fun createCall() = service.createChatDialog(chat)
         }.asLiveData()
     }
 

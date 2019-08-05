@@ -1,4 +1,4 @@
-package com.connectycube.messenger
+package com.connectycube.messenger.adapters
 
 import android.content.Context
 import android.os.Build
@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.connectycube.chat.model.ConnectycubeChatDialog
 import com.connectycube.chat.model.ConnectycubeDialogType
+import com.connectycube.messenger.R
 import com.connectycube.messenger.utilities.getPrettyDate
 import com.connectycube.messenger.utilities.loadChatDialogPhoto
 
@@ -28,7 +29,7 @@ class ChatDialogAdapter(private val context: Context) :
 
     override fun onBindViewHolder(holder: ChatDialogViewHolder, position: Int) {
         val chatDialog = getItem(position)
-        holder.bind(chatDialog, View.OnClickListener { onChatDialogSelected(chatDialog) })
+        holder.bind(context, chatDialog, View.OnClickListener { onChatDialogSelected(chatDialog) })
     }
 
     private fun onChatDialogSelected(chatDialog: ConnectycubeChatDialog) {
@@ -47,25 +48,39 @@ class ChatDialogAdapter(private val context: Context) :
         private val txtUnreadMessagesCount: TextView = itemView.findViewById(R.id.unread_message_count_text_view)
         private val txtLastMessageDate: TextView = itemView.findViewById(R.id.last_masage_date_text_view)
 
-        fun bind(chatDialog: ConnectycubeChatDialog, clickListener: View.OnClickListener) {
-            loadChatDialogPhoto(chatDialog.type == ConnectycubeDialogType.PRIVATE,
+        fun bind(activityContext: Context, chatDialog: ConnectycubeChatDialog, clickListener: View.OnClickListener) {
+            loadChatDialogPhoto(activityContext,
+                chatDialog.type == ConnectycubeDialogType.PRIVATE,
                 chatDialog.photo,
                 imgAvatar)
 
             txtName.text = chatDialog.name
             txtLastMessage.text = chatDialog.lastMessage
-            txtLastMessageDate.text = getPrettyDate(context, chatDialog.lastMessageDateSent * 1000)
 
-            if (chatDialog.unreadMessageCount > 0) {
+            setLastMessageDate(activityContext, txtLastMessageDate, chatDialog)
+
+            if (chatDialog.unreadMessageCount != null && chatDialog.unreadMessageCount > 0) {
                 txtUnreadMessagesCount.visibility = View.VISIBLE
                 txtUnreadMessagesCount.text = chatDialog.unreadMessageCount.toString()
-                setTextColor(context, txtLastMessageDate, R.color.unread_messages_date)
+                setTextColor(activityContext, txtLastMessageDate, R.color.unread_messages_date)
             } else {
                 txtUnreadMessagesCount.visibility = View.GONE
-                setTextColor(context, txtLastMessageDate, R.color.dark_grey)
+                setTextColor(activityContext, txtLastMessageDate, R.color.dark_grey)
             }
 
             itemView.setOnClickListener(clickListener)
+        }
+
+        private fun setLastMessageDate(
+            activityContext: Context,
+            textView: TextView,
+            chatDialog: ConnectycubeChatDialog
+        ) {
+            var lastMessageDateSent: Long = chatDialog.lastMessageDateSent * 1000
+
+            if (lastMessageDateSent == 0L) lastMessageDateSent = chatDialog.createdAt.time
+
+            textView.text = getPrettyDate(activityContext, lastMessageDateSent)
         }
 
         private fun setTextColor(context: Context, textView: TextView, @ColorRes color: Int){

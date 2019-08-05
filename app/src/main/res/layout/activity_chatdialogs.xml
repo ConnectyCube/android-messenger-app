@@ -8,7 +8,7 @@
         android:layout_width="match_parent">
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/chatsRecyclerView"
+        android:id="@+id/chats_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         tools:listitem="@layout/list_item_chat_dialog"
@@ -17,7 +17,7 @@
 
 
     <LinearLayout
-            android:id="@+id/layout_chat_empty"
+            android:id="@+id/chats_empty_layout"
             android:layout_centerInParent="true"
             android:layout_gravity="center"
             android:gravity="center"
