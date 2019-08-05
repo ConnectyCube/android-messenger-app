@@ -1,5 +1,6 @@
 package com.connectycube.messenger.utilities
 
+import android.app.Application
 import android.content.Context
 import com.connectycube.chat.model.ConnectycubeChatDialog
 import com.connectycube.messenger.data.AppDatabase
@@ -45,9 +46,9 @@ object InjectorUtils {
         return LiveDataResponsePerformer()
     }
 
-    fun provideCreateChatDialogViewModelFactory(context: Context): CreateChatDialogViewModelFactory {
-        val usersRepository = getUserRepository(context)
-        val chatRepository = getChatRepository(context)
-        return CreateChatDialogViewModelFactory(usersRepository, chatRepository)
+    fun provideCreateChatDialogViewModelFactory(application: Application): CreateChatDialogViewModelFactory {
+        val usersRepository = getUserRepository(application.baseContext)
+        val chatRepository = getChatRepository(application.baseContext)
+        return CreateChatDialogViewModelFactory(application, usersRepository, chatRepository)
     }
 }

@@ -8,7 +8,6 @@ import androidx.appcompat.app.ActionBar
 import androidx.lifecycle.observe
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.connectycube.chat.ConnectycubeChatService
 import com.connectycube.chat.model.ConnectycubeChatDialog
 import com.connectycube.messenger.adapters.ChatDialogAdapter
@@ -16,44 +15,37 @@ import com.connectycube.messenger.utilities.InjectorUtils
 import com.connectycube.messenger.viewmodels.ChatListViewModel
 import com.connectycube.messenger.vo.Status
 import com.connectycube.users.model.ConnectycubeUser
+import kotlinx.android.synthetic.main.activity_chatdialogs.*
 import timber.log.Timber
 
 const val EXTRA_CHAT = "chat_dialog"
 class ChatDialogsActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapterCallback {
 
-    val chatViewModel: ChatListViewModel by viewModels {
+    private val chatViewModel: ChatListViewModel by viewModels {
         InjectorUtils.provideChatListViewModelFactory(this)
     }
 
     private lateinit var chatDialogAdapter: ChatDialogAdapter
-    private lateinit var chatsRecyclerView: RecyclerView
-    private lateinit var emptyListView: View
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Timber.d("onCreate")
         setContentView(R.layout.activity_chatdialogs)
-        initTiilbar()
+        initToolbar()
         initDialogsAdapter()
-        initViews()
         initDialogsRecyclerView()
         subscribeUi()
     }
 
-    private fun initTiilbar() {
+    private fun initToolbar() {
         supportActionBar?.displayOptions = ActionBar.DISPLAY_SHOW_TITLE or ActionBar.DISPLAY_USE_LOGO or ActionBar.DISPLAY_SHOW_HOME
         title = getCurrentUser().fullName
     }
 
-    private fun initViews() {
-        emptyListView = findViewById(R.id.layout_chat_empty)
-        chatsRecyclerView = findViewById(R.id.chatsRecyclerView)
-    }
-
     private fun initDialogsRecyclerView() {
-        chatsRecyclerView.layoutManager = LinearLayoutManager(this)
-        chatsRecyclerView.itemAnimator = DefaultItemAnimator()
-        chatsRecyclerView.adapter = chatDialogAdapter
+        chats_recycler_view.layoutManager = LinearLayoutManager(this)
+        chats_recycler_view.itemAnimator = DefaultItemAnimator()
+        chats_recycler_view.adapter = chatDialogAdapter
     }
 
     private fun subscribeUi() {
@@ -87,7 +79,7 @@ class ChatDialogsActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdap
     }
 
     override fun onChatDialogsListUpdated(currentList: List<ConnectycubeChatDialog>) {
-        emptyListView.visibility = if(currentList.isEmpty()) View.VISIBLE else View.GONE
+        chats_empty_layout.visibility = if(currentList.isEmpty()) View.VISIBLE else View.GONE
     }
 
     private fun getCurrentUser(): ConnectycubeUser {

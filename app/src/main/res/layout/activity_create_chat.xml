@@ -19,7 +19,7 @@
         tools:visibility="visible" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/list_users"
+        android:id="@+id/users_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@+id/progressbar"
