@@ -1,5 +1,6 @@
 package com.connectycube.messenger.api
 
+import android.net.Uri
 import android.os.Bundle
 import androidx.lifecycle.LiveData
 import com.connectycube.chat.ConnectycubeRestChatService
@@ -18,6 +19,7 @@ import com.connectycube.storage.ConnectycubeStorage
 import com.connectycube.storage.model.ConnectycubeFile
 import com.connectycube.users.ConnectycubeUsers
 import com.connectycube.users.model.ConnectycubeUser
+import timber.log.Timber
 import java.io.File
 
 class ConnectycubeService {
@@ -87,19 +89,20 @@ class ConnectycubeService {
                 })
     }
 
-    fun loadFileAsAttachment(
-        file: File, callback: EntityCallback<ConnectycubeAttachment>,
-        progressCallback: ConnectycubeProgressCallback?
-    ) {
-        ConnectycubeStorage.uploadFileTask(file, true, progressCallback).performAsync(
-            object : EntityCallback<ConnectycubeFile> {
-                override fun onSuccess(conFile: ConnectycubeFile, p1: Bundle?) {
-                 }
-
-                override fun onError(ex: ResponseException) {
-
-                }
-
-            })
+    fun loadFileAsAttachment(path: String): LiveData<ApiResponse<ConnectycubeAttachment>> {
+        val file = File(path)
+        Timber.d("loadFileAsAttachment path= $path")
+        return InjectorUtils.provideConnectycubeServiceForType<ConnectycubeFile, ConnectycubeAttachment>()
+            .perform(
+                ConnectycubeStorage.uploadFileTask(file, true
+                ) { Timber.d("loadFileAsAttachment onProgressUpdate $it") },
+                object : Converter<ConnectycubeAttachment, ConnectycubeFile>() {
+                    override fun convertTo(response: ConnectycubeFile): ConnectycubeAttachment {
+                        val attachment = ConnectycubeAttachment(ConnectycubeAttachment.IMAGE_TYPE)
+                        attachment.id = response.id.toString()
+                        attachment.url = response.publicUrl
+                        return attachment
+                    }
+                })
     }
 }

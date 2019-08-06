@@ -27,6 +27,7 @@
     <!--Chats-->
     <string name="chat_text_hint">Message</string>
     <string name="message_attachment">Attachment</string>
+    <string name="loading_attachment_error">Loading attachment error %s</string>
 
     <!-- Errors -->
     <string name="error_credentials_empty">The App class should contain ConnectyCube credentials. Register new account and application at https://admin.connectycube.com

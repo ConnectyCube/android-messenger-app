@@ -18,6 +18,6 @@ abstract class BaseChatActivity : AppCompatActivity()  {
             WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
             WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
         )
-        progressbar.visibility = View.VISIBLE;
+        progressbar.visibility = View.VISIBLE
     }
 }

@@ -33,7 +33,11 @@ import androidx.annotation.NonNull
 import com.zhihu.matisse.listener.OnSelectedListener
 import android.content.pm.ActivityInfo
 import android.net.Uri
+import android.widget.Toast
+import androidx.lifecycle.observe
+import com.connectycube.messenger.api.ConnectycubeService
 import com.connectycube.messenger.utilities.Glide4Engine
+import com.connectycube.messenger.viewmodels.AttachmentViewModel
 import com.zhihu.matisse.filter.Filter.K
 import com.zhihu.matisse.internal.entity.CaptureStrategy
 import com.zhihu.matisse.MimeType.ofAll
@@ -52,6 +56,11 @@ class ChatActivity : BaseChatActivity() {
     private lateinit var chatAdapter: ChatMessageAdapter
     private lateinit var chatDialog: ConnectycubeChatDialog
     private lateinit var model: ChatMessageViewModel
+
+    val modelAttachment: AttachmentViewModel by viewModels {
+        InjectorUtils.provideAttachmentViewModelFactory(this.application)
+    }
+
     private lateinit var messageSender: ConnectycubeMessageSender
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -195,12 +204,28 @@ class ChatActivity : BaseChatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_CODE_CHOOSE && resultCode == Activity.RESULT_OK) {
-//            mAdapter.setData(Matisse.obtainResult(data), Matisse.obtainPathResult(data))
             if(data != null && Matisse.obtainPathResult(data) != null) {
-                Timber.d("OnActivityResult Matisse.obtainResult(data)=" + Matisse.obtainResult(data))
-                Timber.d("OnActivityResult Matisse.obtainPathResult(data)=" + Matisse.obtainPathResult(data))
-//                var file: File = File(Matisse.obtainPathResult(data)[0])
-//                sendChatMessage()
+                val path = Matisse.obtainPathResult(data).iterator().next()
+                uploadAttachment(path)
+            }
+        }
+    }
+
+    private fun uploadAttachment(path: String) {
+        modelAttachment.uploadAttach(path).observe(this) {resource ->
+            when {
+                resource.status == com.connectycube.messenger.vo.Status.LOADING -> {
+                    showProgress(progressbar)
+                }
+                resource.status == com.connectycube.messenger.vo.Status.SUCCESS -> {
+                    hideProgress(progressbar)
+                    Timber.d("resource.data=" + resource.data)
+                    sendChatMessage(attachment = resource.data)
+                }
+                resource.status == com.connectycube.messenger.vo.Status.ERROR -> {
+                    hideProgress(progressbar)
+                    Toast.makeText(applicationContext, getString(R.string.loading_attachment_error, resource.message), Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
