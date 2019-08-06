@@ -14,7 +14,7 @@ interface ChatDao {
     @Query("SELECT * FROM chats ORDER BY lastMessageDateSent DESC")
     fun getChatsSync(): List<Chat>
 
-    @Query("SELECT * FROM chats ORDER BY lastMessageDateSent AND createdAt DESC")
+    @Query("SELECT * FROM chats ORDER BY lastMessageDateSent DESC")
     fun getChats(): LiveData<List<Chat>>
 
     @Query("SELECT * FROM chats WHERE id = :chatId")
