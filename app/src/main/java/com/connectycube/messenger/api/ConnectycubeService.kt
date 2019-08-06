@@ -1,16 +1,24 @@
 package com.connectycube.messenger.api
 
+import android.os.Bundle
 import androidx.lifecycle.LiveData
 import com.connectycube.chat.ConnectycubeRestChatService
 import com.connectycube.chat.Consts
+import com.connectycube.chat.model.ConnectycubeAttachment
 import com.connectycube.chat.model.ConnectycubeChatDialog
+import com.connectycube.core.ConnectycubeProgressCallback
+import com.connectycube.core.EntityCallback
+import com.connectycube.core.exception.ResponseException
 import com.connectycube.core.request.RequestGetBuilder
 import com.connectycube.messenger.data.Chat
 import com.connectycube.messenger.data.User
 import com.connectycube.messenger.utilities.Converter
 import com.connectycube.messenger.utilities.InjectorUtils
+import com.connectycube.storage.ConnectycubeStorage
+import com.connectycube.storage.model.ConnectycubeFile
 import com.connectycube.users.ConnectycubeUsers
 import com.connectycube.users.model.ConnectycubeUser
+import java.io.File
 
 class ConnectycubeService {
 
@@ -64,5 +72,21 @@ class ConnectycubeService {
         val chats = ArrayList<Chat>()
         list.forEach { chats.add(Chat(it.dialogId, it.lastMessageDateSent, it.createdAt.time, it.unreadMessageCount, it.name, it)) }
         return chats
+    }
+
+    fun loadFileAsAttachment(
+        file: File, callback: EntityCallback<ConnectycubeAttachment>,
+        progressCallback: ConnectycubeProgressCallback?
+    ) {
+        ConnectycubeStorage.uploadFileTask(file, true, progressCallback).performAsync(
+            object : EntityCallback<ConnectycubeFile> {
+                override fun onSuccess(conFile: ConnectycubeFile, p1: Bundle?) {
+                 }
+
+                override fun onError(ex: ResponseException) {
+
+                }
+
+            })
     }
 }

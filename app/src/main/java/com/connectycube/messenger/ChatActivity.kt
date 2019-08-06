@@ -1,5 +1,7 @@
 package com.connectycube.messenger
 
+import android.app.Activity
+import android.content.Intent
 import android.graphics.Rect
 import android.os.Bundle
 import android.view.View
@@ -12,6 +14,7 @@ import com.connectycube.chat.ConnectycubeChatService
 import com.connectycube.chat.exception.ChatException
 import com.connectycube.chat.listeners.ChatDialogMessageListener
 import com.connectycube.chat.listeners.MessageStatusListener
+import com.connectycube.chat.model.ConnectycubeAttachment
 import com.connectycube.chat.model.ConnectycubeChatDialog
 import com.connectycube.chat.model.ConnectycubeChatMessage
 import com.connectycube.chat.model.ConnectycubeDialogType
@@ -20,15 +23,32 @@ import com.connectycube.messenger.adapters.ClickListener
 import com.connectycube.messenger.api.ConnectycubeMessageSender
 import com.connectycube.messenger.paging.Status
 import com.connectycube.messenger.utilities.InjectorUtils
+import com.connectycube.messenger.utilities.PermissionsHelper
+import com.connectycube.messenger.utilities.REQUEST_ATTACHMENT_IMAGE_CONTACTS
 import com.connectycube.messenger.viewmodels.ChatMessageViewModel
 import kotlinx.android.synthetic.main.activity_chat.*
 import timber.log.Timber
+import com.zhihu.matisse.listener.OnCheckedListener
+import androidx.annotation.NonNull
+import com.zhihu.matisse.listener.OnSelectedListener
+import android.content.pm.ActivityInfo
+import android.net.Uri
+import com.connectycube.messenger.utilities.Glide4Engine
+import com.zhihu.matisse.filter.Filter.K
+import com.zhihu.matisse.internal.entity.CaptureStrategy
+import com.zhihu.matisse.MimeType.ofAll
+import com.zhihu.matisse.Matisse
+import com.zhihu.matisse.MimeType
+import com.zhihu.matisse.filter.Filter
 
+
+const val REQUEST_CODE_CHOOSE = 23;
 class ChatActivity : BaseChatActivity() {
 
     private val clickListener: ClickListener = this::onMessageClicked
     private val messageListener: ChatDialogMessageListener = ChatMessageListener()
     private val messageStatusListener: MessageStatusListener = ChatMessagesStatusListener()
+    private val permissionsHelper = PermissionsHelper(this)
     private lateinit var chatAdapter: ChatMessageAdapter
     private lateinit var chatDialog: ConnectycubeChatDialog
     private lateinit var model: ChatMessageViewModel
@@ -99,7 +119,37 @@ class ChatActivity : BaseChatActivity() {
     }
 
     fun onAttachClick(view: View) {
-
+        if(permissionsHelper.areAllImageGranted()){
+            Timber.d("onAttachClick areAllImageGranted")
+            Matisse.from(this@ChatActivity)
+                .choose(MimeType.ofImage(), false)
+                .countable(false)
+                .capture(true)
+                .captureStrategy(
+                    CaptureStrategy(true, "com.connectycube.messenger.fileprovider")
+                )
+                .maxSelectable(1)
+//                .addFilter(GifSizeFilter(320, 320, 5 * Filter.K * Filter.K))
+                .gridExpectedSize(
+                    resources.getDimensionPixelSize(R.dimen.grid_expected_size)
+                )
+                .restrictOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+                .thumbnailScale(0.85f)
+                //                                            .imageEngine(new GlideEngine())  // for glide-V3
+                .imageEngine(Glide4Engine())    // for glide-V4
+                .setOnSelectedListener { uriList, pathList ->
+                    // DO SOMETHING IMMEDIATELY HERE
+                    Timber.d("onSelected= pathList=$pathList")
+                }
+                .originalEnable(true)
+                .maxOriginalSize(10)
+//                .autoHideToolbarOnSingleTap(true)
+                .setOnCheckedListener(OnCheckedListener { isChecked ->
+                    // DO SOMETHING IMMEDIATELY HERE
+                    Timber.d("isChecked= isChecked=$isChecked")
+                })
+                .forResult(REQUEST_CODE_CHOOSE)
+        } else permissionsHelper.requestImagePermissions()
     }
 
     fun onSendChatClick(view: View) {
@@ -111,8 +161,8 @@ class ChatActivity : BaseChatActivity() {
         Timber.d("message= " + message)
     }
 
-    fun sendChatMessage(text: String) {
-        messageSender.sendChatMessage(text).let {
+    fun sendChatMessage(text: String = "", attachment: ConnectycubeAttachment? = null) {
+        messageSender.sendChatMessage(text, attachment).let {
             if (it.first) {
                 if (ConnectycubeDialogType.PRIVATE == chatDialog.type) {
                     submitMessage(it.second)
@@ -139,6 +189,38 @@ class ChatActivity : BaseChatActivity() {
     fun scrollDown() {
 //        messages_recycleview.scrollToPosition(0)
         messages_recycleview.postDelayed({ messages_recycleview.scrollToPosition(0) }, 200)
+    }
+
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_CODE_CHOOSE && resultCode == Activity.RESULT_OK) {
+//            mAdapter.setData(Matisse.obtainResult(data), Matisse.obtainPathResult(data))
+            if(data != null && Matisse.obtainPathResult(data) != null) {
+                Timber.d("OnActivityResult Matisse.obtainResult(data)=" + Matisse.obtainResult(data))
+                Timber.d("OnActivityResult Matisse.obtainPathResult(data)=" + Matisse.obtainPathResult(data))
+//                var file: File = File(Matisse.obtainPathResult(data)[0])
+//                sendChatMessage()
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int,
+                                            permissions: Array<String>, grantResults: IntArray) {
+        when (requestCode) {
+            REQUEST_ATTACHMENT_IMAGE_CONTACTS -> {
+                // If request is cancelled, the result arrays are empty.
+                if (permissionsHelper.areAllImageGranted()) {
+                    Timber.d("permission was granted")
+                } else {
+                    Timber.d("permission is denied")
+                }
+                return
+            }
+            else -> {
+                // Ignore all other requests.
+            }
+        }
     }
 
     internal inner class ChatMessageListener : ChatDialogMessageListener {

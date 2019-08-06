@@ -27,4 +27,11 @@
     <string name="error_credentials_empty">The App class should contain ConnectyCube credentials. Register new account and application at https://admin.connectycube.com
         then put Application credentials from Overview page + Account key from https://admin.connectycube.com/account/settings</string>
     <string name="error_users_empty">The user_config.json file should contain at least 2 and max 4 users with format [\"login\":\"password\"]. Please go to https://admin.connectycube.com and create users in \'Users\' module.</string>
+
+    <!--fix for Matisse lib-->
+    <plurals name="error_over_count">
+        <item quantity="one">You can only select one media file</item>
+        <item quantity="many">You can only select up to %1$d media files</item>
+    </plurals>
+
 </resources>

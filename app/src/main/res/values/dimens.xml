@@ -11,4 +11,6 @@
 
     <dimen name="attach_image_width">150dp</dimen>
     <dimen name="attach_image_height">150dp</dimen>
+
+    <dimen name="grid_expected_size">120dp</dimen>
 </resources>
