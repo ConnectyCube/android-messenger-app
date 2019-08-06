@@ -74,6 +74,19 @@ class ConnectycubeService {
         return chats
     }
 
+    fun createChatDialog(chat: Chat): LiveData<ApiResponse<Chat>> {
+        val chatDialog: ConnectycubeChatDialog = chat.conChat
+
+        return InjectorUtils.provideConnectycubeServiceForType<ConnectycubeChatDialog, Chat>()
+            .perform(
+                ConnectycubeRestChatService.createChatDialog(chatDialog),
+                object : Converter<Chat, ConnectycubeChatDialog>() {
+                    override fun convertTo(response: ConnectycubeChatDialog): Chat {
+                        return Chat(response.dialogId, response.lastMessageDateSent, response.createdAt.time, response.unreadMessageCount?: 0, response.name, response)
+                    }
+                })
+    }
+
     fun loadFileAsAttachment(
         file: File, callback: EntityCallback<ConnectycubeAttachment>,
         progressCallback: ConnectycubeProgressCallback?

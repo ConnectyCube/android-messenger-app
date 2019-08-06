@@ -7,11 +7,12 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions
 import com.connectycube.messenger.R
+import com.connectycube.users.model.ConnectycubeUser
 
-fun loadChatDialogPhoto(isPrivate: Boolean, url: String?, imageView: ImageView){
+fun loadChatDialogPhoto(activityContext: Context, isPrivate: Boolean, url: String?, imageView: ImageView){
     val placeholder = if (isPrivate) R.drawable.ic_avatar_placeholder else R.drawable.ic_avatar_placeholder_group
 
-    Glide.with(imageView)
+    Glide.with(activityContext)
         .load(url)
         .placeholder(placeholder)
         .error(placeholder)
@@ -46,5 +47,17 @@ fun loadAttachImage(url: String?, imageView: ImageView, ctx: Context){
         .apply(requestOptions)
         .error(placeholder)
         .diskCacheStrategy(DiskCacheStrategy.ALL)
+        .into(imageView)
+}
+
+fun loadUserAvatar(activityContext: Context, connectycubeUser: ConnectycubeUser, imageView: ImageView){
+    val placeholder = R.drawable.ic_avatar_placeholder
+
+    Glide.with(activityContext)
+        .load(connectycubeUser.avatar)
+        .placeholder(placeholder)
+        .error(placeholder)
+        .fallback(placeholder)
+        .apply(RequestOptions.circleCropTransform())
         .into(imageView)
 }
