@@ -34,7 +34,7 @@ class ChatDatabaseWorker(
                                 mapPassword[login]!!,
                                 login,
                                 "",
-                                ConnectycubeUser(login, mapPassword.keys.elementAt(0)).apply { id = mapPassword[login]}
+                                ConnectycubeUser(login, mapPassword.keys.elementAt(0)).apply { id = mapPassword[login] }
                             )
                         )
                     }

@@ -45,7 +45,7 @@ class UserRepository private constructor(private val userDao: UserDao, private v
         }.asLiveData()
     }
 
-    fun getUsers():LiveData<List<User>>{
+    fun getUsers(): LiveData<List<User>> {
         return userDao.getUsers()
     }
 

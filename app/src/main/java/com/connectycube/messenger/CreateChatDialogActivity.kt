@@ -109,7 +109,7 @@ class CreateChatDialogActivity : BaseChatActivity(), CheckableUsersAdapter.Check
     }
 
     private fun startChatActivity(chat: ConnectycubeChatDialog) {
-        val intent = Intent(this, ChatActivity::class.java)
+        val intent = Intent(this, ChatMessageActivity::class.java)
         intent.putExtra(EXTRA_CHAT, chat)
         startActivity(intent)
     }

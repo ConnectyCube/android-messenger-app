@@ -10,11 +10,11 @@ import com.connectycube.messenger.vo.Resource
 class AttachmentRepository private constructor(private val appExecutors: AppExecutors) {
     private val service: ConnectycubeService = ConnectycubeService()
 
-    fun loadFileAsAttachment(path: String): LiveData<Resource<ConnectycubeAttachment>> {
+    fun loadFileAsAttachment(path: String, type: String): LiveData<Resource<ConnectycubeAttachment>> {
         val result = MediatorLiveData<Resource<ConnectycubeAttachment>>()
         result.value = Resource.loading(null)
 
-        val apiResponse = service.loadFileAsAttachment(path)
+        val apiResponse = service.loadFileAsAttachment(path, type)
         result.addSource(apiResponse) { response ->
             when (response) {
                 is ApiSuccessResponse -> {

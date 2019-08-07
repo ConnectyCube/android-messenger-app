@@ -1,21 +1,15 @@
 package com.connectycube.messenger.api
 
-import android.net.Uri
-import android.os.Bundle
 import androidx.lifecycle.LiveData
 import com.connectycube.chat.ConnectycubeRestChatService
 import com.connectycube.chat.Consts
 import com.connectycube.chat.model.ConnectycubeAttachment
 import com.connectycube.chat.model.ConnectycubeChatDialog
-import com.connectycube.core.ConnectycubeProgressCallback
-import com.connectycube.core.EntityCallback
-import com.connectycube.core.exception.ResponseException
 import com.connectycube.core.request.RequestGetBuilder
 import com.connectycube.messenger.data.Chat
 import com.connectycube.messenger.data.User
 import com.connectycube.messenger.utilities.Converter
 import com.connectycube.messenger.utilities.InjectorUtils
-import com.connectycube.messenger.utilities.LiveDataResponsePerformerProgress
 import com.connectycube.storage.ConnectycubeStorage
 import com.connectycube.storage.model.ConnectycubeFile
 import com.connectycube.users.ConnectycubeUsers
@@ -73,7 +67,18 @@ class ConnectycubeService {
 
     private fun wrapChats(list: ArrayList<ConnectycubeChatDialog>): List<Chat> {
         val chats = ArrayList<Chat>()
-        list.forEach { chats.add(Chat(it.dialogId, it.lastMessageDateSent, it.createdAt.time, it.unreadMessageCount, it.name, it)) }
+        list.forEach {
+            chats.add(
+                Chat(
+                    it.dialogId,
+                    it.lastMessageDateSent,
+                    it.createdAt.time,
+                    it.unreadMessageCount,
+                    it.name,
+                    it
+                )
+            )
+        }
         return chats
     }
 
@@ -85,25 +90,34 @@ class ConnectycubeService {
                 ConnectycubeRestChatService.createChatDialog(chatDialog),
                 object : Converter<Chat, ConnectycubeChatDialog>() {
                     override fun convertTo(response: ConnectycubeChatDialog): Chat {
-                        return Chat(response.dialogId, response.lastMessageDateSent, response.createdAt.time, response.unreadMessageCount?: 0, response.name, response)
+                        return Chat(
+                            response.dialogId,
+                            response.lastMessageDateSent,
+                            response.createdAt.time,
+                            response.unreadMessageCount ?: 0,
+                            response.name,
+                            response
+                        )
                     }
                 })
     }
 
-    fun loadFileAsAttachment(path: String): LiveData<ApiResponse<ConnectycubeAttachment>> {
+    fun loadFileAsAttachment(path: String, type: String): LiveData<ApiResponse<ConnectycubeAttachment>> {
         val file = File(path)
         Timber.d("loadFileAsAttachment path= $path")
-        val service = InjectorUtils.provideConnectycubeServiceProgressForType<ConnectycubeFile, ConnectycubeAttachment>()
+        val service =
+            InjectorUtils.provideConnectycubeServiceProgressForType<ConnectycubeFile, ConnectycubeAttachment>()
         return service.perform(
-                ConnectycubeStorage.uploadFileTask(file, true
-                ) { service.progressCallBack.onProgressUpdate(it) },
-                object : Converter<ConnectycubeAttachment, ConnectycubeFile>() {
-                    override fun convertTo(response: ConnectycubeFile): ConnectycubeAttachment {
-                        val attachment = ConnectycubeAttachment(ConnectycubeAttachment.IMAGE_TYPE)
-                        attachment.id = response.id.toString()
-                        attachment.url = response.publicUrl
-                        return attachment
-                    }
-                })
+            ConnectycubeStorage.uploadFileTask(
+                file, true
+            ) { service.progressCallBack.onProgressUpdate(it) },
+            object : Converter<ConnectycubeAttachment, ConnectycubeFile>() {
+                override fun convertTo(response: ConnectycubeFile): ConnectycubeAttachment {
+                    val attachment = ConnectycubeAttachment(type)
+                    attachment.id = response.id.toString()
+                    attachment.url = response.publicUrl
+                    return attachment
+                }
+            })
     }
 }

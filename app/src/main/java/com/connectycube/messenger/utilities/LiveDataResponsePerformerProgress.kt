@@ -13,6 +13,5 @@ class LiveDataResponsePerformerProgress<T, R> : LiveDataResponsePerformer<T, R>(
         val liveData = super.perform(performer, converter)
         progressCallBack = ConnectycubeProgressCallback { liveData.postValue(ApiResponse.create(it)) }
         return liveData
-
     }
 }

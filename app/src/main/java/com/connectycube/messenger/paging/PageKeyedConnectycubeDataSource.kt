@@ -48,8 +48,8 @@ class PageKeyedConnectycubeDataSource(
         networkState.postValue(NetworkState.LOADING)
         val messageGetBuilder = MessageGetBuilder()
 
-        messageGetBuilder.setSkip(params.key)
-        messageGetBuilder.setLimit(params.requestedLoadSize)
+        messageGetBuilder.skip = params.key
+        messageGetBuilder.limit = params.requestedLoadSize
         messageGetBuilder.sortDesc("date_sent")
         messageGetBuilder.markAsRead(false)
 
@@ -74,8 +74,8 @@ class PageKeyedConnectycubeDataSource(
     ) {
         val messageGetBuilder = MessageGetBuilder()
 
-        messageGetBuilder.setSkip(0)
-        messageGetBuilder.setLimit(params.requestedLoadSize)
+        messageGetBuilder.skip = 0
+        messageGetBuilder.limit = params.requestedLoadSize
         messageGetBuilder.sortDesc("date_sent")
         messageGetBuilder.markAsRead(false)
 

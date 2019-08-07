@@ -37,7 +37,10 @@ class ChatDialogAdapter(private val context: Context) :
     }
 
 
-    override fun onCurrentListChanged(previousList: List<ConnectycubeChatDialog>, currentList: List<ConnectycubeChatDialog>) {
+    override fun onCurrentListChanged(
+        previousList: List<ConnectycubeChatDialog>,
+        currentList: List<ConnectycubeChatDialog>
+    ) {
         callback!!.onChatDialogsListUpdated(currentList)
     }
 
@@ -49,10 +52,12 @@ class ChatDialogAdapter(private val context: Context) :
         private val txtLastMessageDate: TextView = itemView.findViewById(R.id.last_masage_date_text_view)
 
         fun bind(activityContext: Context, chatDialog: ConnectycubeChatDialog, clickListener: View.OnClickListener) {
-            loadChatDialogPhoto(activityContext,
+            loadChatDialogPhoto(
+                activityContext,
                 chatDialog.type == ConnectycubeDialogType.PRIVATE,
                 chatDialog.photo,
-                imgAvatar)
+                imgAvatar
+            )
 
             txtName.text = chatDialog.name
             txtLastMessage.text = chatDialog.lastMessage
@@ -83,10 +88,10 @@ class ChatDialogAdapter(private val context: Context) :
             textView.text = getPrettyDate(activityContext, lastMessageDateSent)
         }
 
-        private fun setTextColor(context: Context, textView: TextView, @ColorRes color: Int){
+        private fun setTextColor(context: Context, textView: TextView, @ColorRes color: Int) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 textView.setTextColor(context.resources.getColor(color, context.theme))
-            } else{
+            } else {
                 textView.setTextColor(context.resources.getColor(color))
             }
         }

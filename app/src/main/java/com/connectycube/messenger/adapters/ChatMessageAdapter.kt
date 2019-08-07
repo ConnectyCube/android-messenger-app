@@ -20,7 +20,7 @@ import com.connectycube.chat.model.ConnectycubeDialogType
 import com.connectycube.core.helper.CollectionsUtil
 import com.connectycube.messenger.R
 import com.connectycube.messenger.utilities.loadAttachImage
-import com.connectycube.messenger.utilities.loadChatDialogPhoto
+import com.connectycube.messenger.utilities.loadChatMessagePhoto
 import timber.log.Timber
 
 
@@ -41,7 +41,10 @@ class ChatMessageAdapter(
         return when (viewType) {
             TEXT_OUTCOMING -> ChatMessageOutcomingViewHolder(parent, R.layout.chat_outcoming_item)
             TEXT_INCOMING -> ChatMessageIncomingViewHolder(parent, R.layout.chat_incoming_item)
-            ATTACH_IMAGE_OUTCOMING -> ChatImageAttachOutcomingViewHolder(parent, R.layout.chat_outcoming_attachimage_item)
+            ATTACH_IMAGE_OUTCOMING -> ChatImageAttachOutcomingViewHolder(
+                parent,
+                R.layout.chat_outcoming_attachimage_item
+            )
             ATTACH_IMAGE_INCOMING -> ChatImageAttachIncomingViewHolder(parent, R.layout.chat_incoming_attachimage_item)
             else -> throw IllegalArgumentException("Wrong type of viewType= $viewType")
         }
@@ -165,9 +168,10 @@ class ChatMessageAdapter(
         }
     }
 
-    open inner class BaseChatMessageTextViewHolder(parent: ViewGroup, @LayoutRes chatItem: Int) : BaseChatMessageViewHolder(
-        LayoutInflater.from(parent.context).inflate(chatItem, parent, false)
-    ) {
+    open inner class BaseChatMessageTextViewHolder(parent: ViewGroup, @LayoutRes chatItem: Int) :
+        BaseChatMessageViewHolder(
+            LayoutInflater.from(parent.context).inflate(chatItem, parent, false)
+        ) {
         private val bodyView = itemView.findViewById<TextView>(R.id.text_message_body)
         private var message: ConnectycubeChatMessage? = null
 
@@ -178,19 +182,23 @@ class ChatMessageAdapter(
         }
     }
 
-    inner class ChatMessageIncomingViewHolder(parent: ViewGroup, @LayoutRes chatItem: Int) : BaseChatMessageTextViewHolder(parent, chatItem) {
+    inner class ChatMessageIncomingViewHolder(parent: ViewGroup, @LayoutRes chatItem: Int) :
+        BaseChatMessageTextViewHolder(parent, chatItem) {
         private val imgAvatar: ImageView = itemView.findViewById(R.id.avatar_image_view)
 
         override fun bindTo(message: ConnectycubeChatMessage) {
             super.bindTo(message)
-            loadChatDialogPhoto(chatDialog.type == ConnectycubeDialogType.PRIVATE,
+            loadChatMessagePhoto(
+                chatDialog.type == ConnectycubeDialogType.PRIVATE,
                 "",
                 imgAvatar,
-                context)
+                context
+            )
         }
     }
 
-    inner class ChatMessageOutcomingViewHolder(parent: ViewGroup, @LayoutRes chatItem: Int) : BaseChatMessageTextViewHolder(parent, chatItem) {
+    inner class ChatMessageOutcomingViewHolder(parent: ViewGroup, @LayoutRes chatItem: Int) :
+        BaseChatMessageTextViewHolder(parent, chatItem) {
         private val imgStatus: ImageView = itemView.findViewById(R.id.message_status_image_view)
         override fun bindTo(message: ConnectycubeChatMessage) {
             super.bindTo(message)
@@ -217,18 +225,22 @@ class ChatMessageAdapter(
         }
     }
 
-    inner class ChatImageAttachIncomingViewHolder(parent: ViewGroup, @LayoutRes chatItem: Int) : BaseChatImageAttachViewHolder(parent, chatItem){
+    inner class ChatImageAttachIncomingViewHolder(parent: ViewGroup, @LayoutRes chatItem: Int) :
+        BaseChatImageAttachViewHolder(parent, chatItem) {
         private val imgAvatar: ImageView = itemView.findViewById(R.id.avatar_image_view)
         override fun bindTo(message: ConnectycubeChatMessage) {
             super.bindTo(message)
-            loadChatDialogPhoto(chatDialog.type == ConnectycubeDialogType.PRIVATE,
+            loadChatMessagePhoto(
+                chatDialog.type == ConnectycubeDialogType.PRIVATE,
                 "",
                 imgAvatar,
-                context)
+                context
+            )
         }
     }
 
-    inner class ChatImageAttachOutcomingViewHolder(parent: ViewGroup, @LayoutRes chatItem: Int) : BaseChatImageAttachViewHolder(parent, chatItem){
+    inner class ChatImageAttachOutcomingViewHolder(parent: ViewGroup, @LayoutRes chatItem: Int) :
+        BaseChatImageAttachViewHolder(parent, chatItem) {
         private val imgStatus: ImageView = itemView.findViewById(R.id.message_status_image_view)
         override fun bindTo(message: ConnectycubeChatMessage) {
             super.bindTo(message)

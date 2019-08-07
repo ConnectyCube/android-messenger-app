@@ -1,7 +1,6 @@
 package com.connectycube.messenger.api
 
 import android.content.Context
-import android.util.Log
 import android.widget.Toast
 import com.connectycube.chat.model.ConnectycubeAttachment
 import com.connectycube.chat.model.ConnectycubeChatDialog
@@ -14,9 +13,12 @@ import timber.log.Timber
 class ConnectycubeMessageSender(private val context: Context, private val dialog: ConnectycubeChatDialog) {
 
 
-    fun sendChatMessage(text: String? = "", attachment: ConnectycubeAttachment? = null): Pair<Boolean, ConnectycubeChatMessage> {
+    fun sendChatMessage(
+        text: String? = "",
+        attachment: ConnectycubeAttachment? = null
+    ): Pair<Boolean, ConnectycubeChatMessage> {
         val chatMessage = ConnectycubeChatMessage()
-        var result:Boolean = false
+        var result: Boolean = false
         if (attachment != null) {
             chatMessage.addAttachment(attachment)
             chatMessage.body = context.getString(R.string.message_attachment)
@@ -41,8 +43,7 @@ class ConnectycubeMessageSender(private val context: Context, private val dialog
         } catch (e: InterruptedException) {
             Timber.d(e)
             Toast.makeText(context, "Can't send a message, You are not connected to chat", Toast.LENGTH_SHORT).show()
-        }
-        finally {
+        } finally {
             return Pair(result, chatMessage)
         }
     }

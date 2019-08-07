@@ -9,8 +9,11 @@ import com.connectycube.messenger.data.ChatMessageRepository
 
 private const val PAGE_SIZE = 20
 
-class ChatMessageViewModel internal constructor(val repository: ChatMessageRepository, val chat: ConnectycubeChatDialog):
-    ViewModel()  {
+class ChatMessageListViewModel internal constructor(
+    val repository: ChatMessageRepository,
+    val chat: ConnectycubeChatDialog
+) :
+    ViewModel() {
     private var scroll: Boolean = false
     private val dialogName = createShowDialog()
     private val repoResult = map(dialogName) {
@@ -18,10 +21,11 @@ class ChatMessageViewModel internal constructor(val repository: ChatMessageRepos
     }
     val messages = Transformations.switchMap(repoResult) {
         MediatorLiveData<Pair<PagedList<ConnectycubeChatMessage>, Boolean>>().apply {
-            addSource(it.pagedList) {data ->
+            addSource(it.pagedList) { data ->
                 value = Pair(data, scroll)
             }
-        }}
+        }
+    }
     val networkState = Transformations.switchMap(repoResult, { it.networkState })!!
     val refreshState = Transformations.switchMap(repoResult, { it.refreshState })!!
 
@@ -30,7 +34,7 @@ class ChatMessageViewModel internal constructor(val repository: ChatMessageRepos
         repoResult.value?.refresh?.invoke()
     }
 
-    private fun createShowDialog():MutableLiveData<ConnectycubeChatDialog> {
+    private fun createShowDialog(): MutableLiveData<ConnectycubeChatDialog> {
         val dialogName = MutableLiveData<ConnectycubeChatDialog>()
         dialogName.value = chat
         return dialogName

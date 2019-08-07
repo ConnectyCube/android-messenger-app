@@ -2,18 +2,13 @@ package com.connectycube.messenger
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
-import android.view.WindowManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ListView
 import android.widget.Toast
-import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
 import androidx.lifecycle.observe
 import com.connectycube.auth.session.ConnectycubeSessionManager
-import com.connectycube.auth.session.ConnectycubeSessionParameters
-import com.connectycube.auth.session.ConnectycubeSettings
 import com.connectycube.chat.ConnectycubeChatService
 import com.connectycube.core.EntityCallback
 import com.connectycube.core.exception.ResponseException
@@ -33,7 +28,7 @@ import timber.log.Timber
 class LoginActivity : BaseChatActivity() {
     private lateinit var users: ArrayList<ConnectycubeUser>
     private lateinit var adapter: ArrayAdapter<String>
-    val isSignedIn:Boolean = false
+    val isSignedIn: Boolean = false
     val isLoggedIn: Boolean
         get() = ConnectycubeChatService.getInstance().isLoggedIn
 
@@ -52,10 +47,10 @@ class LoginActivity : BaseChatActivity() {
         val usersLogins = ArrayList<String>()
         users.forEach { usersLogins.add(it.login) }
 
-        val userViewModel: UserListViewModel by viewModels {
+        val userListViewModel: UserListViewModel by viewModels {
             InjectorUtils.provideUserListViewModelFactory(this, usersLogins)
         }
-        userViewModel.getUsers().observe(this) { resource ->
+        userListViewModel.getUsers().observe(this) { resource ->
             if (resource.status == Status.SUCCESS) {
                 val listUser = resource.data
 
@@ -66,10 +61,12 @@ class LoginActivity : BaseChatActivity() {
         }
     }
 
-    fun isSignedInREST(user: ConnectycubeUser) = ConnectycubeSessionManager.getInstance().sessionParameters?.userId == user.id ?: false
+    fun isSignedInREST(user: ConnectycubeUser) =
+        ConnectycubeSessionManager.getInstance().sessionParameters?.userId == user.id ?: false
 
     fun signInRestIdNeed(user: ConnectycubeUser) {
-        if(!isSignedInREST(user)) {
+//        ToDo check if we make login with not current user, clear database if so
+        if (!isSignedInREST(user)) {
             signInRest(user)
         } else {
             loginToChat(user)
@@ -84,7 +81,11 @@ class LoginActivity : BaseChatActivity() {
 
             override fun onError(ex: ResponseException) {
                 hideProgress(progressbar)
-                Toast.makeText(applicationContext, getString(R.string.login_chat_login_error, ex.message), Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    applicationContext,
+                    getString(R.string.login_chat_login_error, ex.message),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         })
     }
@@ -114,12 +115,12 @@ class LoginActivity : BaseChatActivity() {
     }
 
     fun startDialogs() {
-        Timber.d("ChatDialogsActivity.start")
+        Timber.d("ChatDialogActivity.start")
         startChatDialogsActivity()
     }
 
     private fun startChatDialogsActivity() {
-        val intent = Intent(this, ChatDialogsActivity::class.java)
+        val intent = Intent(this, ChatDialogActivity::class.java)
         startActivity(intent)
     }
 

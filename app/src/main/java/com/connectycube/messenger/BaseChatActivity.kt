@@ -3,10 +3,9 @@ package com.connectycube.messenger
 import android.view.View
 import android.view.WindowManager
 import android.widget.ProgressBar
-import androidx.activity.ComponentActivity
 import androidx.appcompat.app.AppCompatActivity
 
-abstract class BaseChatActivity : AppCompatActivity()  {
+abstract class BaseChatActivity : AppCompatActivity() {
 
     fun hideProgress(progressbar: ProgressBar) {
         window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)

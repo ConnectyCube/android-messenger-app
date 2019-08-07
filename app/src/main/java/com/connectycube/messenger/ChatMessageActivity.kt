@@ -24,7 +24,7 @@ import com.connectycube.messenger.paging.Status
 import com.connectycube.messenger.utilities.InjectorUtils
 import com.connectycube.messenger.utilities.PermissionsHelper
 import com.connectycube.messenger.utilities.REQUEST_ATTACHMENT_IMAGE_CONTACTS
-import com.connectycube.messenger.viewmodels.ChatMessageViewModel
+import com.connectycube.messenger.viewmodels.ChatMessageListViewModel
 import kotlinx.android.synthetic.main.activity_chat.*
 import timber.log.Timber
 import com.zhihu.matisse.listener.OnCheckedListener
@@ -39,7 +39,8 @@ import com.zhihu.matisse.MimeType
 
 
 const val REQUEST_CODE_CHOOSE = 23;
-class ChatActivity : BaseChatActivity() {
+
+class ChatMessageActivity : BaseChatActivity() {
 
     private val clickListener: ClickListener = this::onMessageClicked
     private val messageListener: ChatDialogMessageListener = ChatMessageListener()
@@ -47,7 +48,7 @@ class ChatActivity : BaseChatActivity() {
     private val permissionsHelper = PermissionsHelper(this)
     private lateinit var chatAdapter: ChatMessageAdapter
     private lateinit var chatDialog: ConnectycubeChatDialog
-    private lateinit var model: ChatMessageViewModel
+    private lateinit var modelChatMessageList: ChatMessageListViewModel
 
     val modelAttachment: AttachmentViewModel by viewModels {
         InjectorUtils.provideAttachmentViewModelFactory(this.application)
@@ -62,12 +63,12 @@ class ChatActivity : BaseChatActivity() {
         chatDialog = intent.getSerializableExtra(EXTRA_CHAT) as ConnectycubeChatDialog
         chatDialog.initForChat(ConnectycubeChatService.getInstance())
         chatDialog.addMessageListener(messageListener)
-
+        initChat()
         messageSender = ConnectycubeMessageSender(this, chatDialog)
-        val chatViewModel: ChatMessageViewModel by viewModels {
-            InjectorUtils.provideMessageListViewModelFactory(this, chatDialog)
+        val chatMessageListViewModel: ChatMessageListViewModel by viewModels {
+            InjectorUtils.provideChatMessageListViewModelFactory(this, chatDialog)
         }
-        model = chatViewModel
+        modelChatMessageList = chatMessageListViewModel
         initManagers()
         initChatAdapter()
     }
@@ -84,7 +85,7 @@ class ChatActivity : BaseChatActivity() {
                 resources.getDimension(R.dimen.margin_normal).toInt()
             )
         )
-        model.refreshState.observe(this, Observer {
+        modelChatMessageList.refreshState.observe(this, Observer {
             Timber.d("refreshState= $it")
             if (it.status == Status.RUNNING && chatAdapter.itemCount == 0) {
                 showProgress(progressbar)
@@ -93,16 +94,32 @@ class ChatActivity : BaseChatActivity() {
             }
         })
 
-        model.networkState.observe(this, Observer {
+        modelChatMessageList.networkState.observe(this, Observer {
             Timber.d("networkState= $it")
         })
 
 
-        model.messages.observe(this, Observer {
+        modelChatMessageList.messages.observe(this, Observer {
             Timber.d("submitList= ${it.second}")
             chatAdapter.submitList(it.first)
             scrollDownIfNeed(it.second)
         })
+    }
+
+    private fun initChat() {
+        when (chatDialog.type) {
+            ConnectycubeDialogType.GROUP, ConnectycubeDialogType.BROADCAST -> {
+//                ToDo consider to join async
+                chatDialog.join()
+            }
+
+            ConnectycubeDialogType.PRIVATE -> Timber.d("ConnectycubeDialogType.PRIVATE type")
+
+            else -> {
+                Timber.d("Unsupported type")
+                finish()
+            }
+        }
     }
 
     fun initManagers() {
@@ -111,7 +128,8 @@ class ChatActivity : BaseChatActivity() {
 
     fun unregisterChatManagers() {
         ConnectycubeChatService.getInstance().messageStatusesManager.messageStatusListeners?.forEach {
-            ConnectycubeChatService.getInstance().messageStatusesManager.removeMessageStatusListener(it)}
+            ConnectycubeChatService.getInstance().messageStatusesManager.removeMessageStatusListener(it)
+        }
     }
 
     override fun onDestroy() {
@@ -120,7 +138,7 @@ class ChatActivity : BaseChatActivity() {
     }
 
     fun onAttachClick(view: View) {
-        if(permissionsHelper.areAllImageGranted()){
+        if (permissionsHelper.areAllImageGranted()) {
             Timber.d("onAttachClick areAllImageGranted")
             requestImageDevice()
         } else permissionsHelper.requestImagePermissions()
@@ -136,7 +154,7 @@ class ChatActivity : BaseChatActivity() {
     }
 
     fun requestImageDevice() {
-        Matisse.from(this@ChatActivity)
+        Matisse.from(this@ChatMessageActivity)
             .choose(MimeType.ofImage(), false)
             .countable(false)
             .capture(true)
@@ -180,8 +198,8 @@ class ChatActivity : BaseChatActivity() {
     }
 
     fun submitMessage(message: ConnectycubeChatMessage) {
-        Timber.d("submitMessage model.messages.value")
-        model.refresh(true)
+        Timber.d("submitMessage modelChatMessageList.messages.value")
+        modelChatMessageList.refresh(true)
     }
 
     fun scrollDownIfNeed(scroll: Boolean) {
@@ -199,19 +217,19 @@ class ChatActivity : BaseChatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_CODE_CHOOSE && resultCode == Activity.RESULT_OK) {
-            if(data != null && Matisse.obtainPathResult(data) != null) {
+            if (data != null && Matisse.obtainPathResult(data) != null) {
                 val path = Matisse.obtainPathResult(data).iterator().next()
-                uploadAttachment(path)
+                uploadAttachment(path, ConnectycubeAttachment.IMAGE_TYPE)
             }
         }
     }
 
-    private fun uploadAttachment(path: String) {
-        modelAttachment.uploadAttachment(path).observe(this) { resource ->
+    private fun uploadAttachment(path: String, type: String) {
+        modelAttachment.uploadAttachment(path, type).observe(this) { resource ->
             when {
                 resource.status == com.connectycube.messenger.vo.Status.LOADING -> {
                     showProgress(progressbar)
-                    progressbar.progress = resource.progress?:0
+                    progressbar.progress = resource.progress ?: 0
                 }
 
                 resource.status == com.connectycube.messenger.vo.Status.SUCCESS -> {
@@ -221,14 +239,20 @@ class ChatActivity : BaseChatActivity() {
                 }
                 resource.status == com.connectycube.messenger.vo.Status.ERROR -> {
                     hideProgress(progressbar)
-                    Toast.makeText(applicationContext, getString(R.string.loading_attachment_error, resource.message), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        applicationContext,
+                        getString(R.string.loading_attachment_error, resource.message),
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int,
-                                            permissions: Array<String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>, grantResults: IntArray
+    ) {
         when (requestCode) {
             REQUEST_ATTACHMENT_IMAGE_CONTACTS -> {
                 // If request is cancelled, the result arrays are empty.
@@ -250,6 +274,7 @@ class ChatActivity : BaseChatActivity() {
             Timber.d("ChatMessageListener processMessage " + chatMessage.body)
             submitMessage(chatMessage)
         }
+
         override fun processError(s: String, e: ChatException, chatMessage: ConnectycubeChatMessage, integer: Int?) {
 
         }
@@ -271,15 +296,15 @@ class ChatActivity : BaseChatActivity() {
         }
     }
 
-    inner class ChatMessagesStatusListener: MessageStatusListener{
+    inner class ChatMessagesStatusListener : MessageStatusListener {
         override fun processMessageRead(messageID: String, dialogId: String, userId: Int) {
             Timber.d("processMessageRead messageID= $messageID")
-            model.refresh()
-         }
+            modelChatMessageList.refresh()
+        }
 
         override fun processMessageDelivered(messageID: String, dialogId: String, userId: Int) {
             Timber.d("processMessageDelivered messageID= $messageID")
-         }
+        }
 
     }
 }

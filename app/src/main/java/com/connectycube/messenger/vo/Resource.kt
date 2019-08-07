@@ -3,6 +3,7 @@ package com.connectycube.messenger.vo
 import com.connectycube.messenger.vo.Status.SUCCESS
 import com.connectycube.messenger.vo.Status.ERROR
 import com.connectycube.messenger.vo.Status.LOADING
+
 /**
  * A generic class that holds a value with its loading status.
  * @param <T>

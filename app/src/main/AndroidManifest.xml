@@ -23,8 +23,8 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".ChatDialogsActivity"/>
-        <activity android:name=".ChatActivity"/>
+        <activity android:name=".ChatDialogActivity"/>
+        <activity android:name=".ChatMessageActivity"/>
         <activity android:name=".CreateChatDialogActivity" />
         <provider
                 android:name="androidx.core.content.FileProvider"

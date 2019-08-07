@@ -11,5 +11,6 @@ class AttachmentViewModelFactory(
 ) : ViewModelProvider.NewInstanceFactory() {
 
     @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>) = AttachmentViewModel(applicationContext, attachmentRepository) as T
+    override fun <T : ViewModel> create(modelClass: Class<T>) =
+        AttachmentViewModel(applicationContext, attachmentRepository) as T
 }

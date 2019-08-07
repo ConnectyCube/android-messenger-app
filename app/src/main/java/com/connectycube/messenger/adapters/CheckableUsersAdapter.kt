@@ -32,7 +32,11 @@ class CheckableUsersAdapter(
 
     override fun onBindViewHolder(holder: CheckableUserViewHolder, position: Int) {
         val user = getItem(position)
-        holder.bind(context, user, isUserChecked(user), CompoundButton.OnCheckedChangeListener { _, checked -> setUserChecked(user, checked) })
+        holder.bind(
+            context,
+            user,
+            isUserChecked(user),
+            CompoundButton.OnCheckedChangeListener { _, checked -> setUserChecked(user, checked) })
     }
 
     private fun isUserChecked(user: ConnectycubeUser): Boolean {
@@ -47,7 +51,7 @@ class CheckableUsersAdapter(
         return items[position]
     }
 
-    fun setItems(users: List<ConnectycubeUser>){
+    fun setItems(users: List<ConnectycubeUser>) {
         items = users
         notifyDataSetChanged()
     }
@@ -58,10 +62,17 @@ class CheckableUsersAdapter(
         private val txtLastActivity: TextView = itemView.findViewById(R.id.last_activity_text_view)
         private val checkBox: CheckBox = itemView.findViewById(R.id.checkbox)
 
-        fun bind(activityContext: Context, connectycubeUser: ConnectycubeUser, isSelected: Boolean, onCheckedChangeListener: CompoundButton.OnCheckedChangeListener) {
-            loadUserAvatar(activityContext,
+        fun bind(
+            activityContext: Context,
+            connectycubeUser: ConnectycubeUser,
+            isSelected: Boolean,
+            onCheckedChangeListener: CompoundButton.OnCheckedChangeListener
+        ) {
+            loadUserAvatar(
+                activityContext,
                 connectycubeUser,
-                imgAvatar)
+                imgAvatar
+            )
 
             txtName.text = connectycubeUser.fullName
             txtLastActivity.text = getPrettyLastActivityDate(activityContext, connectycubeUser.lastRequestAt)

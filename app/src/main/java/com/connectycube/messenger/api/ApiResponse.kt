@@ -1,7 +1,5 @@
 package com.connectycube.messenger.api
 
-import timber.log.Timber
-
 /**
  * Common class used by API responses.
  * @param <T> the type of the response object

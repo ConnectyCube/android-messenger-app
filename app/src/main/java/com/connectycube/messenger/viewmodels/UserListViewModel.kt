@@ -4,7 +4,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.connectycube.messenger.api.ApiResponse
 import com.connectycube.messenger.data.User
 import com.connectycube.messenger.data.UserRepository
 import com.connectycube.messenger.vo.Resource
@@ -24,7 +23,7 @@ class UserListViewModel internal constructor(val userRepository: UserRepository,
         viewModelScope.cancel()
     }
 
-    fun getUsers(): LiveData<Resource<List<User>>>{
+    fun getUsers(): LiveData<Resource<List<User>>> {
         return userRepository.loadUsers(logins)
     }
 
