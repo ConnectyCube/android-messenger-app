@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
 import androidx.lifecycle.Observer
-import androidx.paging.PagedList
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.connectycube.chat.ConnectycubeChatService
@@ -29,21 +28,14 @@ import com.connectycube.messenger.viewmodels.ChatMessageViewModel
 import kotlinx.android.synthetic.main.activity_chat.*
 import timber.log.Timber
 import com.zhihu.matisse.listener.OnCheckedListener
-import androidx.annotation.NonNull
-import com.zhihu.matisse.listener.OnSelectedListener
 import android.content.pm.ActivityInfo
-import android.net.Uri
 import android.widget.Toast
 import androidx.lifecycle.observe
-import com.connectycube.messenger.api.ConnectycubeService
 import com.connectycube.messenger.utilities.Glide4Engine
 import com.connectycube.messenger.viewmodels.AttachmentViewModel
-import com.zhihu.matisse.filter.Filter.K
 import com.zhihu.matisse.internal.entity.CaptureStrategy
-import com.zhihu.matisse.MimeType.ofAll
 import com.zhihu.matisse.Matisse
 import com.zhihu.matisse.MimeType
-import com.zhihu.matisse.filter.Filter
 
 
 const val REQUEST_CODE_CHOOSE = 23;
@@ -212,11 +204,13 @@ class ChatActivity : BaseChatActivity() {
     }
 
     private fun uploadAttachment(path: String) {
-        modelAttachment.uploadAttach(path).observe(this) {resource ->
+        modelAttachment.uploadAttachment(path).observe(this) { resource ->
             when {
                 resource.status == com.connectycube.messenger.vo.Status.LOADING -> {
                     showProgress(progressbar)
+                    progressbar.progress = resource.progress?:0
                 }
+
                 resource.status == com.connectycube.messenger.vo.Status.SUCCESS -> {
                     hideProgress(progressbar)
                     Timber.d("resource.data=" + resource.data)

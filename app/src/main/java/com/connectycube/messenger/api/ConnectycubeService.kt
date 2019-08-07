@@ -15,6 +15,7 @@ import com.connectycube.messenger.data.Chat
 import com.connectycube.messenger.data.User
 import com.connectycube.messenger.utilities.Converter
 import com.connectycube.messenger.utilities.InjectorUtils
+import com.connectycube.messenger.utilities.LiveDataResponsePerformerProgress
 import com.connectycube.storage.ConnectycubeStorage
 import com.connectycube.storage.model.ConnectycubeFile
 import com.connectycube.users.ConnectycubeUsers
@@ -92,10 +93,10 @@ class ConnectycubeService {
     fun loadFileAsAttachment(path: String): LiveData<ApiResponse<ConnectycubeAttachment>> {
         val file = File(path)
         Timber.d("loadFileAsAttachment path= $path")
-        return InjectorUtils.provideConnectycubeServiceForType<ConnectycubeFile, ConnectycubeAttachment>()
-            .perform(
+        val service = InjectorUtils.provideConnectycubeServiceProgressForType<ConnectycubeFile, ConnectycubeAttachment>()
+        return service.perform(
                 ConnectycubeStorage.uploadFileTask(file, true
-                ) { Timber.d("loadFileAsAttachment onProgressUpdate $it") },
+                ) { service.progressCallBack.onProgressUpdate(it) },
                 object : Converter<ConnectycubeAttachment, ConnectycubeFile>() {
                     override fun convertTo(response: ConnectycubeFile): ConnectycubeAttachment {
                         val attachment = ConnectycubeAttachment(ConnectycubeAttachment.IMAGE_TYPE)

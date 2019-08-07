@@ -1,17 +1,17 @@
 package com.connectycube.messenger.utilities
 
 import android.os.Bundle
-import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.connectycube.core.EntityCallback
 import com.connectycube.core.exception.ResponseException
 import com.connectycube.core.server.Performer
 import com.connectycube.messenger.api.ApiResponse
 import java.util.concurrent.atomic.AtomicBoolean
 
-class LiveDataResponsePerformer<T, R> {
+open class LiveDataResponsePerformer<T, R> {
 
-    open fun perform(performer: Performer<T>, converter: Converter<R, T>): LiveData<ApiResponse<R>> {
-        return object : LiveData<ApiResponse<R>>() {
+    open fun perform(performer: Performer<T>, converter: Converter<R, T>): MutableLiveData<ApiResponse<R>> {
+        return object : MutableLiveData<ApiResponse<R>>() {
             private var started = AtomicBoolean(false)
             override fun onActive() {
                 super.onActive()

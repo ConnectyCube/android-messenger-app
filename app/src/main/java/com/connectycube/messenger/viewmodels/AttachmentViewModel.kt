@@ -13,7 +13,7 @@ class AttachmentViewModel internal constructor(
 ) :
     AndroidViewModel(applicationContext) {
 
-    fun uploadAttach(path: String): LiveData<Resource<ConnectycubeAttachment>> =
+    fun uploadAttachment(path: String): LiveData<Resource<ConnectycubeAttachment>> =
         attachmentRepo.loadFileAsAttachment(path)
 
 }

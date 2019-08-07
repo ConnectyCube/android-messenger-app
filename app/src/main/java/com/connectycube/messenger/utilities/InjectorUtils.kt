@@ -43,6 +43,10 @@ object InjectorUtils {
         return LiveDataResponsePerformer()
     }
 
+    fun <T, R> provideConnectycubeServiceProgressForType(): LiveDataResponsePerformerProgress<T, R> {
+        return LiveDataResponsePerformerProgress()
+    }
+
     fun provideCreateChatDialogViewModelFactory(application: Application): CreateChatDialogViewModelFactory {
         val usersRepository = getUserRepository(application.baseContext)
         val chatRepository = getChatRepository(application.baseContext)

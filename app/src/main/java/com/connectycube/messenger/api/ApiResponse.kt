@@ -16,11 +16,17 @@ sealed class ApiResponse<T> {
         fun <T> create(response: T): ApiResponse<T> {
             return ApiSuccessResponse(response)
         }
+
+        fun <T> create(progress: Int): ApiProgressResponse<T> {
+            return ApiProgressResponse(progress)
+        }
     }
 }
 
 
 class ApiEmptyResponse<T> : ApiResponse<T>()
+
+class ApiProgressResponse<T>(val progress: Int) : ApiResponse<T>()
 
 data class ApiSuccessResponse<T>(
     val body: T
