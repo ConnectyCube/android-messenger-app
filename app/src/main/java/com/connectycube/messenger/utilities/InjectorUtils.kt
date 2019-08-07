@@ -3,10 +3,7 @@ package com.connectycube.messenger.utilities
 import android.app.Application
 import android.content.Context
 import com.connectycube.chat.model.ConnectycubeChatDialog
-import com.connectycube.messenger.data.AppDatabase
-import com.connectycube.messenger.data.ChatMessageRepository
-import com.connectycube.messenger.data.ChatRepository
-import com.connectycube.messenger.data.UserRepository
+import com.connectycube.messenger.data.*
 import com.connectycube.messenger.viewmodels.*
 
 object InjectorUtils {
@@ -46,9 +43,22 @@ object InjectorUtils {
         return LiveDataResponsePerformer()
     }
 
+    fun <T, R> provideConnectycubeServiceProgressForType(): LiveDataResponsePerformerProgress<T, R> {
+        return LiveDataResponsePerformerProgress()
+    }
+
     fun provideCreateChatDialogViewModelFactory(application: Application): CreateChatDialogViewModelFactory {
         val usersRepository = getUserRepository(application.baseContext)
         val chatRepository = getChatRepository(application.baseContext)
         return CreateChatDialogViewModelFactory(application, usersRepository, chatRepository)
+    }
+
+    private fun getAttachmentViewRepository(): AttachmentRepository {
+        return AttachmentRepository.getInstance()
+    }
+
+    fun provideAttachmentViewModelFactory(application: Application): AttachmentViewModelFactory {
+        val repository = getAttachmentViewRepository()
+        return AttachmentViewModelFactory(application, repository)
     }
 }

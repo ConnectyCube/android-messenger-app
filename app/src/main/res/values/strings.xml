@@ -27,6 +27,7 @@
     <!--Chats-->
     <string name="chat_text_hint">Message</string>
     <string name="message_attachment">Attachment</string>
+    <string name="loading_attachment_error">Loading attachment error %s</string>
 
     <!-- Errors -->
     <string name="error_credentials_empty">The App class should contain ConnectyCube credentials. Register new account and application at https://admin.connectycube.com
@@ -35,4 +36,11 @@
     <string name="select_users_choose_users">Please, choose at least one participant</string>
 
     <string name="today">Today</string>
+
+    <!--fix for Matisse lib-->
+    <plurals name="error_over_count">
+        <item quantity="one">You can only select one media file</item>
+        <item quantity="many">You can only select up to %1$d media files</item>
+    </plurals>
+
 </resources>

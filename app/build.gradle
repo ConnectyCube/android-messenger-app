@@ -40,6 +40,7 @@ ext {
     paging_version = "2.1.0"
     glideVersion = '4.9.0'
     recyclerViewVersion = '1.1.0-beta01'
+    matisseVersion = '0.5.1-beta1'
 }
 
 dependencies { configuration ->
@@ -56,6 +57,7 @@ dependencies { configuration ->
     implementation 'com.android.support:multidex:1.0.3'
     implementation "com.google.android.material:material:$materialVersion"
     implementation 'com.jakewharton.timber:timber:4.7.1'
+    implementation "com.zhihu.android:matisse:$matisseVersion"
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation 'androidx.appcompat:appcompat:1.0.2'
@@ -69,6 +71,7 @@ dependencies { configuration ->
 
 private static void connectycubeComponents(configuration, version) {
     configuration.implementation "com.connectycube:connectycube-android-sdk-chat:$version"
+    configuration.implementation "com.connectycube:connectycube-android-sdk-storage:$version"
 }
 
 private static void androidRoomComponents(configuration, roomVersion) {

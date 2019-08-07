@@ -58,6 +58,8 @@ class CreateChatDialogViewModel internal constructor(
                 Chat(
                     chatId = chatDialog.dialogId,
                     lastMessageDateSent = chatDialog.lastMessageDateSent,
+                    createdAt = if (chatDialog.createdAt != null) chatDialog.createdAt.time else 0,
+                    unreadMessageCount = if (chatDialog.unreadMessageCount != null) chatDialog.unreadMessageCount else 0,
                     name = chatDialog.name ?: (array[0]?.fullName ?: ""),
                     conChat = chatDialog
                 )

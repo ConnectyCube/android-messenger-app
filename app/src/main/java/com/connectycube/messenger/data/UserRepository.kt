@@ -37,7 +37,7 @@ class UserRepository private constructor(private val userDao: UserDao, private v
                 userDao.insertAll(item)
             }
 
-            override fun shouldFetch(data: List<User>?) = data.isNullOrEmpty()
+            override fun shouldFetch(data: List<User>?, newData: List<User>?) = data.isNullOrEmpty()
 
             override fun loadFromDb() = userDao.getUsers()
 

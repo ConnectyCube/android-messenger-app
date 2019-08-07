@@ -66,10 +66,10 @@ class LoginActivity : BaseChatActivity() {
         }
     }
 
-    fun isSignedIn(user: ConnectycubeUser) = ConnectycubeSessionManager.getInstance().sessionParameters?.userId == user.id ?: false
+    fun isSignedInREST(user: ConnectycubeUser) = ConnectycubeSessionManager.getInstance().sessionParameters?.userId == user.id ?: false
 
     fun signInRestIdNeed(user: ConnectycubeUser) {
-        if(!isSignedIn(user)) {
+        if(!isSignedInREST(user)) {
             signInRest(user)
         } else {
             loginToChat(user)
@@ -138,8 +138,19 @@ class LoginActivity : BaseChatActivity() {
         }
     }
 
-    override fun onBackPressed() {
+    fun logout() {
         ConnectycubeChatService.getInstance().destroy()
+//        ConnectycubeUsers.signOut().performAsync(object: EntityCallback<Void> {
+//            override fun onSuccess(void: Void?, bundle: Bundle?) {
+//            }
+//
+//            override fun onError(ex: ResponseException) {
+//            }
+//        })
+    }
+
+    override fun onBackPressed() {
+        logout()
         finish()
     }
 }

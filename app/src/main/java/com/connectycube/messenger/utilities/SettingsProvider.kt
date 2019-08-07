@@ -56,6 +56,10 @@ object SettingsProvider {
         ConnectycubeSettings.getInstance().logLevel = LogLevel.DEBUG
         ConnectycubeChatService.setDebugEnabled(true)
         ConnectycubeChatService.setDefaultConnectionTimeout(0)
+        ConnectycubeChatService.setConnectionFabric(TcpChatConnectionFabric(TcpConfigurationBuilder().apply {
+            socketTimeout = 0
+        }))
+
 
         val builder = TcpConfigurationBuilder()
             .setAllowListenNetwork(true)

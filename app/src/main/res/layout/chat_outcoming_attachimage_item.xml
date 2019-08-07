@@ -1,0 +1,51 @@
+<androidx.constraintlayout.widget.ConstraintLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    <LinearLayout
+            android:id="@+id/bubble_frame"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/margin_tiny"
+            android:orientation="vertical"
+            android:background="@drawable/text_message_bubble"
+            android:backgroundTint="@color/blue_light"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+                android:id="@+id/text_message_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingRight="@dimen/margin_small"
+                android:paddingLeft="@dimen/margin_small"
+                tools:text="Yesterday"
+                android:layout_gravity="end"
+                android:paddingEnd="@dimen/margin_small"
+                tools:ignore="RtlSymmetry"/>
+
+        <ImageView
+                android:id="@+id/attachment_image_view"
+                android:adjustViewBounds="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/margin_tiny"
+                tools:ignore="ContentDescription"
+                tools:src="@drawable/ic_avatar_placeholder"/>
+
+        <ImageView
+                android:id="@+id/message_status_image_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:scaleType="fitCenter"
+                tools:src="@drawable/ic_check_black_16dp"
+                android:layout_gravity="end"
+                tools:ignore="ContentDescription"/>
+
+    </LinearLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
