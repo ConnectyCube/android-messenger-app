@@ -122,34 +122,7 @@ class ChatActivity : BaseChatActivity() {
     fun onAttachClick(view: View) {
         if(permissionsHelper.areAllImageGranted()){
             Timber.d("onAttachClick areAllImageGranted")
-            Matisse.from(this@ChatActivity)
-                .choose(MimeType.ofImage(), false)
-                .countable(false)
-                .capture(true)
-                .captureStrategy(
-                    CaptureStrategy(true, "com.connectycube.messenger.fileprovider")
-                )
-                .maxSelectable(1)
-//                .addFilter(GifSizeFilter(320, 320, 5 * Filter.K * Filter.K))
-                .gridExpectedSize(
-                    resources.getDimensionPixelSize(R.dimen.grid_expected_size)
-                )
-                .restrictOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
-                .thumbnailScale(0.85f)
-                //                                            .imageEngine(new GlideEngine())  // for glide-V3
-                .imageEngine(Glide4Engine())    // for glide-V4
-                .setOnSelectedListener { uriList, pathList ->
-                    // DO SOMETHING IMMEDIATELY HERE
-                    Timber.d("onSelected= pathList=$pathList")
-                }
-                .originalEnable(true)
-                .maxOriginalSize(10)
-//                .autoHideToolbarOnSingleTap(true)
-                .setOnCheckedListener(OnCheckedListener { isChecked ->
-                    // DO SOMETHING IMMEDIATELY HERE
-                    Timber.d("isChecked= isChecked=$isChecked")
-                })
-                .forResult(REQUEST_CODE_CHOOSE)
+            requestImageDevice()
         } else permissionsHelper.requestImagePermissions()
     }
 
@@ -160,6 +133,36 @@ class ChatActivity : BaseChatActivity() {
 
     private fun onMessageClicked(message: ConnectycubeChatMessage) {
         Timber.d("message= " + message)
+    }
+
+    fun requestImageDevice() {
+        Matisse.from(this@ChatActivity)
+            .choose(MimeType.ofImage(), false)
+            .countable(false)
+            .capture(true)
+            .captureStrategy(
+                CaptureStrategy(true, "com.connectycube.messenger.fileprovider")
+            )
+            .maxSelectable(1)
+//                .addFilter(GifSizeFilter(320, 320, 5 * Filter.K * Filter.K))
+            .gridExpectedSize(
+                resources.getDimensionPixelSize(R.dimen.grid_expected_size)
+            )
+            .restrictOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+            .thumbnailScale(0.85f)
+            .imageEngine(Glide4Engine())
+            .setOnSelectedListener { uriList, pathList ->
+                // DO SOMETHING IMMEDIATELY HERE
+                Timber.d("onSelected= pathList=$pathList")
+            }
+            .originalEnable(true)
+            .maxOriginalSize(10)
+//                .autoHideToolbarOnSingleTap(true)
+            .setOnCheckedListener(OnCheckedListener { isChecked ->
+                // DO SOMETHING IMMEDIATELY HERE
+                Timber.d("isChecked= isChecked=$isChecked")
+            })
+            .forResult(REQUEST_CODE_CHOOSE)
     }
 
     fun sendChatMessage(text: String = "", attachment: ConnectycubeAttachment? = null) {
