@@ -1,9 +1,11 @@
 package com.connectycube.messenger.viewmodels
 
 import androidx.lifecycle.*
+import com.connectycube.chat.model.ConnectycubeChatDialog
 import com.connectycube.messenger.data.Chat
 import com.connectycube.messenger.data.ChatRepository
 import com.connectycube.messenger.vo.Resource
+import com.connectycube.messenger.vo.Status
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
@@ -27,6 +29,16 @@ class ChatDialogListViewModel internal constructor(val chatRepository: ChatRepos
             chatMediatorLiveData.value = data
         }
         return chatMediatorLiveData
+    }
+
+    fun getChatDialogs(): LiveData<Resource<List<ConnectycubeChatDialog>>>{
+        return Transformations.map(getChats()){
+            when(it.status){
+                Status.LOADING -> Resource.loading(null)
+                Status.SUCCESS -> Resource.success(it.data?.map { chat -> chat.conChat })
+                Status.ERROR -> Resource.error(it.message.toString(), null)
+            }
+        }
     }
 
     fun updateChat(chat: Chat) {
