@@ -47,4 +47,8 @@ abstract class AppDatabase : RoomDatabase() {
                 .build()
         }
     }
+
+    fun clearTablesForLogout() {
+        chatDao().nukeTable()
+    }
 }

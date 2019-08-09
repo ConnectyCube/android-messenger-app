@@ -20,6 +20,9 @@
     <string name="action_start_logout">Logout</string>
     <string name="action_create">Create</string>
 
+    <!--Menu-->
+    <string name="menu_chat_dialog_logout">Logout</string>
+
     <!--ChatDialogs-->
     <string name="chat_login">Login…</string>
     <string name="chat_list_empty">There are no any chats yet</string>

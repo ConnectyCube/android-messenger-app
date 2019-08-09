@@ -12,6 +12,10 @@ class ChatDialogListViewModel internal constructor(val chatRepository: ChatRepos
     ViewModel() {
     var chatLiveData = MutableLiveData<Resource<List<Chat>>>()
     val chatMediatorLiveData = MediatorLiveData<Resource<List<Chat>>>()
+
+    val chatLiveDataLazy by lazy {
+        return@lazy getChats()
+    }
     /**
      * Cancel all coroutines when the ViewModel is cleared.
      */
@@ -21,7 +25,7 @@ class ChatDialogListViewModel internal constructor(val chatRepository: ChatRepos
         viewModelScope.cancel()
     }
 
-    fun getChats(): LiveData<Resource<List<Chat>>> {
+    private fun getChats(): LiveData<Resource<List<Chat>>> {
         val chatListLiveData = chatRepository.loadChats()
         chatMediatorLiveData.addSource(chatListLiveData) { data ->
             chatMediatorLiveData.value = data

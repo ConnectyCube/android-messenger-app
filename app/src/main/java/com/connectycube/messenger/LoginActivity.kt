@@ -122,6 +122,7 @@ class LoginActivity : BaseChatActivity() {
     private fun startChatDialogsActivity() {
         val intent = Intent(this, ChatDialogActivity::class.java)
         startActivity(intent)
+        finish()
     }
 
     fun initUsers() {
