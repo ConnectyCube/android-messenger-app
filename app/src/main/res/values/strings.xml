@@ -3,6 +3,7 @@
 
     <!--LoginActivity-->
     <string name="user_login">Login as</string>
+    <string name="user_logged_in">Logged in as %s …</string>
     <string name="user">User %1$s</string>
     <string name="login_chat_login_error">Login Chat error. Please relogin. Error %s</string>
     <string name="loading_users_error">Loading users error. Error %s</string>

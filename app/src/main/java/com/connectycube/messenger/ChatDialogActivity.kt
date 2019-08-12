@@ -20,6 +20,7 @@ import com.connectycube.chat.model.ConnectycubeChatMessage
 import com.connectycube.messenger.adapters.ChatDialogAdapter
 import com.connectycube.messenger.api.UserService
 import com.connectycube.messenger.utilities.InjectorUtils
+import com.connectycube.messenger.utilities.SharedPreferencesManager
 import com.connectycube.messenger.viewmodels.ChatDialogListViewModel
 import com.connectycube.messenger.vo.Status
 import com.connectycube.users.model.ConnectycubeUser
@@ -125,7 +126,7 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
     }
 
     private fun getCurrentUser(): ConnectycubeUser {
-        return ConnectycubeChatService.getInstance().user
+        return SharedPreferencesManager.getInstance(applicationContext).getCurrentUser()
     }
 
     private fun startChatActivity(chat: ConnectycubeChatDialog) {
@@ -156,6 +157,7 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
         chatDialogListViewModel.chatLiveDataLazy.removeObservers(this)
         GlobalScope.launch(Dispatchers.Main) {
             UserService.instance.ultimateLogout(applicationContext)
+            SharedPreferencesManager.getInstance(applicationContext).deleteCurrentUser()
             startLoginActivity()
             hideProgress(progressbar)
 

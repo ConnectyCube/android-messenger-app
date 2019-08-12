@@ -9,7 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 
-class UserService {
+class UserService private constructor() {
 
     private object Holder {
         val INSTANCE = UserService()

@@ -13,10 +13,7 @@ import com.connectycube.chat.ConnectycubeChatService
 import com.connectycube.core.EntityCallback
 import com.connectycube.core.exception.ResponseException
 import com.connectycube.messenger.data.User
-import com.connectycube.messenger.utilities.InjectorUtils
-import com.connectycube.messenger.utilities.SAMPLE_CONFIG_FILE_NAME
-import com.connectycube.messenger.utilities.SettingsProvider
-import com.connectycube.messenger.utilities.getAllUsersFromFile
+import com.connectycube.messenger.utilities.*
 import com.connectycube.messenger.viewmodels.UserListViewModel
 import com.connectycube.messenger.vo.Status
 import com.connectycube.users.ConnectycubeUsers
@@ -37,11 +34,22 @@ class LoginActivity : BaseChatActivity() {
         setContentView(R.layout.activity_login)
         actionBar?.setTitle(R.string.title_login_activity)
         SettingsProvider.initChat()
-        initUsers()
-        initUserAdapter()
+        chargeLogin()
     }
 
-    fun loginTo(user: ConnectycubeUser) {
+    private fun chargeLogin() {
+        if (SharedPreferencesManager.getInstance(applicationContext).currentUserExists()) {
+            showProgress(progressbar)
+            val user = SharedPreferencesManager.getInstance(applicationContext).getCurrentUser()
+            text_view.text = getString(R.string.user_logged_in, user.fullName ?: user.login)
+            loginToChat(user)
+        } else {
+            initUsers()
+            initUserAdapter()
+        }
+    }
+
+    private fun loginTo(user: ConnectycubeUser) {
         showProgress(progressbar)
         Timber.d("called loginTo user = $user")
         val usersLogins = ArrayList<String>()
@@ -61,11 +69,10 @@ class LoginActivity : BaseChatActivity() {
         }
     }
 
-    fun isSignedInREST(user: ConnectycubeUser) =
+    private fun isSignedInREST(user: ConnectycubeUser) =
         ConnectycubeSessionManager.getInstance().sessionParameters?.userId == user.id ?: false
 
-    fun signInRestIdNeed(user: ConnectycubeUser) {
-//        ToDo check if we make login with not current user, clear database if so
+    private fun signInRestIdNeed(user: ConnectycubeUser) {
         if (!isSignedInREST(user)) {
             signInRest(user)
         } else {
@@ -73,9 +80,10 @@ class LoginActivity : BaseChatActivity() {
         }
     }
 
-    fun signInRest(user: ConnectycubeUser) {
+    private fun signInRest(user: ConnectycubeUser) {
         ConnectycubeUsers.signIn(user).performAsync(object : EntityCallback<ConnectycubeUser> {
-            override fun onSuccess(User: ConnectycubeUser, args: Bundle) {
+            override fun onSuccess(conUser: ConnectycubeUser, args: Bundle) {
+                SharedPreferencesManager.getInstance(applicationContext).saveCurrentUser(user)
                 loginToChat(user)
             }
 
@@ -125,7 +133,7 @@ class LoginActivity : BaseChatActivity() {
         finish()
     }
 
-    fun initUsers() {
+    private fun initUsers() {
         users = getAllUsersFromFile(SAMPLE_CONFIG_FILE_NAME, this)
     }
 
@@ -138,21 +146,5 @@ class LoginActivity : BaseChatActivity() {
         list_users.onItemClickListener = AdapterView.OnItemClickListener { _, _, position, _ ->
             loginTo(users[position])
         }
-    }
-
-    fun logout() {
-        ConnectycubeChatService.getInstance().destroy()
-//        ConnectycubeUsers.signOut().performAsync(object: EntityCallback<Void> {
-//            override fun onSuccess(void: Void?, bundle: Bundle?) {
-//            }
-//
-//            override fun onError(ex: ResponseException) {
-//            }
-//        })
-    }
-
-    override fun onBackPressed() {
-        logout()
-        finish()
     }
 }
