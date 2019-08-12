@@ -65,12 +65,16 @@ class ChatMessageActivity : BaseChatActivity() {
         chatDialog.addMessageListener(messageListener)
         initChat()
         messageSender = ConnectycubeMessageSender(this, chatDialog)
+        modelChatMessageList = getChatMessageListViewModel()
+        initManagers()
+        initChatAdapter()
+    }
+
+    private fun getChatMessageListViewModel(): ChatMessageListViewModel {
         val chatMessageListViewModel: ChatMessageListViewModel by viewModels {
             InjectorUtils.provideChatMessageListViewModelFactory(this, chatDialog)
         }
-        modelChatMessageList = chatMessageListViewModel
-        initManagers()
-        initChatAdapter()
+        return chatMessageListViewModel
     }
 
     private fun initChatAdapter() {

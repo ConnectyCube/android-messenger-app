@@ -2,9 +2,9 @@
 <androidx.constraintlayout.widget.ConstraintLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        xmlns:tools="http://schemas.android.com/tools">
+        android:layout_height="match_parent">
 
     <ProgressBar
             android:id="@+id/progressbar"
@@ -13,13 +13,13 @@
             android:layout_height="wrap_content"
             android:indeterminate="true"
             android:max="100"
-            android:backgroundTint="@color/white"
-            android:indeterminateTint="@color/colorAccent"
             android:layout_marginTop="-7dp"
             android:visibility="gone"
+            tools:visibility="visible"
             tools:ignore="MissingConstraints"/>
+
     <TextView
-            android:id="@+id/textView"
+            android:id="@+id/text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/user_login"
@@ -38,7 +38,7 @@
             android:drawSelectorOnTop="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView"
+            app:layout_constraintTop_toBottomOf="@+id/text_view"
             tools:listitem="@layout/list_item_user_simple"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

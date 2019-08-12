@@ -28,4 +28,7 @@ interface ChatDao {
 
     @Query("SELECT * FROM chats LIMIT :limit OFFSET :offset")
     fun getChatsByPage(limit: Int, offset: Int): LiveData<List<Chat>>
+
+    @Query("DELETE FROM chats")
+    fun nukeTable()
 }

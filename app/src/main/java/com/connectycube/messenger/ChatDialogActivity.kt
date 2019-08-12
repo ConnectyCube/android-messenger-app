@@ -2,6 +2,8 @@ package com.connectycube.messenger
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
@@ -13,14 +15,19 @@ import com.connectycube.chat.ConnectycubeChatService
 import com.connectycube.chat.IncomingMessagesManager
 import com.connectycube.chat.exception.ChatException
 import com.connectycube.chat.listeners.ChatDialogMessageListener
-import com.connectycube.chat.model.ConnectycubeChatMessage
 import com.connectycube.chat.model.ConnectycubeChatDialog
+import com.connectycube.chat.model.ConnectycubeChatMessage
 import com.connectycube.messenger.adapters.ChatDialogAdapter
+import com.connectycube.messenger.api.UserService
 import com.connectycube.messenger.utilities.InjectorUtils
+import com.connectycube.messenger.utilities.SharedPreferencesManager
 import com.connectycube.messenger.viewmodels.ChatDialogListViewModel
 import com.connectycube.messenger.vo.Status
 import com.connectycube.users.model.ConnectycubeUser
 import kotlinx.android.synthetic.main.activity_chatdialogs.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 const val EXTRA_CHAT = "chat_dialog"
@@ -66,7 +73,7 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
 
     private fun subscribeUi() {
         Timber.d("subscribeUi")
-        chatDialogListViewModel.getChatDialogs().observe(this) { resource ->
+        chatDialogListViewModel.chatLiveDataLazy.observe(this) { resource ->
             when (resource.status) {
                 Status.SUCCESS -> {
                     hideProgress(progressbar)
@@ -124,7 +131,7 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
     }
 
     private fun getCurrentUser(): ConnectycubeUser {
-        return ConnectycubeChatService.getInstance().user
+        return SharedPreferencesManager.getInstance(applicationContext).getCurrentUser()
     }
 
     private fun startChatActivity(chat: ConnectycubeChatDialog) {
@@ -133,10 +140,48 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
         startActivity(intent)
     }
 
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.chat_dialog_activity, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.menu_chat_dialog_logout -> {
+                logout()
+                item.isEnabled = false
+                invalidateOptionsMenu()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun logout() {
+        showProgress(progressbar)
+        chatDialogListViewModel.chatLiveDataLazy.removeObservers(this)
+        GlobalScope.launch(Dispatchers.Main) {
+            UserService.instance.ultimateLogout(applicationContext)
+            SharedPreferencesManager.getInstance(applicationContext).deleteCurrentUser()
+            startLoginActivity()
+            hideProgress(progressbar)
+
+            finish()
+        }
+    }
+
     override fun onBackPressed() {
-        super.onBackPressed()
-        ConnectycubeChatService.getInstance().destroy()
-        finish()
+        //go home
+        val startMain = Intent(Intent.ACTION_MAIN)
+        startMain.addCategory(Intent.CATEGORY_HOME)
+        startMain.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        startActivity(startMain)
+    }
+
+    private fun startLoginActivity() {
+        val intent = Intent(this, LoginActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        this.startActivity(intent)
     }
 
     private inner class AllMessageListener : ChatDialogMessageListener {
