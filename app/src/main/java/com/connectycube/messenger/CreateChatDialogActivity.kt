@@ -58,10 +58,17 @@ class CreateChatDialogActivity : BaseChatActivity(), CheckableUsersAdapter.Check
             invalidateOptionsMenu()
         }
 
-        createChatDialogViewModel.getUsers().observe(this) { users ->
-            hideProgress(progressbar)
-            if (users.isNotEmpty()) {
-                usersAdapter.setItems(users)
+        createChatDialogViewModel.getUsers().observe(this) { result ->
+            when(result.status){
+                Status.LOADING -> showProgress(progressbar)
+                Status.ERROR -> hideProgress(progressbar)
+                Status.SUCCESS -> {
+                    hideProgress(progressbar)
+                    val users = result.data
+                    if (users?.isNotEmpty()!!) {
+                        usersAdapter.setItems(users)
+                    }
+                }
             }
         }
     }

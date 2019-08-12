@@ -73,11 +73,16 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
 
     private fun subscribeUi() {
         Timber.d("subscribeUi")
-        chatDialogListViewModel.chatLiveDataLazy.observe(this) { resource ->
-            if (resource.status == Status.SUCCESS) {
-                val listChats = resource.data
-                Timber.d("chatDialogListViewModel.getChats() = $listChats" + ", conUser= " + listChats!![0].conChat)
-                updateDialogAdapter(listChats.map { chat -> chat.conChat })
+        chatDialogListViewModel.getChatDialogs().observe(this) { resource ->
+            when (resource.status) {
+                Status.SUCCESS -> {
+                    hideProgress(progressbar)
+                    val listChatDialogs = resource.data
+                    Timber.d("chatDialogListViewModel.getChats() = $listChatDialogs" + ", conUser= " + listChatDialogs!![0])
+                    updateDialogAdapter(listChatDialogs)
+                }
+                Status.LOADING -> showProgress(progressbar)
+                Status.ERROR -> hideProgress(progressbar)
             }
         }
     }

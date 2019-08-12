@@ -1,10 +1,7 @@
 package com.connectycube.messenger.viewmodels
 
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
+import androidx.lifecycle.*
 import com.connectycube.chat.ConnectycubeChatService
 import com.connectycube.chat.model.ConnectycubeChatDialog
 import com.connectycube.chat.utils.DialogUtils
@@ -24,10 +21,25 @@ class CreateChatDialogViewModel internal constructor(
 
     internal var liveSelectedUsers = MutableLiveData<ArrayList<ConnectycubeUser>>()
 
-    fun getUsers(): LiveData<List<ConnectycubeUser>> {
-        return Transformations.map(usersRepository.getUsers()) {
-            it.map { user -> user.conUser }.filter { user -> !isCurrentUser(user) }
+    fun getUsers(): LiveData<Resource<List<ConnectycubeUser>>> {
+        val result = MediatorLiveData<Resource<List<ConnectycubeUser>>>()
+        result.value = Resource.loading(null)
+
+        val source = usersRepository.getUsers()
+        result.addSource(source) {
+            if (it.isNullOrEmpty()) {
+                result.value = Resource.error(
+                    getApplication<Application>().getString(R.string.error_while_loading_users),
+                    null)
+            } else {
+                result.value = Resource.success(it
+                    .map { user -> user.conUser }
+                    .filter { conUser -> !isCurrentUser(conUser) })
+                result.removeSource(source)
+            }
         }
+
+        return result
     }
 
     fun updateUserSelection(user: ConnectycubeUser, isSelected: Boolean) {
