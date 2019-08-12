@@ -16,7 +16,7 @@ class ChatDialogListViewModel internal constructor(val chatRepository: ChatRepos
     val chatMediatorLiveData = MediatorLiveData<Resource<List<Chat>>>()
 
     val chatLiveDataLazy by lazy {
-        return@lazy getChats()
+        return@lazy getChatDialogs()
     }
     /**
      * Cancel all coroutines when the ViewModel is cleared.

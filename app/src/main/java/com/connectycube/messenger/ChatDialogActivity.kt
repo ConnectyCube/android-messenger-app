@@ -73,7 +73,7 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
 
     private fun subscribeUi() {
         Timber.d("subscribeUi")
-        chatDialogListViewModel.getChatDialogs().observe(this) { resource ->
+        chatDialogListViewModel.chatLiveDataLazy.observe(this) { resource ->
             when (resource.status) {
                 Status.SUCCESS -> {
                     hideProgress(progressbar)
@@ -171,7 +171,7 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
     }
 
     override fun onBackPressed() {
-        //go to home
+        //go home
         val startMain = Intent(Intent.ACTION_MAIN)
         startMain.addCategory(Intent.CATEGORY_HOME)
         startMain.flags = Intent.FLAG_ACTIVITY_NEW_TASK

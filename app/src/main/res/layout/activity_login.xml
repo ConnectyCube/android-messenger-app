@@ -13,10 +13,9 @@
             android:layout_height="wrap_content"
             android:indeterminate="true"
             android:max="100"
-            android:backgroundTint="@color/white"
-            android:indeterminateTint="@color/colorAccent"
             android:layout_marginTop="-7dp"
             android:visibility="gone"
+            tools:visibility="visible"
             tools:ignore="MissingConstraints"/>
 
     <TextView

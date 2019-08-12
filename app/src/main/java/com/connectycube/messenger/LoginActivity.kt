@@ -34,10 +34,10 @@ class LoginActivity : BaseChatActivity() {
         setContentView(R.layout.activity_login)
         actionBar?.setTitle(R.string.title_login_activity)
         SettingsProvider.initChat()
-        chargeLogin()
+        makeLogin()
     }
 
-    private fun chargeLogin() {
+    private fun makeLogin() {
         if (SharedPreferencesManager.getInstance(applicationContext).currentUserExists()) {
             showProgress(progressbar)
             val user = SharedPreferencesManager.getInstance(applicationContext).getCurrentUser()
