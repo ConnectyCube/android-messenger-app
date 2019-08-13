@@ -1,10 +1,12 @@
 package com.connectycube.messenger.api
 
+import android.os.Bundle
 import androidx.lifecycle.LiveData
 import com.connectycube.chat.ConnectycubeRestChatService
 import com.connectycube.chat.Consts
 import com.connectycube.chat.model.ConnectycubeAttachment
 import com.connectycube.chat.model.ConnectycubeChatDialog
+import com.connectycube.core.helper.StringifyArrayList
 import com.connectycube.core.request.RequestGetBuilder
 import com.connectycube.messenger.data.Chat
 import com.connectycube.messenger.data.User
@@ -119,5 +121,10 @@ class ConnectycubeService {
                     return attachment
                 }
             })
+    }
+
+    fun deleteDialog(vararg dialogId: String, forceDelete: Boolean): LiveData<ApiResponse<ArrayList<String>>>{
+        return InjectorUtils.provideConnectycubeServiceForType<ArrayList<String>, Void>()
+            .perform(ConnectycubeRestChatService.deleteDialogs(StringifyArrayList<String>(arrayListOf(*dialogId)), forceDelete, Bundle()))
     }
 }

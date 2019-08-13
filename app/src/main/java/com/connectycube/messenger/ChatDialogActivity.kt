@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.ActionBar
 import androidx.lifecycle.observe
@@ -121,13 +120,23 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
     }
 
     override fun onChatDialogSelected(chatDialog: ConnectycubeChatDialog) {
-        Toast.makeText(this, "Selected dialog " + chatDialog.dialogId, Toast.LENGTH_SHORT).show()
         currentDialogId = chatDialog.dialogId
         startChatActivity(chatDialog)
     }
 
     override fun onChatDialogsListUpdated(currentList: List<ConnectycubeChatDialog>) {
         chats_empty_layout.visibility = if (currentList.isEmpty()) View.VISIBLE else View.GONE
+    }
+
+    override fun onChatDialogDelete(chatDialog: ConnectycubeChatDialog) {
+        Timber.d("Try delete dialog " + chatDialog.dialogId)
+        chatDialogListViewModel.deleteChat(chatDialog).observe(this) { resource ->
+            when (resource.status) {
+                Status.SUCCESS -> hideProgress(progressbar)
+                Status.LOADING -> showProgress(progressbar)
+                Status.ERROR -> hideProgress(progressbar)
+            }
+        }
     }
 
     private fun getCurrentUser(): ConnectycubeUser {

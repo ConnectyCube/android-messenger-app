@@ -41,6 +41,7 @@
     <string name="error_while_loading_users">Error while loading users</string>
 
     <string name="today">Today</string>
+    <string name="delete">Delete</string>
 
     <!--fix for Matisse lib-->
     <plurals name="error_over_count">

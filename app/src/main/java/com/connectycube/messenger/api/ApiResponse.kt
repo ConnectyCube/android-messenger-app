@@ -1,5 +1,7 @@
 package com.connectycube.messenger.api
 
+import android.os.Bundle
+
 /**
  * Common class used by API responses.
  * @param <T> the type of the response object
@@ -15,6 +17,10 @@ sealed class ApiResponse<T> {
             return ApiSuccessResponse(response)
         }
 
+        fun <T> create(response: T, responseBundle: Bundle?): ApiResponse<T> {
+            return ApiSuccessResponse(response, responseBundle)
+        }
+
         fun <T> create(progress: Int): ApiProgressResponse<T> {
             return ApiProgressResponse(progress)
         }
@@ -28,6 +34,12 @@ class ApiProgressResponse<T>(val progress: Int) : ApiResponse<T>()
 
 data class ApiSuccessResponse<T>(
     val body: T
-) : ApiResponse<T>()
+) : ApiResponse<T>() {
+    var bundle: Bundle? = null
+
+    constructor(body: T, bundle: Bundle?) : this(body) {
+        this.bundle = bundle
+    }
+}
 
 data class ApiErrorResponse<T>(val errorMessage: String) : ApiResponse<T>()
