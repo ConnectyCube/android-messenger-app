@@ -39,7 +39,7 @@ object InjectorUtils {
     }
 
     private fun getChatMessageRepository(context: Context): ChatMessageRepository {
-        return ChatMessageRepository.getInstance()
+        return ChatMessageRepository.getInstance(context.applicationContext)
     }
 
     fun <T, R> provideConnectycubeServiceForType(): LiveDataResponsePerformer<T, R> {

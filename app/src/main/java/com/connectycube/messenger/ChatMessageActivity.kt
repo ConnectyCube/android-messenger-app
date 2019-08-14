@@ -102,11 +102,11 @@ class ChatMessageActivity : BaseChatActivity() {
             Timber.d("networkState= $it")
         })
 
-
         modelChatMessageList.messages.observe(this, Observer {
-            Timber.d("submitList= ${it.second}")
-            chatAdapter.submitList(it.first)
-            scrollDownIfNeed(it.second)
+            Timber.d("submitList= $it")
+
+            chatAdapter.submitList(it)
+            scrollDownIfNeed(modelChatMessageList.getScroll())
         })
     }
 
@@ -131,9 +131,8 @@ class ChatMessageActivity : BaseChatActivity() {
     }
 
     fun unregisterChatManagers() {
-        ConnectycubeChatService.getInstance().messageStatusesManager.messageStatusListeners?.forEach {
-            ConnectycubeChatService.getInstance().messageStatusesManager.removeMessageStatusListener(it)
-        }
+        ConnectycubeChatService.getInstance().messageStatusesManager.removeMessageStatusListener(messageStatusListener)
+        chatDialog.removeMessageListrener(messageListener)
     }
 
     override fun onDestroy() {
@@ -203,7 +202,7 @@ class ChatMessageActivity : BaseChatActivity() {
 
     fun submitMessage(message: ConnectycubeChatMessage) {
         Timber.d("submitMessage modelChatMessageList.messages.value")
-        modelChatMessageList.refresh(true)
+        modelChatMessageList.postItem(message, true)
     }
 
     fun scrollDownIfNeed(scroll: Boolean) {
@@ -303,7 +302,7 @@ class ChatMessageActivity : BaseChatActivity() {
     inner class ChatMessagesStatusListener : MessageStatusListener {
         override fun processMessageRead(messageID: String, dialogId: String, userId: Int) {
             Timber.d("processMessageRead messageID= $messageID")
-            modelChatMessageList.refresh()
+//            modelChatMessageList.refresh()
         }
 
         override fun processMessageDelivered(messageID: String, dialogId: String, userId: Int) {

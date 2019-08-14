@@ -101,7 +101,7 @@ class ChatMessageAdapter(
 
     fun isIncoming(chatMessage: ConnectycubeChatMessage): Boolean {
         val localUser = ConnectycubeChatService.getInstance().user
-        return chatMessage.senderId != localUser.id
+        return chatMessage.senderId != null && chatMessage.senderId != localUser.id
     }
 
     fun withAttachment(chatMessage: ConnectycubeChatMessage): Boolean {
