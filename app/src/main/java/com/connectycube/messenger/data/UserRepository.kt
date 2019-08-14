@@ -49,6 +49,10 @@ class UserRepository private constructor(private val userDao: UserDao, private v
         return userDao.getUsers()
     }
 
+    fun getUsersByIds(vararg usersIds: Int): LiveData<List<User>> {
+        return userDao.getUsersByIds(*usersIds)
+    }
+
     companion object {
 
         // For Singleton instantiation

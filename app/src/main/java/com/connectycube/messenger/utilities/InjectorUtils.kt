@@ -56,6 +56,12 @@ object InjectorUtils {
         return CreateChatDialogViewModelFactory(application, usersRepository, chatRepository)
     }
 
+    fun provideChatDialogDetailsViewModelFactory(application: Application, dialogId: String): ChatDialogDetailsViewModelFactory {
+        val usersRepository = getUserRepository(application.baseContext)
+        val chatRepository = getChatRepository(application.baseContext)
+        return ChatDialogDetailsViewModelFactory(application, dialogId, usersRepository, chatRepository)
+    }
+
     private fun getAttachmentViewRepository(): AttachmentRepository {
         return AttachmentRepository.getInstance()
     }

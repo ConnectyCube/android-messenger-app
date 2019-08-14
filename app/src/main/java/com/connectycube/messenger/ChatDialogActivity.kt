@@ -139,6 +139,12 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
         }
     }
 
+    override fun onChatDialogPreview(chatDialog: ConnectycubeChatDialog) {
+        val intent = Intent(this, ChatDialogDetailsActivity::class.java)
+        intent.putExtra(EXTRA_CHAT_DIALOG_ID, chatDialog.dialogId)
+        startActivity(intent)
+    }
+
     private fun getCurrentUser(): ConnectycubeUser {
         return SharedPreferencesManager.getInstance(applicationContext).getCurrentUser()
     }

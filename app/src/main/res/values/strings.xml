@@ -15,6 +15,14 @@
     <string name="last_activity">Last activity:</string>
     <string name="new_chat">New Chat</string>
 
+    <!--ChatDialogDetailsActivity-->
+    <string name="occupants">Occupants</string>
+    <string name="you">You</string>
+    <string name="creator">Creator</string>
+    <string name="admin">Administrator</string>
+    <string name="view_details">View Details</string>
+    <string name="description">Description</string>
+
     <!--Action bar-->
     <string name="title_login_activity">Login</string>
     <string name="title_current_user">Logged in as %1$s</string>
@@ -39,6 +47,7 @@
     <string name="error_users_empty">The user_config.json file should contain at least 2 and max 4 users with format [\"login\":\"password\"]. Please go to https://admin.connectycube.com and create users in \'Users\' module.</string>
     <string name="select_users_choose_users">Please, choose at least one participant</string>
     <string name="error_while_loading_users">Error while loading users</string>
+    <string name="something_went_wrong_try_again_later">Something went wrong, try again later</string>
 
     <string name="today">Today</string>
     <string name="delete">Delete</string>

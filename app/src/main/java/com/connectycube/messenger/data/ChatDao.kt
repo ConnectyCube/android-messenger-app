@@ -2,7 +2,6 @@ package com.connectycube.messenger.data
 
 import androidx.lifecycle.LiveData
 import androidx.room.*
-import androidx.room.*
 
 /**
  * The Data Access Object for the Chat class.
