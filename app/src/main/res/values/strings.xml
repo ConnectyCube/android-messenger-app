@@ -51,6 +51,11 @@
 
     <string name="today">Today</string>
     <string name="delete">Delete</string>
+    <string name="id_format">id: %s</string>
+    <string name="edit_group_description">Edit Group Description</string>
+    <string name="group_description">GroupDescription</string>
+    <string name="put_there_some_information_about_group">Put there some additional information about group</string>
+    <string name="group_description_can_not_be_empty">Group description can not be empty</string>
 
     <!--fix for Matisse lib-->
     <plurals name="error_over_count">

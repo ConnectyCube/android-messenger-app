@@ -72,4 +72,14 @@ class ChatDialogDetailsViewModel internal constructor(
     fun getCurrentUser(): ConnectycubeUser {
         return ConnectycubeChatService.getInstance().user
     }
+
+    fun updateGroupDescription(newDescription: String) {
+        val result = liveDialog
+//        result.value = Resource.loading(null)
+
+
+
+
+
+    }
 }

@@ -59,7 +59,7 @@ internal class ChatDialogAdapter(private val context: Context) :
     }
 
     private fun onChatDialogPreview(chatDialog: ConnectycubeChatDialog) {
-        callback?.onChatDialogPreview(chatDialog)
+        callback?.onChatDialogDetails(chatDialog)
     }
 
     override fun onCurrentListChanged(
@@ -182,6 +182,6 @@ internal class ChatDialogAdapter(private val context: Context) :
         fun onChatDialogSelected(chatDialog: ConnectycubeChatDialog)
         fun onChatDialogsListUpdated(currentList: List<ConnectycubeChatDialog>)
         fun onChatDialogDelete(chatDialog: ConnectycubeChatDialog)
-        fun onChatDialogPreview(chatDialog: ConnectycubeChatDialog)
+        fun onChatDialogDetails(chatDialog: ConnectycubeChatDialog)
     }
 }
