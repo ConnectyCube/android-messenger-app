@@ -52,7 +52,7 @@ class MessageBoundaryCallback(
     @MainThread
     override fun onItemAtEndLoaded(itemAtEnd: ConnectycubeChatMessage) {
         Timber.d("onItemAtEndLoaded itemAtEnd= ${itemAtEnd.body}")
-        helper.runIfNotRunning(PagingRequestHelper.RequestType.AFTER) {
+        helper.runIfNotRunning(PagingRequestHelper.RequestType.BEFORE) {
             chatMessageApi.getTopBefore(
                 dialogId = dialogId,
                 before = itemAtEnd.dateSent,
@@ -79,7 +79,7 @@ class MessageBoundaryCallback(
     override fun onItemAtFrontLoaded(itemAtFront: ConnectycubeChatMessage) {
         // ignored, since we only ever append to what's in the DB
         Timber.d("onItemAtFrontLoaded= ${itemAtFront.body}")
-        helper.runIfNotRunning(PagingRequestHelper.RequestType.BEFORE) {
+        helper.runIfNotRunning(PagingRequestHelper.RequestType.AFTER) {
             chatMessageApi.getTopAfter(
                 dialogId = dialogId,
                 after = itemAtFront.dateSent,
@@ -93,8 +93,7 @@ class MessageBoundaryCallback(
             : EntityCallback<ArrayList<ConnectycubeChatMessage>> {
         return object : EntityCallback<ArrayList<ConnectycubeChatMessage>> {
             override fun onSuccess(items: ArrayList<ConnectycubeChatMessage>, bundle: Bundle?) {
-                if (items.isNotEmpty()) insertItemsIntoDb(convertToMessages(items), it)
-                Timber.d("createWebserviceCallback ${items.size}")
+                insertItemsIntoDb(convertToMessages(items), it)
             }
 
             override fun onError(ex: ResponseException) {

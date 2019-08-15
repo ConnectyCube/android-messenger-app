@@ -89,6 +89,16 @@ class ChatMessageActivity : BaseChatActivity() {
                 resources.getDimension(R.dimen.margin_normal).toInt()
             )
         )
+        chatAdapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                super.onItemRangeInserted(positionStart, itemCount)
+                Timber.d("onItemRangeInserted $positionStart")
+                if (positionStart == 0) {
+                    Timber.d("onItemRangeInserted scrollDownPosition to $positionStart")
+                    scrollDown()
+                }
+            }
+        })
         modelChatMessageList.refreshState.observe(this, Observer {
             Timber.d("refreshState= $it")
             if (it.status == Status.RUNNING && chatAdapter.itemCount == 0) {
@@ -100,21 +110,20 @@ class ChatMessageActivity : BaseChatActivity() {
 
         modelChatMessageList.networkState.observe(this, Observer {
             Timber.d("networkState= $it")
+            chatAdapter.setNetworkState(it)
         })
 
         modelChatMessageList.messages.observe(this, Observer {
-            Timber.d("submitList= $it")
+            Timber.d("submitList= ${it.size}")
 
             chatAdapter.submitList(it)
-            scrollDownIfNeed(modelChatMessageList.getScroll())
         })
     }
 
     private fun initChat() {
         when (chatDialog.type) {
             ConnectycubeDialogType.GROUP, ConnectycubeDialogType.BROADCAST -> {
-//                ToDo consider to join async
-                chatDialog.join()
+                chatDialog.join(null)
             }
 
             ConnectycubeDialogType.PRIVATE -> Timber.d("ConnectycubeDialogType.PRIVATE type")
@@ -148,8 +157,8 @@ class ChatMessageActivity : BaseChatActivity() {
     }
 
     fun onSendChatClick(view: View) {
-        val text = input_chat_message.text.toString().trim { it <= ' ' }
-        sendChatMessage(text)
+        val text = input_chat_message.text.toString().trim()
+        if (text.isNotEmpty()) sendChatMessage(text)
     }
 
     private fun onMessageClicked(message: ConnectycubeChatMessage) {
@@ -202,18 +211,11 @@ class ChatMessageActivity : BaseChatActivity() {
 
     fun submitMessage(message: ConnectycubeChatMessage) {
         Timber.d("submitMessage modelChatMessageList.messages.value")
-        modelChatMessageList.postItem(message, true)
-    }
-
-    fun scrollDownIfNeed(scroll: Boolean) {
-        if (scroll) {
-            scrollDown()
-        }
+        modelChatMessageList.postItem(message)
     }
 
     fun scrollDown() {
-//        messages_recycleview.scrollToPosition(0)
-        messages_recycleview.postDelayed({ messages_recycleview.scrollToPosition(0) }, 200)
+        messages_recycleview.postDelayed({ messages_recycleview.smoothScrollToPosition(0) }, 200)
     }
 
 

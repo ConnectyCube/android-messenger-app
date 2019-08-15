@@ -3,12 +3,11 @@ package com.connectycube.messenger.data
 import android.content.Context
 import android.os.Bundle
 import androidx.annotation.MainThread
-import androidx.arch.core.executor.ArchTaskExecutor
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
-import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
+import androidx.paging.toLiveData
 import com.connectycube.chat.model.ConnectycubeChatMessage
 import com.connectycube.core.EntityCallback
 import com.connectycube.core.exception.ResponseException
@@ -44,10 +43,10 @@ class ChatMessageRepository(
      * Inserts the response into the database while also assigning position indices to items.
      */
     private fun insertResultIntoDb(items: List<Message>?) {
-        items?.let {
+        items?.isNotEmpty().let {
             db.runInTransaction {
-                Timber.d("insertResultIntoDb items= ${items.size}, items= $items")
-                db.messageDao().insert(items)
+                Timber.d("insertResultIntoDb items= ${items?.size}, items= $items")
+                db.messageDao().insert(items!!)
             }
         }
     }
@@ -111,11 +110,9 @@ class ChatMessageRepository(
 
         val dataSourceConnectycubeChatMessage = db.messageDao().postsByDialogId(dialogId).map { it.conMessage }
 
-        val livePagedList = LivePagedListBuilder(dataSourceConnectycubeChatMessage, config)
-            .setInitialLoadKey(null)
-            .setBoundaryCallback(boundaryCallback)
-            .setFetchExecutor(ArchTaskExecutor.getIOThreadExecutor())
-            .build()
+        val livePagedList = dataSourceConnectycubeChatMessage.toLiveData(
+            pageSize = pageSize,
+            boundaryCallback = boundaryCallback)
 
         Timber.d("livePagedList= $livePagedList")
         return Listing(
@@ -132,7 +129,7 @@ class ChatMessageRepository(
     }
 
     companion object {
-        private const val DEFAULT_NETWORK_PAGE_SIZE = 5
+        private const val DEFAULT_NETWORK_PAGE_SIZE = 20
         // For Singleton instantiation
         @Volatile
         private var instance: ChatMessageRepository? = null
