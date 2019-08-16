@@ -63,7 +63,7 @@ class EditTextActivity : BaseChatActivity() {
 
     private fun applyEdit(text: Editable) {
         val resultIntent = Intent()
-        resultIntent.putExtra(EXTRA_DATA, text)
+        resultIntent.putExtra(EXTRA_DATA, text.toString())
         setResult(Activity.RESULT_OK, resultIntent)
         finish()
     }

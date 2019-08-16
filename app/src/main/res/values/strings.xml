@@ -22,6 +22,12 @@
     <string name="admin">Administrator</string>
     <string name="view_details">View Details</string>
     <string name="description">Description</string>
+    <string name="add_to_admins">Add to admins</string>
+    <string name="remove_from_admins">Remove from admins</string>
+    <string name="remove_from_occupants">Remove from occupants</string>
+    <string name="edit_group_name">Edit Group Name</string>
+    <string name="group_name">Group Name</string>
+    <string name="put_name_for_group">Put name for group</string>
 
     <!--Action bar-->
     <string name="title_login_activity">Login</string>
@@ -48,14 +54,16 @@
     <string name="select_users_choose_users">Please, choose at least one participant</string>
     <string name="error_while_loading_users">Error while loading users</string>
     <string name="something_went_wrong_try_again_later">Something went wrong, try again later</string>
+    <string name="group_description_can_not_be_empty">Group description can not be empty</string>
+    <string name="group_name_can_not_be_empty">Group name can not be empty</string>
+    <string name="coming_soon">Coming soon</string>
 
     <string name="today">Today</string>
     <string name="delete">Delete</string>
     <string name="id_format">id: %s</string>
     <string name="edit_group_description">Edit Group Description</string>
-    <string name="group_description">GroupDescription</string>
+    <string name="group_description">Group Description</string>
     <string name="put_there_some_information_about_group">Put there some additional information about group</string>
-    <string name="group_description_can_not_be_empty">Group description can not be empty</string>
 
     <!--fix for Matisse lib-->
     <plurals name="error_over_count">

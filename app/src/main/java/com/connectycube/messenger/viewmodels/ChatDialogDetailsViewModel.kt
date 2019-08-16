@@ -56,7 +56,6 @@ class ChatDialogDetailsViewModel internal constructor(
                 )
             } else {
                 result.value = Resource.success(charDialog.conChat)
-                result.removeSource(source)
             }
         }
 
@@ -73,13 +72,37 @@ class ChatDialogDetailsViewModel internal constructor(
         return ConnectycubeChatService.getInstance().user
     }
 
-    fun updateGroupDescription(newDescription: String) {
-        val result = liveDialog
-//        result.value = Resource.loading(null)
+    fun updateGroupDescription(dialogId: String, newDescription: String) {
+        chatRepository.updateChatDescription(dialogId, newDescription) { error, chat ->
+            liveDialog().postValue(Resource.error(error, chat.conChat))
+        }
+    }
 
+    fun updateGroupName(dialogId: String, newName: String) {
+        chatRepository.updateChatName(dialogId, newName) { error, chat ->
+            liveDialog().postValue(Resource.error(error, chat.conChat))
+        }
+    }
 
+    fun addUserToAdmins(dialogId: String, userId: Int) {
+        chatRepository.addChatAdmins(dialogId, userId) { error, chat ->
+            liveDialog().postValue(Resource.error(error, chat.conChat))
+        }
+    }
 
+    fun removeUserFromAdmins(dialogId: String, userId: Int) {
+        chatRepository.removeChatAdmins(dialogId, userId) { error, chat ->
+            liveDialog().postValue(Resource.error(error, chat.conChat))
+        }
+    }
 
+    fun removeOccupantUser(dialogId: String, userId: Int) {
+        chatRepository.removeChatOccupants(dialogId, userId) { error, chat ->
+            liveDialog().postValue(Resource.error(error, chat.conChat))
+        }
+    }
 
+    private fun liveDialog(): MutableLiveData<Resource<ConnectycubeChatDialog>> {
+        return liveDialog as MutableLiveData<Resource<ConnectycubeChatDialog>>
     }
 }

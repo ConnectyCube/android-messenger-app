@@ -1,9 +1,7 @@
 package com.connectycube.messenger.adapters
 
 import android.content.Context
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -12,7 +10,11 @@ import com.connectycube.messenger.utilities.getPrettyLastActivityDate
 import com.connectycube.messenger.utilities.loadUserAvatar
 import com.connectycube.users.model.ConnectycubeUser
 
-class DialogOccupantsAdapter(
+const val MENU_ITEM_ADMIN_ADD: Int = 0
+const val MENU_ITEM_ADMIN_REMOVE: Int = 1
+const val MENU_ITEM_OCCUPANT_REMOVE: Int = 2
+
+internal class DialogOccupantsAdapter(
     private val context: Context,
     private val callback: DialogOccupantsAdapterCallback
 ) : RecyclerView.Adapter<DialogOccupantsAdapter.DialogOccupantViewHolder>() {
@@ -28,18 +30,49 @@ class DialogOccupantsAdapter(
         return DialogOccupantViewHolder(view)
     }
 
+    override fun onViewRecycled(holder: DialogOccupantViewHolder) {
+        holder.unbind()
+    }
+
     override fun onBindViewHolder(holder: DialogOccupantViewHolder, position: Int) {
         val user = getItem(position)
         holder.bind(
             context,
             user,
-            isCurrentUser(user),
-            isCreator(user),
-            isAdmin(user)
+            object : DialogOccupantViewHolder.DialogOccupantViewHolderCallback {
+                override fun isUserCreator(connectycubeUser: ConnectycubeUser): Boolean {
+                    return isCreator(connectycubeUser)
+                }
+
+                override fun isUserAdmin(connectycubeUser: ConnectycubeUser): Boolean {
+                    return isAdmin(connectycubeUser)
+                }
+
+                override fun isCurrentUser(connectycubeUser: ConnectycubeUser): Boolean {
+                    return isUserCurrentUser(connectycubeUser)
+                }
+
+                override fun onItemAddAdmin(connectycubeUser: ConnectycubeUser) {
+                    onAddUserToAdmins(connectycubeUser.id)
+                }
+
+                override fun onItemRemoveAdmin(connectycubeUser: ConnectycubeUser) {
+                    onRemoveUserFromAdmins(connectycubeUser.id)
+                }
+
+                override fun onItemRemoveOccupant(connectycubeUser: ConnectycubeUser) {
+                    onRemoveUserFromOccupants(connectycubeUser.id)
+                }
+            },
+            getCurrentUser()
         )
     }
 
-    private fun isCurrentUser(user: ConnectycubeUser): Boolean {
+    private fun getCurrentUser(): ConnectycubeUser {
+        return callback.getCurrentUser()
+    }
+
+    private fun isUserCurrentUser(user: ConnectycubeUser): Boolean {
         return callback.isCurrentUser(user)
     }
 
@@ -51,6 +84,18 @@ class DialogOccupantsAdapter(
         return callback.isUserAdmin(user)
     }
 
+    private fun onAddUserToAdmins(userId: Int) {
+        callback.onAddUserToAdmins(userId)
+    }
+
+    private fun onRemoveUserFromAdmins(userId: Int) {
+        callback.onRemoveUserFromAdmins(userId)
+    }
+
+    private fun onRemoveUserFromOccupants(userId: Int) {
+        callback.onRemoveUserFromOccupants(userId)
+    }
+
     private fun getItem(position: Int): ConnectycubeUser {
         return items[position]
     }
@@ -60,7 +105,12 @@ class DialogOccupantsAdapter(
         notifyDataSetChanged()
     }
 
-    inner class DialogOccupantViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    internal class DialogOccupantViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView),
+        View.OnCreateContextMenuListener,
+        MenuItem.OnMenuItemClickListener {
+        private var model: ConnectycubeUser? = null
+        private var callback: DialogOccupantViewHolderCallback? = null
+        private var currentUser: ConnectycubeUser? = null
         private val imgAvatar: ImageView = itemView.findViewById(R.id.avatar_image_view)
         private val txtName: TextView = itemView.findViewById(R.id.name_text_viw)
         private val txtLastActivityTitle: TextView = itemView.findViewById(R.id.last_activity_title_txt)
@@ -70,17 +120,20 @@ class DialogOccupantsAdapter(
         fun bind(
             activityContext: Context,
             connectycubeUser: ConnectycubeUser,
-            isCurrentUser: Boolean,
-            isCreator: Boolean,
-            isAdministrator: Boolean
+            callback: DialogOccupantViewHolderCallback,
+            currentUser: ConnectycubeUser
         ) {
+            this.model = connectycubeUser
+            this.callback = callback
+            this.currentUser = currentUser
+
             loadUserAvatar(
                 activityContext,
                 connectycubeUser,
                 imgAvatar
             )
 
-            if (isCurrentUser) {
+            if (isCurrentUser()) {
                 txtName.text = activityContext.getText(R.string.you)
                 txtLastActivity.visibility = View.GONE
                 txtLastActivityTitle.visibility = View.GONE
@@ -92,16 +145,98 @@ class DialogOccupantsAdapter(
             }
 
             when {
-                isCreator -> {
+                isCreator() -> {
                     txtRole.visibility = View.VISIBLE
                     txtRole.text = activityContext.getText(R.string.creator)
                 }
-                isAdministrator -> {
+                isAdministrator() -> {
                     txtRole.visibility = View.VISIBLE
                     txtRole.text = activityContext.getText(R.string.admin)
                 }
                 else -> txtRole.visibility = View.GONE
             }
+
+            itemView.setOnCreateContextMenuListener(this)
+        }
+
+        private fun isAdministrator(): Boolean {
+            if (model == null) return false
+
+            return callback?.isUserAdmin(model!!)!!
+        }
+
+        private fun isCurrentUser(): Boolean {
+            if (model == null) return false
+
+            return callback?.isCurrentUser(model!!)!!
+        }
+
+        private fun isCreator(): Boolean {
+            if (model == null) return false
+
+            return callback?.isUserCreator(model!!)!!
+        }
+
+        private fun isCurrentUserCreator(): Boolean {
+            return currentUser?.let { callback?.isUserCreator(it) }!!
+        }
+
+        private fun isCurrentUserCreatorOrAdministrator(): Boolean {
+            return currentUser?.let { callback?.isUserCreator(it)!! || callback?.isUserAdmin(it)!! }!!
+        }
+
+        fun unbind() {
+            model = null
+            callback = null
+        }
+
+        override fun onCreateContextMenu(menu: ContextMenu?, v: View?, menuInfo: ContextMenu.ContextMenuInfo?) {
+            if (isCurrentUserCreator()) {
+                when {
+                    isAdministrator() ->
+                        menu?.add(Menu.NONE, MENU_ITEM_ADMIN_REMOVE, Menu.NONE, R.string.remove_from_admins)
+                            ?.setOnMenuItemClickListener(this)
+                    else ->
+                        menu?.add(Menu.NONE, MENU_ITEM_ADMIN_ADD, Menu.NONE, R.string.add_to_admins)
+                            ?.setOnMenuItemClickListener(this)
+                }
+            }
+
+            if (isCurrentUserCreatorOrAdministrator()) {
+                menu?.add(Menu.NONE, MENU_ITEM_OCCUPANT_REMOVE, Menu.NONE, R.string.remove_from_occupants)
+                    ?.setOnMenuItemClickListener(this)
+            }
+        }
+
+        override fun onMenuItemClick(item: MenuItem?): Boolean {
+            when (item?.itemId) {
+                MENU_ITEM_ADMIN_ADD -> notifyAddAdmin()
+                MENU_ITEM_ADMIN_REMOVE -> notifyRemoveAdmin()
+                MENU_ITEM_OCCUPANT_REMOVE -> notifyRemoveOccupant()
+            }
+            return true
+        }
+
+        private fun notifyRemoveOccupant() {
+            model?.let { callback?.onItemRemoveOccupant(it) }
+
+        }
+
+        private fun notifyRemoveAdmin() {
+            model?.let { callback?.onItemRemoveAdmin(it) }
+        }
+
+        private fun notifyAddAdmin() {
+            model?.let { callback?.onItemAddAdmin(it) }
+        }
+
+        internal interface DialogOccupantViewHolderCallback {
+            fun isUserCreator(connectycubeUser: ConnectycubeUser): Boolean
+            fun isUserAdmin(connectycubeUser: ConnectycubeUser): Boolean
+            fun isCurrentUser(connectycubeUser: ConnectycubeUser): Boolean
+            fun onItemAddAdmin(connectycubeUser: ConnectycubeUser)
+            fun onItemRemoveAdmin(connectycubeUser: ConnectycubeUser)
+            fun onItemRemoveOccupant(connectycubeUser: ConnectycubeUser)
         }
     }
 
@@ -109,5 +244,9 @@ class DialogOccupantsAdapter(
         fun isUserCreator(user: ConnectycubeUser): Boolean
         fun isUserAdmin(user: ConnectycubeUser): Boolean
         fun isCurrentUser(user: ConnectycubeUser): Boolean
+        fun getCurrentUser(): ConnectycubeUser
+        fun onAddUserToAdmins(userId: Int)
+        fun onRemoveUserFromAdmins(userId: Int)
+        fun onRemoveUserFromOccupants(userId: Int)
     }
 }
