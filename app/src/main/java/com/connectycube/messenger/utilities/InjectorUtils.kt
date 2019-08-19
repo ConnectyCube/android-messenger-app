@@ -1,11 +1,10 @@
 package com.connectycube.messenger.utilities
 
+import android.app.Application
 import android.content.Context
-import com.connectycube.messenger.data.AppDatabase
-import com.connectycube.messenger.data.ChatRepository
-import com.connectycube.messenger.data.UserRepository
-import com.connectycube.messenger.viewmodels.ChatListViewModelFactory
-import com.connectycube.messenger.viewmodels.UserListViewModelFactory
+import com.connectycube.chat.model.ConnectycubeChatDialog
+import com.connectycube.messenger.data.*
+import com.connectycube.messenger.viewmodels.*
 
 object InjectorUtils {
 
@@ -20,9 +19,9 @@ object InjectorUtils {
         )
     }
 
-    fun provideChatListViewModelFactory(context: Context): ChatListViewModelFactory {
+    fun provideChatDialogListViewModelFactory(context: Context): ChatDialogListViewModelFactory {
         val repository = getChatRepository(context)
-        return ChatListViewModelFactory(repository)
+        return ChatDialogListViewModelFactory(repository)
     }
 
     private fun getChatRepository(context: Context): ChatRepository {
@@ -31,7 +30,48 @@ object InjectorUtils {
         )
     }
 
+    fun provideChatMessageListViewModelFactory(
+        context: Context,
+        chat: ConnectycubeChatDialog
+    ): ChatMessageListViewModelFactory {
+        val repository = getChatMessageRepository(context)
+        return ChatMessageListViewModelFactory(repository, chat)
+    }
+
+    private fun getChatMessageRepository(context: Context): ChatMessageRepository {
+        return ChatMessageRepository.getInstance(context.applicationContext)
+    }
+
     fun <T, R> provideConnectycubeServiceForType(): LiveDataResponsePerformer<T, R> {
         return LiveDataResponsePerformer()
+    }
+
+    fun <T, R> provideSyncConnectycubeServiceForType(): ResponsePerformer<T, R> {
+        return ResponsePerformer()
+    }
+
+    fun <T, R> provideConnectycubeServiceProgressForType(): LiveDataResponsePerformerProgress<T, R> {
+        return LiveDataResponsePerformerProgress()
+    }
+
+    fun provideCreateChatDialogViewModelFactory(application: Application): CreateChatDialogViewModelFactory {
+        val usersRepository = getUserRepository(application.baseContext)
+        val chatRepository = getChatRepository(application.baseContext)
+        return CreateChatDialogViewModelFactory(application, usersRepository, chatRepository)
+    }
+
+    fun provideChatDialogDetailsViewModelFactory(application: Application, dialogId: String): ChatDialogDetailsViewModelFactory {
+        val usersRepository = getUserRepository(application.baseContext)
+        val chatRepository = getChatRepository(application.baseContext)
+        return ChatDialogDetailsViewModelFactory(application, dialogId, usersRepository, chatRepository)
+    }
+
+    private fun getAttachmentViewRepository(): AttachmentRepository {
+        return AttachmentRepository.getInstance()
+    }
+
+    fun provideAttachmentViewModelFactory(application: Application): AttachmentViewModelFactory {
+        val repository = getAttachmentViewRepository()
+        return AttachmentViewModelFactory(application, repository)
     }
 }

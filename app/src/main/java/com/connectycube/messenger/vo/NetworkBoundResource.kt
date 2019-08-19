@@ -28,12 +28,23 @@ abstract class NetworkBoundResource<ResultType, RequestType>
         @Suppress("LeakingThis")
         val dbSource = loadFromDb()
         result.addSource(dbSource) { data ->
+            if (shouldShowMediateResult(data)) setValue(Resource.success(data))
             result.removeSource(dbSource)
-            if (shouldFetch(data)) {
-                fetchFromNetwork(dbSource)
-            } else {
-                result.addSource(dbSource) { newData ->
-                    setValue(Resource.success(newData))
+            val apiResponse = createCallSlice()
+            result.addSource(apiResponse) { response ->
+                result.removeSource(apiResponse)
+                var newCallData: RequestType? = null
+                when (response) {
+                    is ApiSuccessResponse -> {
+                        newCallData = processResponse(response)
+                    }
+                }
+                if (shouldFetch(data, newCallData)) {
+                    fetchFromNetwork(dbSource)
+                } else {
+                    result.addSource(dbSource) { newData ->
+                        setValue(Resource.success(newData))
+                    }
                 }
             }
         }
@@ -98,11 +109,23 @@ abstract class NetworkBoundResource<ResultType, RequestType>
     protected abstract fun saveCallResult(item: RequestType)
 
     @MainThread
-    protected abstract fun shouldFetch(data: ResultType?): Boolean
+    protected abstract fun shouldFetch(data: ResultType?, newData: RequestType?): Boolean
 
     @MainThread
     protected abstract fun loadFromDb(): LiveData<ResultType>
 
     @MainThread
+    protected open fun shouldShowMediateResult(data: ResultType?): Boolean = false
+
+    @MainThread
     protected abstract fun createCall(): LiveData<ApiResponse<RequestType>>
+
+    @MainThread
+    protected open fun createCallSlice(): LiveData<ApiResponse<RequestType>> =
+        object : LiveData<ApiResponse<RequestType>>() {
+            override fun onActive() {
+                super.onActive()
+                postValue(ApiResponse.create(NotImplementedError()))
+            }
+        }
 }

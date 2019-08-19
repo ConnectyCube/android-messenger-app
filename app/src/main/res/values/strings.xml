@@ -3,21 +3,73 @@
 
     <!--LoginActivity-->
     <string name="user_login">Login as</string>
+    <string name="user_logged_in">Logged in as %s …</string>
     <string name="user">User %1$s</string>
     <string name="login_chat_login_error">Login Chat error. Please relogin. Error %s</string>
     <string name="loading_users_error">Loading users error. Error %s</string>
+
+    <!--DialogsActivity-->
+    <string name="yesterday">Yesterday</string>
+
+    <!--CreateDialogActivity-->
+    <string name="last_activity">Last activity:</string>
+    <string name="new_chat">New Chat</string>
+
+    <!--ChatDialogDetailsActivity-->
+    <string name="occupants">Occupants</string>
+    <string name="you">You</string>
+    <string name="creator">Creator</string>
+    <string name="admin">Administrator</string>
+    <string name="view_details">View Details</string>
+    <string name="description">Description</string>
+    <string name="add_to_admins">Add to admins</string>
+    <string name="remove_from_admins">Remove from admins</string>
+    <string name="remove_from_occupants">Remove from occupants</string>
+    <string name="edit_group_name">Edit Group Name</string>
+    <string name="group_name">Group Name</string>
+    <string name="put_name_for_group">Put name for group</string>
 
     <!--Action bar-->
     <string name="title_login_activity">Login</string>
     <string name="title_current_user">Logged in as %1$s</string>
     <string name="action_start_logout">Logout</string>
+    <string name="action_create">Create</string>
 
-    <!--Dialogs-->
+    <!--Menu-->
+    <string name="menu_chat_dialog_logout">Logout</string>
+
+    <!--ChatDialogs-->
     <string name="chat_login">Login…</string>
     <string name="chat_list_empty">There are no any chats yet</string>
+
+    <!--ChatMessages-->
+    <string name="chat_text_hint">Message</string>
+    <string name="message_attachment">Attachment</string>
+    <string name="loading_attachment_error">Loading attachment error %s</string>
+    <string name="fbd_scroll_counter_label">%s</string>
 
     <!-- Errors -->
     <string name="error_credentials_empty">The App class should contain ConnectyCube credentials. Register new account and application at https://admin.connectycube.com
         then put Application credentials from Overview page + Account key from https://admin.connectycube.com/account/settings</string>
-    <string name="error_users_empty">The user_config.json file should contain at least 2 and max 4 users with format [\"login\":\"password\"]. Please go to https://admin.connectycube.com and create users in \'Users\' module.</string>
+    <string name="error_users_empty">The user_config.json file should contain at least 2 and max 5 users with format [\"login\":{\"password\":userId}]. Please go to https://admin.connectycube.com and create users in \'Users\' module.</string>
+    <string name="select_users_choose_users">Please, choose at least one participant</string>
+    <string name="error_while_loading_users">Error while loading users</string>
+    <string name="something_went_wrong_try_again_later">Something went wrong, try again later</string>
+    <string name="group_description_can_not_be_empty">Group description can not be empty</string>
+    <string name="group_name_can_not_be_empty">Group name can not be empty</string>
+    <string name="coming_soon">Coming soon</string>
+
+    <string name="today">Today</string>
+    <string name="delete">Delete</string>
+    <string name="id_format">id: %s</string>
+    <string name="edit_group_description">Edit Group Description</string>
+    <string name="group_description">Group Description</string>
+    <string name="put_there_some_information_about_group">Put there some additional information about group</string>
+
+    <!--fix for Matisse lib-->
+    <plurals name="error_over_count">
+        <item quantity="one">You can only select one media file</item>
+        <item quantity="many">You can only select up to %1$d media files</item>
+    </plurals>
+
 </resources>

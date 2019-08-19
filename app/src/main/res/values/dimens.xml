@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <dimen name="margin_big">24dp</dimen>
     <dimen name="margin_normal">16dp</dimen>
     <dimen name="margin_small">8dp</dimen>
+    <dimen name="margin_tiny">4dp</dimen>
 
     <dimen name="list_item_margin">@dimen/margin_normal</dimen>
 
     <dimen name="chat_fab_margin">16dp</dimen>
+
+    <dimen name="attach_image_width">150dp</dimen>
+    <dimen name="attach_image_height">150dp</dimen>
+
+    <dimen name="grid_expected_size">120dp</dimen>
 </resources>

@@ -2,23 +2,18 @@ package com.connectycube.messenger
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
-import android.view.WindowManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ListView
 import android.widget.Toast
-import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
 import androidx.lifecycle.observe
+import com.connectycube.auth.session.ConnectycubeSessionManager
 import com.connectycube.chat.ConnectycubeChatService
 import com.connectycube.core.EntityCallback
 import com.connectycube.core.exception.ResponseException
 import com.connectycube.messenger.data.User
-import com.connectycube.messenger.utilities.InjectorUtils
-import com.connectycube.messenger.utilities.SAMPLE_CONFIG_FILE_NAME
-import com.connectycube.messenger.utilities.SettingsProvider
-import com.connectycube.messenger.utilities.getAllUsersFromFile
+import com.connectycube.messenger.utilities.*
 import com.connectycube.messenger.viewmodels.UserListViewModel
 import com.connectycube.messenger.vo.Status
 import com.connectycube.users.ConnectycubeUsers
@@ -27,10 +22,10 @@ import kotlinx.android.synthetic.main.activity_login.*
 import timber.log.Timber
 
 
-class LoginActivity : ComponentActivity() {
+class LoginActivity : BaseChatActivity() {
     private lateinit var users: ArrayList<ConnectycubeUser>
     private lateinit var adapter: ArrayAdapter<String>
-    val isSignedIn:Boolean = false
+    val isSignedIn: Boolean = false
     val isLoggedIn: Boolean
         get() = ConnectycubeChatService.getInstance().isLoggedIn
 
@@ -39,20 +34,31 @@ class LoginActivity : ComponentActivity() {
         setContentView(R.layout.activity_login)
         actionBar?.setTitle(R.string.title_login_activity)
         SettingsProvider.initChat()
-        initUsers()
-        initUserAdapter()
+        makeLogin()
     }
 
-    fun loginTo(user: ConnectycubeUser) {
-        showProgress()
+    private fun makeLogin() {
+        if (SharedPreferencesManager.getInstance(applicationContext).currentUserExists()) {
+            showProgress(progressbar)
+            val user = SharedPreferencesManager.getInstance(applicationContext).getCurrentUser()
+            text_view.text = getString(R.string.user_logged_in, user.fullName ?: user.login)
+            loginToChat(user)
+        } else {
+            initUsers()
+            initUserAdapter()
+        }
+    }
+
+    private fun loginTo(user: ConnectycubeUser) {
+        showProgress(progressbar)
         Timber.d("called loginTo user = $user")
         val usersLogins = ArrayList<String>()
         users.forEach { usersLogins.add(it.login) }
 
-        val userViewModel: UserListViewModel by viewModels {
+        val userListViewModel: UserListViewModel by viewModels {
             InjectorUtils.provideUserListViewModelFactory(this, usersLogins)
         }
-        userViewModel.getUsers().observe(this) { resource ->
+        userListViewModel.getUsers().observe(this) { resource ->
             if (resource.status == Status.SUCCESS) {
                 val listUser = resource.data
 
@@ -63,21 +69,31 @@ class LoginActivity : ComponentActivity() {
         }
     }
 
-    fun signInRestIdNeed(user: ConnectycubeUser) {
-        if(!isSignedIn) {
+    private fun isSignedInREST(user: ConnectycubeUser) =
+        ConnectycubeSessionManager.getInstance().sessionParameters?.userId == user.id ?: false
+
+    private fun signInRestIdNeed(user: ConnectycubeUser) {
+        if (!isSignedInREST(user)) {
             signInRest(user)
+        } else {
+            loginToChat(user)
         }
     }
 
-    fun signInRest(user: ConnectycubeUser) {
+    private fun signInRest(user: ConnectycubeUser) {
         ConnectycubeUsers.signIn(user).performAsync(object : EntityCallback<ConnectycubeUser> {
-            override fun onSuccess(User: ConnectycubeUser, args: Bundle) {
+            override fun onSuccess(conUser: ConnectycubeUser, args: Bundle) {
+                SharedPreferencesManager.getInstance(applicationContext).saveCurrentUser(user)
                 loginToChat(user)
             }
 
             override fun onError(ex: ResponseException) {
-                hideProgress()
-                Toast.makeText(applicationContext, getString(R.string.login_chat_login_error, ex.message), Toast.LENGTH_SHORT).show()
+                hideProgress(progressbar)
+                Toast.makeText(
+                    applicationContext,
+                    getString(R.string.login_chat_login_error, ex.message),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         })
     }
@@ -87,12 +103,12 @@ class LoginActivity : ComponentActivity() {
         if (!isLoggedIn) {
             ConnectycubeChatService.getInstance().login(user, object : EntityCallback<Void> {
                 override fun onSuccess(void: Void?, bundle: Bundle?) {
-                    hideProgress()
+                    hideProgress(progressbar)
                     startDialogs()
                 }
 
                 override fun onError(ex: ResponseException) {
-                    hideProgress()
+                    hideProgress(progressbar)
                     Toast.makeText(
                         applicationContext,
                         getString(R.string.login_chat_login_error, ex.message),
@@ -101,22 +117,23 @@ class LoginActivity : ComponentActivity() {
                 }
             })
         } else {
-            hideProgress()
+            hideProgress(progressbar)
             startDialogs()
         }
     }
 
     fun startDialogs() {
-        Timber.d("ChatDialogsActivity.start")
+        Timber.d("ChatDialogActivity.start")
         startChatDialogsActivity()
     }
 
     private fun startChatDialogsActivity() {
-        val intent = Intent(this, ChatDialogsActivity::class.java)
+        val intent = Intent(this, ChatDialogActivity::class.java)
         startActivity(intent)
+        finish()
     }
 
-    fun initUsers() {
+    private fun initUsers() {
         users = getAllUsersFromFile(SAMPLE_CONFIG_FILE_NAME, this)
     }
 
@@ -129,24 +146,5 @@ class LoginActivity : ComponentActivity() {
         list_users.onItemClickListener = AdapterView.OnItemClickListener { _, _, position, _ ->
             loginTo(users[position])
         }
-    }
-
-    private fun hideProgress() {
-        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-        progressbar.visibility = View.GONE;
-    }
-
-    private fun showProgress() {
-        getWindow().setFlags(
-            WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
-            WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
-        );
-
-        progressbar.visibility = View.VISIBLE;
-    }
-
-    override fun onBackPressed() {
-        ConnectycubeChatService.getInstance().destroy()
-        finish()
     }
 }

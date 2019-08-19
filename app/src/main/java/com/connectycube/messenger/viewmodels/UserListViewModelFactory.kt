@@ -5,8 +5,8 @@ import androidx.lifecycle.ViewModelProvider
 import com.connectycube.messenger.data.UserRepository
 
 class UserListViewModelFactory(
-private val repository: UserRepository,
-private val logins: ArrayList<String>
+    private val repository: UserRepository,
+    private val logins: ArrayList<String>
 ) : ViewModelProvider.NewInstanceFactory() {
 
     @Suppress("UNCHECKED_CAST")

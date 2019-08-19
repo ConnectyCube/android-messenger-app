@@ -37,12 +37,20 @@ class UserRepository private constructor(private val userDao: UserDao, private v
                 userDao.insertAll(item)
             }
 
-            override fun shouldFetch(data: List<User>?) = data.isNullOrEmpty()
+            override fun shouldFetch(data: List<User>?, newData: List<User>?) = data.isNullOrEmpty()
 
             override fun loadFromDb() = userDao.getUsers()
 
             override fun createCall() = service.loadUsers(usersLogins)
         }.asLiveData()
+    }
+
+    fun getUsers(): LiveData<List<User>> {
+        return userDao.getUsers()
+    }
+
+    fun getUsersByIds(vararg usersIds: Int): LiveData<List<User>> {
+        return userDao.getUsersByIds(*usersIds)
     }
 
     companion object {
