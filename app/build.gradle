@@ -35,7 +35,7 @@ ext {
     roomVersion = '2.1.0'
     lifecycleVersion = '2.2.0-alpha02'
     workVersion = '2.1.0'
-    materialVersion = '1.0.0'
+    materialVersion = '1.1.0-alpha06'
     paging_version = "2.1.0"
     glideVersion = '4.9.0'
     recyclerViewVersion = '1.1.0-beta01'

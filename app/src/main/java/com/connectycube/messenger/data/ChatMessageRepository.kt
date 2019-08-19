@@ -108,7 +108,7 @@ class ChatMessageRepository(
             .setPageSize(pageSize)
             .build()
 
-        val dataSourceConnectycubeChatMessage = db.messageDao().postsByDialogId(dialogId).map { it.conMessage }
+        val dataSourceConnectycubeChatMessage = db.messageDao().postsByDialogId(dialogId).map { it.cubeMessage }
 
         val livePagedList = dataSourceConnectycubeChatMessage.toLiveData(
             pageSize = pageSize,

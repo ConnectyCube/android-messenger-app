@@ -13,7 +13,7 @@ data class Message(
     @ColumnInfo(name = "id") val messageId: String,
     val dialogId: String,
     val dateSent: Long,
-    val conMessage: ConnectycubeChatMessage
+    val cubeMessage: ConnectycubeChatMessage
 ) {
-    override fun toString() = "messageId= $messageId, body= ${conMessage.body}, dateSent= $dateSent"
+    override fun toString() = "messageId= $messageId, body= ${cubeMessage.body}, dateSent= $dateSent"
 }

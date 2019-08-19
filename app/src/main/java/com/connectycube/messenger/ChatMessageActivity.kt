@@ -25,7 +25,7 @@ import com.connectycube.messenger.utilities.InjectorUtils
 import com.connectycube.messenger.utilities.PermissionsHelper
 import com.connectycube.messenger.utilities.REQUEST_ATTACHMENT_IMAGE_CONTACTS
 import com.connectycube.messenger.viewmodels.ChatMessageListViewModel
-import kotlinx.android.synthetic.main.activity_chat.*
+import kotlinx.android.synthetic.main.activity_chatmessages.*
 import timber.log.Timber
 import com.zhihu.matisse.listener.OnCheckedListener
 import android.content.pm.ActivityInfo
@@ -59,7 +59,7 @@ class ChatMessageActivity : BaseChatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Timber.d("onCreate")
-        setContentView(R.layout.activity_chat)
+        setContentView(R.layout.activity_chatmessages)
         chatDialog = intent.getSerializableExtra(EXTRA_CHAT) as ConnectycubeChatDialog
         chatDialog.initForChat(ConnectycubeChatService.getInstance())
         chatDialog.addMessageListener(messageListener)
@@ -79,6 +79,7 @@ class ChatMessageActivity : BaseChatActivity() {
 
     private fun initChatAdapter() {
         chatAdapter = ChatMessageAdapter(this, chatDialog, clickListener)
+        scroll_fb.setOnClickListener { scrollDown() }
         val layoutManager = LinearLayoutManager(this)
         layoutManager.stackFromEnd = false
         layoutManager.reverseLayout = true
@@ -89,13 +90,27 @@ class ChatMessageActivity : BaseChatActivity() {
                 resources.getDimension(R.dimen.margin_normal).toInt()
             )
         )
-        chatAdapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
-            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
-                super.onItemRangeInserted(positionStart, itemCount)
-                Timber.d("onItemRangeInserted $positionStart")
-                if (positionStart == 0) {
-                    Timber.d("onItemRangeInserted scrollDownPosition to $positionStart")
-                    scrollDown()
+
+        messages_recycleview.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                val totalItemCount = layoutManager.itemCount
+                val firstVisible = layoutManager.findFirstCompletelyVisibleItemPosition()
+
+                val shouldShow = firstVisible >= 1
+                if (totalItemCount > 0 && shouldShow) {
+                    scroll_fb.show()
+                    val shouldAdd =
+                        scroll_fb.text.isEmpty() || scroll_fb.text.toString().toInt() != modelChatMessageList.unreadCounter
+                    if (modelChatMessageList.unreadCounter > 0 && shouldAdd) {
+                        scroll_fb.text = modelChatMessageList.unreadCounter.toString()
+                        scroll_fb.extend()
+                    }
+                } else {
+                    scroll_fb.shrink()
+                    scroll_fb.hide()
+                    scroll_fb.text = ""
+                    modelChatMessageList.unreadCounter = 0
                 }
             }
         })
@@ -200,8 +215,8 @@ class ChatMessageActivity : BaseChatActivity() {
             if (it.first) {
                 if (ConnectycubeDialogType.PRIVATE == chatDialog.type) {
                     submitMessage(it.second)
-                    input_chat_message.setText("")
                 }
+                input_chat_message.setText("")
             } else {
                 Timber.d("sendChatMessage failed")
             }
@@ -215,7 +230,7 @@ class ChatMessageActivity : BaseChatActivity() {
     }
 
     fun scrollDown() {
-        messages_recycleview.postDelayed({ messages_recycleview.smoothScrollToPosition(0) }, 200)
+        messages_recycleview.smoothScrollToPosition(0)
     }
 
 
@@ -275,9 +290,12 @@ class ChatMessageActivity : BaseChatActivity() {
     }
 
     internal inner class ChatMessageListener : ChatDialogMessageListener {
-        override fun processMessage(s: String, chatMessage: ConnectycubeChatMessage, integer: Int?) {
+        override fun processMessage(dialogId: String, chatMessage: ConnectycubeChatMessage, senderId: Int) {
             Timber.d("ChatMessageListener processMessage " + chatMessage.body)
             submitMessage(chatMessage)
+            if (senderId != ConnectycubeChatService.getInstance().user.id) {
+                modelChatMessageList.unreadCounter++
+            }
         }
 
         override fun processError(s: String, e: ChatException, chatMessage: ConnectycubeChatMessage, integer: Int?) {

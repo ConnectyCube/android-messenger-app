@@ -16,6 +16,7 @@ class ChatMessageListViewModel internal constructor(
     private val chat: ConnectycubeChatDialog
 ) :
     ViewModel() {
+    var unreadCounter = 0
     private val dialogName = createShowDialog()
     private val repoResult = map(dialogName) {
         repository.postsOfDialogId(it.dialogId, PAGE_SIZE)

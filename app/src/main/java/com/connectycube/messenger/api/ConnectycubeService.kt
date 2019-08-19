@@ -8,7 +8,6 @@ import com.connectycube.chat.model.ConnectycubeAttachment
 import com.connectycube.chat.model.ConnectycubeChatDialog
 import com.connectycube.chat.request.DialogRequestBuilder
 import com.connectycube.core.helper.StringifyArrayList
-import com.connectycube.core.request.LimitedRequestBuilder
 import com.connectycube.chat.model.ConnectycubeChatMessage
 import com.connectycube.chat.request.MessageGetBuilder
 import com.connectycube.core.request.RequestGetBuilder
@@ -65,7 +64,7 @@ class ConnectycubeService {
     }
 
     fun createChatDialog(chat: Chat): LiveData<ApiResponse<Chat>> {
-        val chatDialog: ConnectycubeChatDialog = chat.conChat
+        val chatDialog: ConnectycubeChatDialog = chat.cubeChat
 
         return InjectorUtils.provideConnectycubeServiceForType<ConnectycubeChatDialog, Chat>()
             .perform(

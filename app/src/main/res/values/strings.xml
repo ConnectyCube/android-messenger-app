@@ -42,15 +42,16 @@
     <string name="chat_login">Login…</string>
     <string name="chat_list_empty">There are no any chats yet</string>
 
-    <!--Chats-->
+    <!--ChatMessages-->
     <string name="chat_text_hint">Message</string>
     <string name="message_attachment">Attachment</string>
     <string name="loading_attachment_error">Loading attachment error %s</string>
+    <string name="fbd_scroll_counter_label">%s</string>
 
     <!-- Errors -->
     <string name="error_credentials_empty">The App class should contain ConnectyCube credentials. Register new account and application at https://admin.connectycube.com
         then put Application credentials from Overview page + Account key from https://admin.connectycube.com/account/settings</string>
-    <string name="error_users_empty">The user_config.json file should contain at least 2 and max 4 users with format [\"login\":\"password\"]. Please go to https://admin.connectycube.com and create users in \'Users\' module.</string>
+    <string name="error_users_empty">The user_config.json file should contain at least 2 and max 5 users with format [\"login\":{\"password\":userId}]. Please go to https://admin.connectycube.com and create users in \'Users\' module.</string>
     <string name="select_users_choose_users">Please, choose at least one participant</string>
     <string name="error_while_loading_users">Error while loading users</string>
     <string name="something_went_wrong_try_again_later">Something went wrong, try again later</string>
