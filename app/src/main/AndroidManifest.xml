@@ -16,7 +16,7 @@
             android:theme="@style/AppTheme"
             tools:ignore="GoogleAppIndexingWarning">
         <activity android:name=".LoginActivity"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -26,6 +26,10 @@
         <activity android:name=".ChatDialogActivity"/>
         <activity android:name=".ChatMessageActivity"/>
         <activity android:name=".CreateChatDialogActivity" />
+        <activity android:name=".ChatDialogDetailsActivity"
+            android:theme="@style/AppTheme.NoActionBar"/>
+        <activity android:name=".EditTextActivity"
+            android:windowSoftInputMode="adjustResize"/>
         <provider
                 android:name="androidx.core.content.FileProvider"
                 android:authorities="${applicationId}.fileprovider"

@@ -46,6 +46,10 @@ object InjectorUtils {
         return LiveDataResponsePerformer()
     }
 
+    fun <T, R> provideSyncConnectycubeServiceForType(): ResponsePerformer<T, R> {
+        return ResponsePerformer()
+    }
+
     fun <T, R> provideConnectycubeServiceProgressForType(): LiveDataResponsePerformerProgress<T, R> {
         return LiveDataResponsePerformerProgress()
     }
@@ -54,6 +58,12 @@ object InjectorUtils {
         val usersRepository = getUserRepository(application.baseContext)
         val chatRepository = getChatRepository(application.baseContext)
         return CreateChatDialogViewModelFactory(application, usersRepository, chatRepository)
+    }
+
+    fun provideChatDialogDetailsViewModelFactory(application: Application, dialogId: String): ChatDialogDetailsViewModelFactory {
+        val usersRepository = getUserRepository(application.baseContext)
+        val chatRepository = getChatRepository(application.baseContext)
+        return ChatDialogDetailsViewModelFactory(application, dialogId, usersRepository, chatRepository)
     }
 
     private fun getAttachmentViewRepository(): AttachmentRepository {

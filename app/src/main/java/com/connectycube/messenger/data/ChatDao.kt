@@ -1,10 +1,7 @@
 package com.connectycube.messenger.data
 
 import androidx.lifecycle.LiveData
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import androidx.room.*
 
 /**
  * The Data Access Object for the Chat class.
@@ -20,6 +17,9 @@ interface ChatDao {
     @Query("SELECT * FROM chats WHERE id = :chatId")
     fun getChat(chatId: String?): LiveData<Chat>
 
+    @Query("SELECT * FROM chats WHERE id = :chatId")
+    fun getChatValue(chatId: String?): Chat
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(chat: Chat)
 
@@ -31,4 +31,10 @@ interface ChatDao {
 
     @Query("DELETE FROM chats")
     fun nukeTable()
+
+    @Query("DELETE FROM chats WHERE id in (:dialogsIds)")
+    fun deleteChatsByIds(vararg dialogsIds: String?)
+
+    @Delete
+    fun deleteChat(vararg chats: Chat)
 }

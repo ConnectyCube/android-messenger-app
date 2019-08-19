@@ -2,9 +2,7 @@ package com.connectycube.messenger.adapters
 
 import android.content.Context
 import android.os.Build
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.ColorRes
@@ -17,10 +15,17 @@ import com.connectycube.messenger.R
 import com.connectycube.messenger.utilities.getPrettyDate
 import com.connectycube.messenger.utilities.loadChatDialogPhoto
 
-class ChatDialogAdapter(private val context: Context) :
+const val MENU_ITEM_DETAILS: Int = 0
+const val MENU_ITEM_DELETE: Int = 1
+
+internal class ChatDialogAdapter(private val context: Context) :
     ListAdapter<ConnectycubeChatDialog, ChatDialogAdapter.ChatDialogViewHolder>(ChatDialogDiffCallback()) {
 
     var callback: ChatDialogAdapterCallback? = null
+
+    override fun onViewRecycled(holder: ChatDialogViewHolder) {
+        holder.unbind()
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatDialogViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.list_item_chat_dialog, parent, false)
@@ -29,13 +34,33 @@ class ChatDialogAdapter(private val context: Context) :
 
     override fun onBindViewHolder(holder: ChatDialogViewHolder, position: Int) {
         val chatDialog = getItem(position)
-        holder.bind(context, chatDialog, View.OnClickListener { onChatDialogSelected(chatDialog) })
+        holder.bind(context,
+            chatDialog, object : ChatDialogViewHolder.ChatDialogViewHolderCallback {
+                override fun onItemDelete(chatDialog: ConnectycubeChatDialog) {
+                    onChatDialogDelete(chatDialog)
+                }
+
+                override fun onItemSelected(chatDialog: ConnectycubeChatDialog) {
+                    onChatDialogSelected(chatDialog)
+                }
+
+                override fun onItemViewDetails(chatDialog: ConnectycubeChatDialog) {
+                    onChatDialogPreview(chatDialog)
+                }
+            })
     }
 
     private fun onChatDialogSelected(chatDialog: ConnectycubeChatDialog) {
-        callback!!.onChatDialogSelected(chatDialog)
+        callback?.onChatDialogSelected(chatDialog)
     }
 
+    private fun onChatDialogDelete(chatDialog: ConnectycubeChatDialog) {
+        callback?.onChatDialogDelete(chatDialog)
+    }
+
+    private fun onChatDialogPreview(chatDialog: ConnectycubeChatDialog) {
+        callback?.onChatDialogDetails(chatDialog)
+    }
 
     override fun onCurrentListChanged(
         previousList: List<ConnectycubeChatDialog>,
@@ -44,14 +69,21 @@ class ChatDialogAdapter(private val context: Context) :
         callback!!.onChatDialogsListUpdated(currentList)
     }
 
-    inner class ChatDialogViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    internal class ChatDialogViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView),
+        View.OnCreateContextMenuListener,
+        MenuItem.OnMenuItemClickListener {
+        private var model: ConnectycubeChatDialog? = null
+        private var callback: ChatDialogViewHolderCallback? = null
         private val imgAvatar: ImageView = itemView.findViewById(R.id.avatar_image_view)
         private val txtName: TextView = itemView.findViewById(R.id.name_text_viw)
         private val txtLastMessage: TextView = itemView.findViewById(R.id.last_message_text_view)
         private val txtUnreadMessagesCount: TextView = itemView.findViewById(R.id.unread_message_count_text_view)
         private val txtLastMessageDate: TextView = itemView.findViewById(R.id.last_masage_date_text_view)
 
-        fun bind(activityContext: Context, chatDialog: ConnectycubeChatDialog, clickListener: View.OnClickListener) {
+        fun bind(activityContext: Context, chatDialog: ConnectycubeChatDialog, callback: ChatDialogViewHolderCallback) {
+            this.model = chatDialog
+            this.callback = callback
+
             loadChatDialogPhoto(
                 activityContext,
                 chatDialog.type == ConnectycubeDialogType.PRIVATE,
@@ -73,7 +105,13 @@ class ChatDialogAdapter(private val context: Context) :
                 setTextColor(activityContext, txtLastMessageDate, R.color.dark_grey)
             }
 
-            itemView.setOnClickListener(clickListener)
+            itemView.setOnClickListener { notifyItemSelected() }
+            itemView.setOnCreateContextMenuListener(this)
+        }
+
+        fun unbind() {
+            model = null
+            callback = null
         }
 
         private fun setLastMessageDate(
@@ -95,6 +133,37 @@ class ChatDialogAdapter(private val context: Context) :
                 textView.setTextColor(context.resources.getColor(color))
             }
         }
+
+        override fun onCreateContextMenu(menu: ContextMenu?, v: View?, menuInfo: ContextMenu.ContextMenuInfo?) {
+            menu?.add(Menu.NONE, MENU_ITEM_DETAILS, Menu.NONE, R.string.view_details)?.setOnMenuItemClickListener(this)
+            menu?.add(Menu.NONE, MENU_ITEM_DELETE, Menu.NONE, R.string.delete)?.setOnMenuItemClickListener(this)
+        }
+
+        override fun onMenuItemClick(item: MenuItem?): Boolean {
+            when (item?.itemId) {
+                MENU_ITEM_DETAILS -> notifyItemDetails()
+                MENU_ITEM_DELETE -> notifyItemDelete()
+            }
+            return true
+        }
+
+        private fun notifyItemDetails() {
+            model?.let { callback?.onItemViewDetails(it) }
+        }
+
+        private fun notifyItemDelete() {
+            model?.let { callback?.onItemDelete(it) }
+        }
+
+        private fun notifyItemSelected() {
+            model?.let { callback?.onItemSelected(it) }
+        }
+
+        internal interface ChatDialogViewHolderCallback {
+            fun onItemSelected(chatDialog: ConnectycubeChatDialog)
+            fun onItemDelete(chatDialog: ConnectycubeChatDialog)
+            fun onItemViewDetails(chatDialog: ConnectycubeChatDialog)
+        }
     }
 
     private class ChatDialogDiffCallback : DiffUtil.ItemCallback<ConnectycubeChatDialog>() {
@@ -112,5 +181,7 @@ class ChatDialogAdapter(private val context: Context) :
     interface ChatDialogAdapterCallback {
         fun onChatDialogSelected(chatDialog: ConnectycubeChatDialog)
         fun onChatDialogsListUpdated(currentList: List<ConnectycubeChatDialog>)
+        fun onChatDialogDelete(chatDialog: ConnectycubeChatDialog)
+        fun onChatDialogDetails(chatDialog: ConnectycubeChatDialog)
     }
 }

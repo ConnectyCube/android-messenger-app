@@ -5,5 +5,6 @@
             android:id="@+id/menu_chat_dialog_logout"
             android:icon="@drawable/ic_logout_24"
             android:title="@string/menu_chat_dialog_logout"
+            app:iconTint="@color/white"
             app:showAsAction="always" />
 </menu>
