@@ -19,7 +19,27 @@ open class LiveDataResponsePerformer<T, R> {
                     performer.performAsync(object : EntityCallback<T> {
                         override fun onSuccess(response: T, bundle: Bundle?) {
                             val wrapped = converter.convertTo(response)
-                            postValue(ApiResponse.create(wrapped))
+                            postValue(ApiResponse.create(wrapped, bundle))
+                        }
+
+                        override fun onError(ex: ResponseException) {
+                            postValue(ApiResponse.create(ex))
+                        }
+                    })
+                }
+            }
+        }
+    }
+
+    open fun perform(performer: Performer<T>): MutableLiveData<ApiResponse<T>> {
+        return object : MutableLiveData<ApiResponse<T>>() {
+            private var started = AtomicBoolean(false)
+            override fun onActive() {
+                super.onActive()
+                if (started.compareAndSet(false, true)) {
+                    performer.performAsync(object : EntityCallback<T> {
+                        override fun onSuccess(response: T, bundle: Bundle?) {
+                            postValue(ApiResponse.create(response, bundle))
                         }
 
                         override fun onError(ex: ResponseException) {

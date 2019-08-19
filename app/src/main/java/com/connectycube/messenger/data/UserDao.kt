@@ -25,4 +25,7 @@ interface UserDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAll(users: List<User>)
+
+    @Query("SELECT * FROM users WHERE id in (:usersIds)")
+    fun getUsersByIds(vararg usersIds: Int): LiveData<List<User>>
 }

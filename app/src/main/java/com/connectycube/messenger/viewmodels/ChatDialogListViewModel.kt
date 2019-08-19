@@ -36,13 +36,7 @@ class ChatDialogListViewModel internal constructor(val chatRepository: ChatRepos
     }
 
     fun getChatDialogs(): LiveData<Resource<List<ConnectycubeChatDialog>>>{
-        return Transformations.map(getChats()){
-            when(it.status){
-                Status.LOADING -> Resource.loading(null)
-                Status.SUCCESS -> Resource.success(it.data?.map { chat -> chat.conChat })
-                Status.ERROR -> Resource.error(it.message.toString(), null)
-            }
-        }
+        return transformData(getChats())
     }
 
     fun updateChat(chat: Chat) {
@@ -55,6 +49,20 @@ class ChatDialogListViewModel internal constructor(val chatRepository: ChatRepos
     fun updateChat(dialogId: String) {
         chatMediatorLiveData.addSource(chatRepository.update(dialogId)) { data ->
             chatMediatorLiveData.value = data
+        }
+    }
+
+    fun deleteChat(chatDialog: ConnectycubeChatDialog): LiveData<Resource<List<ConnectycubeChatDialog>>>{
+        return transformData(chatRepository.deleteChats(false, chatsIds = *arrayOf(chatDialog.dialogId)))
+    }
+
+    private fun transformData(source: LiveData<Resource<List<Chat>>>): LiveData<Resource<List<ConnectycubeChatDialog>>>{
+        return Transformations.map(source){
+            when(it.status){
+                Status.LOADING -> Resource.loading(null)
+                Status.SUCCESS -> Resource.success(it.data?.map { chat -> chat.conChat })
+                Status.ERROR -> Resource.error(it.message.toString(), null)
+            }
         }
     }
 }
