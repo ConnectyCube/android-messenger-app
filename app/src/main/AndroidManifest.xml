@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          xmlns:tools="http://schemas.android.com/tools" package="com.connectycube.messenger">
+          xmlns:tools="http://schemas.android.com/tools"
+          package="com.connectycube.messenger">
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
@@ -15,8 +16,10 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme"
             tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".LoginActivity"
-            android:theme="@style/AppTheme.NoActionBar.Splash">
+        <activity
+                android:name=".LoginActivity"
+                android:theme="@style/AppTheme.NoActionBar.Splash"
+                android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -25,11 +28,14 @@
         </activity>
         <activity android:name=".ChatDialogActivity"/>
         <activity android:name=".ChatMessageActivity"/>
-        <activity android:name=".CreateChatDialogActivity" />
-        <activity android:name=".ChatDialogDetailsActivity"
-            android:theme="@style/AppTheme.NoActionBar"/>
-        <activity android:name=".EditTextActivity"
-            android:windowSoftInputMode="adjustResize"/>
+        <activity android:name=".CreateChatDialogActivity"/>
+        <activity
+                android:name=".ChatDialogDetailsActivity"
+                android:theme="@style/AppTheme.NoActionBar"/>
+        <activity
+                android:name=".EditTextActivity"
+                android:windowSoftInputMode="adjustResize"/>
+
         <provider
                 android:name="androidx.core.content.FileProvider"
                 android:authorities="${applicationId}.fileprovider"

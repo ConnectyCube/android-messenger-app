@@ -8,14 +8,13 @@ import com.connectycube.chat.model.ConnectycubeAttachment
 import com.connectycube.chat.model.ConnectycubeChatDialog
 import com.connectycube.chat.request.DialogRequestBuilder
 import com.connectycube.core.helper.StringifyArrayList
-import com.connectycube.core.request.LimitedRequestBuilder
+import com.connectycube.chat.model.ConnectycubeChatMessage
+import com.connectycube.chat.request.MessageGetBuilder
 import com.connectycube.core.request.RequestGetBuilder
 import com.connectycube.messenger.data.Chat
+import com.connectycube.messenger.data.Message
 import com.connectycube.messenger.data.User
-import com.connectycube.messenger.utilities.Converter
-import com.connectycube.messenger.utilities.InjectorUtils
-import com.connectycube.messenger.utilities.LiveDataResponsePerformer
-import com.connectycube.messenger.utilities.ResponsePerformer
+import com.connectycube.messenger.utilities.*
 import com.connectycube.storage.ConnectycubeStorage
 import com.connectycube.storage.model.ConnectycubeFile
 import com.connectycube.users.ConnectycubeUsers
@@ -32,16 +31,9 @@ class ConnectycubeService {
                 ConnectycubeUsers.getUsersByLogins(usersLogins, null),
                 object : Converter<List<User>, ArrayList<ConnectycubeUser>>() {
                     override fun convertTo(response: ArrayList<ConnectycubeUser>): List<User> {
-                        return wrapUsers(response)
+                        return convertToUsers(response)
                     }
                 })
-    }
-
-
-    private fun wrapUsers(list: ArrayList<ConnectycubeUser>): List<User> {
-        val users = ArrayList<User>()
-        list.forEach { users.add(User(it.id, it.login, it.fullName, it)) }
-        return users
     }
 
     fun loadChatsSlice(): LiveData<ApiResponse<List<Chat>>> {
@@ -51,7 +43,7 @@ class ConnectycubeService {
                 ConnectycubeRestChatService.getChatDialogs(null, requestGetBuilder),
                 object : Converter<List<Chat>, ArrayList<ConnectycubeChatDialog>>() {
                     override fun convertTo(response: ArrayList<ConnectycubeChatDialog>): List<Chat> {
-                        return wrapChats(response)
+                        return convertToChats(response)
                     }
                 })
     }
@@ -66,30 +58,13 @@ class ConnectycubeService {
                 ConnectycubeRestChatService.getChatDialogs(null, requestBuilder),
                 object : Converter<List<Chat>, ArrayList<ConnectycubeChatDialog>>() {
                     override fun convertTo(response: ArrayList<ConnectycubeChatDialog>): List<Chat> {
-                        return wrapChats(response)
+                        return convertToChats(response)
                     }
                 })
     }
 
-    private fun wrapChats(list: ArrayList<ConnectycubeChatDialog>): List<Chat> {
-        val chats = ArrayList<Chat>()
-        list.forEach {
-            chats.add(
-                Chat(
-                    it.dialogId,
-                    it.lastMessageDateSent,
-                    it.createdAt.time,
-                    it.unreadMessageCount,
-                    it.name,
-                    it
-                )
-            )
-        }
-        return chats
-    }
-
     fun createChatDialog(chat: Chat): LiveData<ApiResponse<Chat>> {
-        val chatDialog: ConnectycubeChatDialog = chat.conChat
+        val chatDialog: ConnectycubeChatDialog = chat.cubeChat
 
         return InjectorUtils.provideConnectycubeServiceForType<ConnectycubeChatDialog, Chat>()
             .perform(
@@ -125,6 +100,17 @@ class ConnectycubeService {
                     return attachment
                 }
             })
+    }
+
+    fun loadMessages(dialogId: String, messageGetBuilder: MessageGetBuilder): LiveData<ApiResponse<List<Message>>> {
+        return InjectorUtils.provideConnectycubeServiceForType<ArrayList<ConnectycubeChatMessage>, List<Message>>()
+            .perform(
+                ConnectycubeRestChatService.getDialogMessages(ConnectycubeChatDialog(dialogId), messageGetBuilder),
+                object : Converter<List<Message>, ArrayList<ConnectycubeChatMessage>>() {
+                    override fun convertTo(response: ArrayList<ConnectycubeChatMessage>): List<Message> {
+                        return convertToMessages(response)
+                    }
+                })
     }
 
     fun deleteDialog(vararg dialogId: String, forceDelete: Boolean): LiveData<ApiResponse<ArrayList<String>>>{

@@ -19,6 +19,7 @@ import com.connectycube.chat.model.ConnectycubeChatMessage
 import com.connectycube.chat.model.ConnectycubeDialogType
 import com.connectycube.core.helper.CollectionsUtil
 import com.connectycube.messenger.R
+import com.connectycube.messenger.paging.NetworkState
 import com.connectycube.messenger.utilities.loadAttachImage
 import com.connectycube.messenger.utilities.loadChatMessagePhoto
 import timber.log.Timber
@@ -30,13 +31,16 @@ class ChatMessageAdapter(
     val context: Context,
     var chatDialog: ConnectycubeChatDialog,
     private val clickListener: ClickListener
-) : PagedListAdapter<ConnectycubeChatMessage, ChatMessageAdapter.BaseChatMessageViewHolder>(diffCallback) {
+) : PagedListAdapter<ConnectycubeChatMessage, RecyclerView.ViewHolder>(diffCallback) {
+    val IN_PROGRESS = -1
     val TEXT_OUTCOMING = 1
     val TEXT_INCOMING = 2
     val ATTACH_IMAGE_OUTCOMING = 3
     val ATTACH_IMAGE_INCOMING = 4
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseChatMessageViewHolder {
+    private var networkState: NetworkState? = null
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         Timber.d("onCreateViewHolder viewType= " + viewType)
         return when (viewType) {
             TEXT_OUTCOMING -> ChatMessageOutcomingViewHolder(parent, R.layout.chat_outcoming_item)
@@ -46,21 +50,30 @@ class ChatMessageAdapter(
                 R.layout.chat_outcoming_attachimage_item
             )
             ATTACH_IMAGE_INCOMING -> ChatImageAttachIncomingViewHolder(parent, R.layout.chat_incoming_attachimage_item)
+            IN_PROGRESS -> NetworkStateItemViewHolder.create(parent)
             else -> throw IllegalArgumentException("Wrong type of viewType= $viewType")
         }
     }
 
-    override fun onBindViewHolder(holder: BaseChatMessageViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         Timber.d("Binding view holder at position $position")
-        val chatMessage = getItem(position)!!
-        if (isIncoming(chatMessage) && !isRead(chatMessage)) {
-            markAsReadMessage(chatMessage)
-        }
-        when (this.getItemViewType(position)) {
-            TEXT_OUTCOMING, TEXT_INCOMING -> onBindTextViewHolder(holder, position)
-            ATTACH_IMAGE_OUTCOMING, ATTACH_IMAGE_INCOMING -> onBindAttachViewHolder(holder, position)
+        val chatMessage = getItem(position)
+        chatMessage?.let {
+            if (isIncoming(chatMessage) && !isRead(chatMessage)) {
+                markAsReadMessage(chatMessage)
+            }
         }
 
+        when (this.getItemViewType(position)) {
+            TEXT_OUTCOMING, TEXT_INCOMING -> onBindTextViewHolder(holder as BaseChatMessageViewHolder, position)
+            ATTACH_IMAGE_OUTCOMING, ATTACH_IMAGE_INCOMING -> onBindAttachViewHolder(
+                holder as BaseChatMessageViewHolder,
+                position
+            )
+            IN_PROGRESS -> (holder as NetworkStateItemViewHolder).bindTo(
+                networkState
+            )
+        }
     }
 
     fun onBindTextViewHolder(holder: BaseChatMessageViewHolder, position: Int) {
@@ -88,20 +101,41 @@ class ChatMessageAdapter(
     }
 
     override fun getItemViewType(position: Int): Int {
-        val chatMessage = this.getItem(position)!!
-        val isReceived = isIncoming(chatMessage)
-        return if (withAttachment(chatMessage)) {
-            if (isReceived) {
-                ATTACH_IMAGE_INCOMING
-            } else ATTACH_IMAGE_OUTCOMING
-        } else if (isReceived) {
-            TEXT_INCOMING
-        } else TEXT_OUTCOMING
+        val chatMessage = this.getItem(position)
+        chatMessage?.let {
+            val isReceived = isIncoming(chatMessage)
+            return if (withAttachment(chatMessage)) {
+                if (isReceived) {
+                    ATTACH_IMAGE_INCOMING
+                } else ATTACH_IMAGE_OUTCOMING
+            } else if (isReceived) {
+                TEXT_INCOMING
+            } else TEXT_OUTCOMING
+        }
+        return IN_PROGRESS
+    }
+
+    private fun hasExtraRow() = networkState != null && networkState != NetworkState.LOADED
+
+    fun setNetworkState(newNetworkState: NetworkState?) {
+        val previousState = this.networkState
+        val hadExtraRow = hasExtraRow()
+        this.networkState = newNetworkState
+        val hasExtraRow = hasExtraRow()
+        if (hadExtraRow != hasExtraRow) {
+            if (hadExtraRow) {
+                notifyItemRemoved(super.getItemCount())
+            } else {
+                notifyItemInserted(super.getItemCount())
+            }
+        } else if (hasExtraRow && previousState != newNetworkState) {
+            notifyItemChanged(itemCount - 1)
+        }
     }
 
     fun isIncoming(chatMessage: ConnectycubeChatMessage): Boolean {
         val localUser = ConnectycubeChatService.getInstance().user
-        return chatMessage.senderId != localUser.id
+        return chatMessage.senderId != null && chatMessage.senderId != localUser.id
     }
 
     fun withAttachment(chatMessage: ConnectycubeChatMessage): Boolean {

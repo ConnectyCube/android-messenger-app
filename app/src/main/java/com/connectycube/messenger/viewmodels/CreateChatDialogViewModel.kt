@@ -73,12 +73,12 @@ class CreateChatDialogViewModel internal constructor(
                     createdAt = if (chatDialog.createdAt != null) chatDialog.createdAt.time else 0,
                     unreadMessageCount = if (chatDialog.unreadMessageCount != null) chatDialog.unreadMessageCount else 0,
                     name = chatDialog.name ?: (array[0]?.fullName ?: ""),
-                    conChat = chatDialog
+                    cubeChat = chatDialog
                 )
             )
         ) {
             when {
-                it.status == Status.SUCCESS -> Resource.success(it.data?.conChat)
+                it.status == Status.SUCCESS -> Resource.success(it.data?.cubeChat)
                 it.status == Status.ERROR -> it.message?.let { it1 -> Resource.error(it1, null) }
                 else -> Resource.loading(null)
             }

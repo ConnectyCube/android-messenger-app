@@ -1,38 +1,30 @@
 package com.connectycube.messenger.viewmodels
 
-import androidx.lifecycle.*
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
 import androidx.lifecycle.Transformations.map
-import androidx.paging.PagedList
+import androidx.lifecycle.ViewModel
 import com.connectycube.chat.model.ConnectycubeChatDialog
 import com.connectycube.chat.model.ConnectycubeChatMessage
 import com.connectycube.messenger.data.ChatMessageRepository
+import com.connectycube.messenger.utilities.convertToMessage
 
 private const val PAGE_SIZE = 20
 
 class ChatMessageListViewModel internal constructor(
-    val repository: ChatMessageRepository,
-    val chat: ConnectycubeChatDialog
+    private val repository: ChatMessageRepository,
+    private val chat: ConnectycubeChatDialog
 ) :
     ViewModel() {
-    private var scroll: Boolean = false
+    var unreadCounter = 0
     private val dialogName = createShowDialog()
     private val repoResult = map(dialogName) {
-        repository.loadDialogMessages(it, PAGE_SIZE)
+        repository.postsOfDialogId(it.dialogId, PAGE_SIZE)
     }
-    val messages = Transformations.switchMap(repoResult) {
-        MediatorLiveData<Pair<PagedList<ConnectycubeChatMessage>, Boolean>>().apply {
-            addSource(it.pagedList) { data ->
-                value = Pair(data, scroll)
-            }
-        }
-    }
-    val networkState = Transformations.switchMap(repoResult, { it.networkState })!!
-    val refreshState = Transformations.switchMap(repoResult, { it.refreshState })!!
 
-    fun refresh(scroll: Boolean = false) {
-        this.scroll = scroll
-        repoResult.value?.refresh?.invoke()
-    }
+    val networkState = Transformations.switchMap(repoResult, { it.networkState })
+    val messages = Transformations.switchMap(repoResult, { it.pagedList })
+    val refreshState = Transformations.switchMap(repoResult, { it.refreshState })
 
     private fun createShowDialog(): MutableLiveData<ConnectycubeChatDialog> {
         val dialogName = MutableLiveData<ConnectycubeChatDialog>()
@@ -40,10 +32,16 @@ class ChatMessageListViewModel internal constructor(
         return dialogName
     }
 
+    fun postItem(message: ConnectycubeChatMessage) {
+        repository.insertItemIntoDb(convertToMessage(message))
+    }
+
+    fun refresh() {
+        repoResult.value?.refresh?.invoke()
+    }
+
     fun retry() {
         val listing = repoResult.value
         listing?.retry?.invoke()
     }
-
-    fun currentDialogName(): ConnectycubeChatDialog? = dialogName.value
 }

@@ -55,7 +55,7 @@ class ChatDialogDetailsViewModel internal constructor(
                     null
                 )
             } else {
-                result.value = Resource.success(charDialog.conChat)
+                result.value = Resource.success(charDialog.cubeChat)
             }
         }
 
@@ -74,31 +74,31 @@ class ChatDialogDetailsViewModel internal constructor(
 
     fun updateGroupDescription(dialogId: String, newDescription: String) {
         chatRepository.updateChatDescription(dialogId, newDescription) { error, chat ->
-            liveDialog().postValue(Resource.error(error, chat.conChat))
+            liveDialog().postValue(Resource.error(error, chat.cubeChat))
         }
     }
 
     fun updateGroupName(dialogId: String, newName: String) {
         chatRepository.updateChatName(dialogId, newName) { error, chat ->
-            liveDialog().postValue(Resource.error(error, chat.conChat))
+            liveDialog().postValue(Resource.error(error, chat.cubeChat))
         }
     }
 
     fun addUserToAdmins(dialogId: String, userId: Int) {
         chatRepository.addChatAdmins(dialogId, userId) { error, chat ->
-            liveDialog().postValue(Resource.error(error, chat.conChat))
+            liveDialog().postValue(Resource.error(error, chat.cubeChat))
         }
     }
 
     fun removeUserFromAdmins(dialogId: String, userId: Int) {
         chatRepository.removeChatAdmins(dialogId, userId) { error, chat ->
-            liveDialog().postValue(Resource.error(error, chat.conChat))
+            liveDialog().postValue(Resource.error(error, chat.cubeChat))
         }
     }
 
     fun removeOccupantUser(dialogId: String, userId: Int) {
         chatRepository.removeChatOccupants(dialogId, userId) { error, chat ->
-            liveDialog().postValue(Resource.error(error, chat.conChat))
+            liveDialog().postValue(Resource.error(error, chat.cubeChat))
         }
     }
 

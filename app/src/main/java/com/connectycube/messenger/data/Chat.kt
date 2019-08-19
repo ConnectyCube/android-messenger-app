@@ -15,7 +15,7 @@ data class Chat(
     val createdAt: Long,
     val unreadMessageCount: Int,
     val name: String,
-    val conChat: ConnectycubeChatDialog
+    val cubeChat: ConnectycubeChatDialog
 ) {
     override fun toString() = "chatId $chatId, lastMessageDateSent= $lastMessageDateSent, createdAt= $createdAt, " +
             "unreadMessageCount= $unreadMessageCount, name= $name"
