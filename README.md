@@ -2,6 +2,10 @@
 
 This project contains a chat messenger & video calling open source demo app for Android written on Kotlin and based on [ConnectyCube](https://connectycube.com/) communication platform.
 
+## Features 
+- Chat 
+- Video chat (coming soon)
+
 ## How to run:
 
 1. Register new account and application at <https://admin.connectycube.com>
