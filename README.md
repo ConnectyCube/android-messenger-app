@@ -1,7 +1,8 @@
-# android-messenger-app
-A messenger app for Android
+# A chat messenger and video calling demo app for Android using ConnectyCube platform
 
-## Steps to use:
+A messenger & video calling open source demo app for Android written on Kotlin 
+
+## How to run:
 
 1. Register new account and application at <https://admin.connectycube.com>
 
