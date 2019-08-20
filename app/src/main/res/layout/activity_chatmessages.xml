@@ -43,7 +43,10 @@
             android:visibility="invisible"
             android:alpha="0.3"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toTopOf="@+id/input_layout"/>
+            app:layout_constraintBottom_toTopOf="@+id/input_layout"
+            tools:iconGravity="textEnd"
+            tools:visibility="visible"
+            tools:text="@string/fbd_scroll_counter_label"/>
 
     <LinearLayout
             android:layout_width="0dp"

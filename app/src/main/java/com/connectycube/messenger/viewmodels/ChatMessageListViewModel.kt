@@ -8,6 +8,7 @@ import com.connectycube.chat.model.ConnectycubeChatDialog
 import com.connectycube.chat.model.ConnectycubeChatMessage
 import com.connectycube.messenger.data.ChatMessageRepository
 import com.connectycube.messenger.utilities.convertToMessage
+import java.util.concurrent.atomic.AtomicBoolean
 
 private const val PAGE_SIZE = 20
 
@@ -16,6 +17,12 @@ class ChatMessageListViewModel internal constructor(
     private val chat: ConnectycubeChatDialog
 ) :
     ViewModel() {
+    private val scrollAtomic = AtomicBoolean()
+    var scroll: Boolean
+        get() = scrollAtomic.getAndSet(false)
+        set(value) {
+            scrollAtomic.set(value)
+        }
     var unreadCounter = 0
     private val dialogName = createShowDialog()
     private val repoResult = map(dialogName) {
