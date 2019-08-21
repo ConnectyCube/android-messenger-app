@@ -33,12 +33,14 @@ import android.widget.Toast
 import androidx.lifecycle.observe
 import com.connectycube.messenger.utilities.Glide4Engine
 import com.connectycube.messenger.viewmodels.AttachmentViewModel
+import com.google.android.material.button.MaterialButton.ICON_GRAVITY_START
+import com.google.android.material.button.MaterialButton.ICON_GRAVITY_TEXT_END
 import com.zhihu.matisse.internal.entity.CaptureStrategy
 import com.zhihu.matisse.Matisse
 import com.zhihu.matisse.MimeType
 
 
-const val REQUEST_CODE_CHOOSE = 23;
+const val REQUEST_CODE_CHOOSE = 23
 
 class ChatMessageActivity : BaseChatActivity() {
 
@@ -66,6 +68,7 @@ class ChatMessageActivity : BaseChatActivity() {
         initChat()
         messageSender = ConnectycubeMessageSender(this, chatDialog)
         modelChatMessageList = getChatMessageListViewModel()
+        modelChatMessageList.unreadCounter = chatDialog.unreadMessageCount
         initManagers()
         initChatAdapter()
     }
@@ -94,23 +97,40 @@ class ChatMessageActivity : BaseChatActivity() {
         messages_recycleview.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
+                fun shrinkFab() {
+                    scroll_fb.iconGravity = ICON_GRAVITY_START
+                    scroll_fb.shrink()
+                    scroll_fb.hide(false)
+                    scroll_fb.text = ""
+                    modelChatMessageList.unreadCounter = 0
+                }
+
+                if (modelChatMessageList.scroll) {
+                    scrollDown()
+                    shrinkFab()
+                    return
+                }
+
                 val totalItemCount = layoutManager.itemCount
-                val firstVisible = layoutManager.findFirstCompletelyVisibleItemPosition()
+                val firstVisible = layoutManager.findFirstVisibleItemPosition()
 
                 val shouldShow = firstVisible >= 1
                 if (totalItemCount > 0 && shouldShow) {
-                    scroll_fb.show()
-                    val shouldAdd =
-                        scroll_fb.text.isEmpty() || scroll_fb.text.toString().toInt() != modelChatMessageList.unreadCounter
-                    if (modelChatMessageList.unreadCounter > 0 && shouldAdd) {
-                        scroll_fb.text = modelChatMessageList.unreadCounter.toString()
+                    if (!scroll_fb.isShown) {
+                        scroll_fb.show(false)
+                        scroll_fb.alpha = 0.3f
+                    }
+                    val count: String? = Regex(pattern = "\\d+").find(input = scroll_fb.text.toString())?.value
+                    val shouldAddCounter =
+                        scroll_fb.text.isEmpty() || count?.toInt() != modelChatMessageList.unreadCounter
+                    if (modelChatMessageList.unreadCounter > 0 && shouldAddCounter) {
+                        scroll_fb.iconGravity = ICON_GRAVITY_TEXT_END
+                        scroll_fb.text =
+                            getString(R.string.fbd_scroll_counter_label, modelChatMessageList.unreadCounter.toString())
                         scroll_fb.extend()
                     }
                 } else {
-                    scroll_fb.shrink()
-                    scroll_fb.hide()
-                    scroll_fb.text = ""
-                    modelChatMessageList.unreadCounter = 0
+                    if (scroll_fb.isShown) shrinkFab()
                 }
             }
         })
@@ -215,6 +235,7 @@ class ChatMessageActivity : BaseChatActivity() {
             if (it.first) {
                 if (ConnectycubeDialogType.PRIVATE == chatDialog.type) {
                     submitMessage(it.second)
+                    modelChatMessageList.scroll = true
                 }
                 input_chat_message.setText("")
             } else {
@@ -292,10 +313,13 @@ class ChatMessageActivity : BaseChatActivity() {
     internal inner class ChatMessageListener : ChatDialogMessageListener {
         override fun processMessage(dialogId: String, chatMessage: ConnectycubeChatMessage, senderId: Int) {
             Timber.d("ChatMessageListener processMessage " + chatMessage.body)
-            submitMessage(chatMessage)
-            if (senderId != ConnectycubeChatService.getInstance().user.id) {
+            val isIncoming = senderId != ConnectycubeChatService.getInstance().user.id
+            if (isIncoming) {
                 modelChatMessageList.unreadCounter++
+            } else {
+                modelChatMessageList.scroll = true
             }
+            submitMessage(chatMessage)
         }
 
         override fun processError(s: String, e: ChatException, chatMessage: ConnectycubeChatMessage, integer: Int?) {
