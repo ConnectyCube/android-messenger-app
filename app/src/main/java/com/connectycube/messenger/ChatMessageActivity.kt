@@ -68,7 +68,7 @@ class ChatMessageActivity : BaseChatActivity() {
         initChat()
         messageSender = ConnectycubeMessageSender(this, chatDialog)
         modelChatMessageList = getChatMessageListViewModel()
-        modelChatMessageList.unreadCounter = chatDialog.unreadMessageCount
+        modelChatMessageList.unreadCounter = chatDialog.unreadMessageCount ?: 0
         initManagers()
         initChatAdapter()
     }
