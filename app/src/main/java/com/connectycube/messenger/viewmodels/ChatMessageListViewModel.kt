@@ -43,6 +43,14 @@ class ChatMessageListViewModel internal constructor(
         repository.insertItemIntoDb(convertToMessage(message))
     }
 
+    fun updateItemReadStatus(messageId: String, userId: Int) {
+        repository.updateItemReadStatus(messageId, userId)
+    }
+
+    fun updateItemDeliveredStatus(messageId: String, userId: Int) {
+        repository.updateItemDeliveredStatus(messageId, userId)
+    }
+
     fun refresh() {
         repoResult.value?.refresh?.invoke()
     }

@@ -346,11 +346,12 @@ class ChatMessageActivity : BaseChatActivity() {
     inner class ChatMessagesStatusListener : MessageStatusListener {
         override fun processMessageRead(messageID: String, dialogId: String, userId: Int) {
             Timber.d("processMessageRead messageID= $messageID")
-//            modelChatMessageList.refresh()
+            modelChatMessageList.updateItemReadStatus(messageID, userId)
         }
 
         override fun processMessageDelivered(messageID: String, dialogId: String, userId: Int) {
             Timber.d("processMessageDelivered messageID= $messageID")
+            modelChatMessageList.updateItemDeliveredStatus(messageID, userId)
         }
 
     }

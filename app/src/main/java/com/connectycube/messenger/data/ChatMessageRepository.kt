@@ -39,6 +39,36 @@ class ChatMessageRepository(
         }
     }
 
+    fun updateItemDeliveredStatus(itemId: String, userId: Int) {
+        appExecutors.diskIO().execute {
+            db.runInTransaction {
+                Timber.d("updateItemDeliveredStatus itemId= $itemId, userId= $userId")
+                val message: Message? = db.messageDao().loadItem(itemId)
+                message?.let {
+                    if (message.cubeMessage.deliveredIds != null) message.cubeMessage.deliveredIds.add(userId)
+                    else message.cubeMessage.deliveredIds = listOf(userId)
+                    message.deliveredIds.add(userId)
+                    db.messageDao().update(message)
+                }
+            }
+        }
+    }
+
+    fun updateItemReadStatus(itemId: String, userId: Int) {
+        appExecutors.diskIO().execute {
+            db.runInTransaction {
+                Timber.d("updateItemReadStatus itemId= $itemId, userId= $userId")
+                val message: Message? = db.messageDao().loadItem(itemId)
+                message?.let {
+                    if (message.cubeMessage.readIds != null) message.cubeMessage.readIds.add(userId)
+                    else message.cubeMessage.readIds = listOf(userId)
+                    message.readIds.add(userId)
+                    db.messageDao().update(message)
+                }
+            }
+        }
+    }
+
     /**
      * Inserts the response into the database while also assigning position indices to items.
      */
@@ -112,7 +142,8 @@ class ChatMessageRepository(
 
         val livePagedList = dataSourceConnectycubeChatMessage.toLiveData(
             pageSize = pageSize,
-            boundaryCallback = boundaryCallback)
+            boundaryCallback = boundaryCallback
+        )
 
         Timber.d("livePagedList= $livePagedList")
         return Listing(
