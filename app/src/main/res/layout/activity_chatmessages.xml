@@ -7,6 +7,52 @@
         android:layout_height="match_parent"
         android:background="@color/splash_screen_bg">
 
+
+    <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="?attr/colorPrimary"
+            android:clipToPadding="false"
+            android:minHeight="?attr/actionBarSize"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+        <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/back_btn"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_margin="16dp"
+                android:background="?actionBarItemBackground"
+                android:src="@drawable/ic_back"
+                android:tint="@color/white"/>
+
+        <ImageView
+                android:id="@+id/avatar"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="?actionBarItemBackground"
+                android:src="@drawable/ic_avatar_placeholder"
+                tools:ignore="ContentDescription" />
+
+
+        <TextView
+                android:id="@+id/chat_message_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:gravity="center"
+                android:maxLines="2"
+                android:ellipsize="end"
+                android:singleLine="false"
+                android:textColor="@color/white"
+                android:textSize="22sp"
+                android:maxLength="30"
+                android:text="Group name \n members list and some more" />
+
+    </androidx.appcompat.widget.Toolbar>
+
     <ProgressBar
             android:id="@+id/progressbar"
             style="?android:attr/progressBarStyleHorizontal"
@@ -19,10 +65,10 @@
             android:visibility="gone"
             tools:ignore="MissingConstraints"
             tools:visibility="visible"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/messages_recycleview"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintTop_toBottomOf="@+id/toolbar"
+            app:layout_constraintBottom_toTopOf="@+id/messages_recycleview"/>
 
     <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/messages_recycleview"

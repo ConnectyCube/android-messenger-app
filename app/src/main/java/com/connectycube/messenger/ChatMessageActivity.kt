@@ -29,7 +29,9 @@ import kotlinx.android.synthetic.main.activity_chatmessages.*
 import timber.log.Timber
 import com.zhihu.matisse.listener.OnCheckedListener
 import android.content.pm.ActivityInfo
+import android.view.Window
 import android.widget.Toast
+import androidx.appcompat.app.ActionBar
 import androidx.lifecycle.observe
 import com.connectycube.messenger.utilities.Glide4Engine
 import com.connectycube.messenger.viewmodels.AttachmentViewModel
@@ -38,6 +40,9 @@ import com.google.android.material.button.MaterialButton.ICON_GRAVITY_TEXT_END
 import com.zhihu.matisse.internal.entity.CaptureStrategy
 import com.zhihu.matisse.Matisse
 import com.zhihu.matisse.MimeType
+import kotlinx.android.synthetic.main.activity_chat_dialog_details.*
+import kotlinx.android.synthetic.main.activity_chatmessages.progressbar
+import kotlinx.android.synthetic.main.activity_chatmessages.toolbar
 
 
 const val REQUEST_CODE_CHOOSE = 23
@@ -62,6 +67,7 @@ class ChatMessageActivity : BaseChatActivity() {
         super.onCreate(savedInstanceState)
         Timber.d("onCreate")
         setContentView(R.layout.activity_chatmessages)
+        initToolbar()
         chatDialog = intent.getSerializableExtra(EXTRA_CHAT) as ConnectycubeChatDialog
         chatDialog.initForChat(ConnectycubeChatService.getInstance())
         chatDialog.addMessageListener(messageListener)
@@ -71,6 +77,11 @@ class ChatMessageActivity : BaseChatActivity() {
         modelChatMessageList.unreadCounter = chatDialog.unreadMessageCount
         initManagers()
         initChatAdapter()
+    }
+
+    private fun initToolbar() {
+        title = ""
+        setSupportActionBar(toolbar)
     }
 
     private fun getChatMessageListViewModel(): ChatMessageListViewModel {
