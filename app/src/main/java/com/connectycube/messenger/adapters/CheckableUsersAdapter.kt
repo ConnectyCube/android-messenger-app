@@ -13,6 +13,7 @@ import com.connectycube.messenger.R
 import com.connectycube.messenger.utilities.getPrettyLastActivityDate
 import com.connectycube.messenger.utilities.loadUserAvatar
 import com.connectycube.users.model.ConnectycubeUser
+import java.util.*
 
 class CheckableUsersAdapter(
     private val context: Context,
@@ -75,7 +76,7 @@ class CheckableUsersAdapter(
             )
 
             txtName.text = connectycubeUser.fullName
-            txtLastActivity.text = getPrettyLastActivityDate(activityContext, connectycubeUser.lastRequestAt)
+            txtLastActivity.text = getPrettyLastActivityDate(activityContext, connectycubeUser.lastRequestAt ?: Date())
 
             checkBox.isChecked = isSelected
             checkBox.setOnCheckedChangeListener(onCheckedChangeListener)
