@@ -38,11 +38,6 @@ class ChatMessageAdapter(
     val ATTACH_IMAGE_OUTCOMING = 3
     val ATTACH_IMAGE_INCOMING = 4
 
-    enum class Payload {
-        READ,
-        DELIVERED
-    }
-
     val localUserId = ConnectycubeChatService.getInstance().user.id
     val occupantIds = chatDialog.occupants.apply { remove(localUserId) }
     private var networkState: NetworkState? = null
@@ -65,13 +60,10 @@ class ChatMessageAdapter(
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int, payloads: MutableList<Any>) {
         Timber.d("Binding view holder at position $position, payloads= ${payloads.isNotEmpty()}")
         if (payloads.isNotEmpty()) {
-            when (payloads[0]) {
-                Payload.READ -> holder.itemView.findViewById<ImageView>(R.id.message_status_image_view).setImageResource(
-                    R.drawable.ic_check_double_16
-                )
-                Payload.DELIVERED -> holder.itemView.findViewById<ImageView>(R.id.message_status_image_view).setImageResource(
-                    R.drawable.ic_check_black_16dp
-                )
+            val message = getItem(position)
+            message?.let {
+                val imgStatus = holder.itemView.findViewById<ImageView>(R.id.message_status_image_view)
+                setStatus(imgStatus, message)
             }
         } else {
             super.onBindViewHolder(holder, position, payloads)
@@ -138,6 +130,14 @@ class ChatMessageAdapter(
         return IN_PROGRESS
     }
 
+    fun setStatus(imgStatus: ImageView?, msg: ConnectycubeChatMessage) {
+        when {
+            messageIsRead(msg) -> imgStatus?.setImageResource(R.drawable.ic_check_double_16)
+            messageIsDelivered(msg) -> imgStatus?.setImageResource(R.drawable.ic_check_black_16dp)
+            else -> imgStatus?.setImageResource(android.R.color.transparent)
+        }
+    }
+
     private fun hasExtraRow() = networkState != null && networkState != NetworkState.LOADED
 
     fun setNetworkState(newNetworkState: NetworkState?) {
@@ -199,17 +199,13 @@ class ChatMessageAdapter(
                 oldItem.id == newItem.id && oldItem.readIds == newItem.readIds && oldItem.deliveredIds == newItem.deliveredIds
 
             override fun getChangePayload(oldItem: ConnectycubeChatMessage, newItem: ConnectycubeChatMessage): Any? {
-                return if ((oldItem.readIds == null && newItem.readIds != null) || (oldItem.readIds != null && !oldItem.readIds.containsAll(
-                        newItem.readIds
-                    ))
-                ) {
-                    Payload.READ
-                } else if ((oldItem.deliveredIds == null && newItem.deliveredIds != null) || (oldItem.deliveredIds != null && !oldItem.deliveredIds.containsAll(
-                        newItem.deliveredIds
-                    ))
-                ) {
-                    Payload.DELIVERED
+                return if (sameExceptStatus(oldItem, newItem)) {
+                    PAYLOAD_STATUS
                 } else null
+            }
+
+            fun sameExceptStatus(oldItem: ConnectycubeChatMessage, newItem: ConnectycubeChatMessage): Boolean {
+                return newItem.readIds != oldItem.readIds || newItem.deliveredIds != oldItem.deliveredIds
             }
         }
     }
@@ -277,9 +273,7 @@ class ChatMessageAdapter(
         val imgStatus: ImageView = itemView.findViewById(R.id.message_status_image_view)
         override fun bindTo(message: ConnectycubeChatMessage) {
             super.bindTo(message)
-            if (messageIsRead(message)) imgStatus.setImageResource(R.drawable.ic_check_double_16)
-            else if (messageIsDelivered(message)) imgStatus.setImageResource(R.drawable.ic_check_black_16dp)
-            else imgStatus.setImageResource(android.R.color.transparent)
+            setStatus(imgStatus, message)
         }
     }
 
@@ -319,9 +313,7 @@ class ChatMessageAdapter(
         private val imgStatus: ImageView = itemView.findViewById(R.id.message_status_image_view)
         override fun bindTo(message: ConnectycubeChatMessage) {
             super.bindTo(message)
-            if (messageIsRead(message)) imgStatus.setImageResource(R.drawable.ic_check_double_16)
-            else if (messageIsDelivered(message)) imgStatus.setImageResource(R.drawable.ic_check_black_16dp)
-            else imgStatus.setImageResource(android.R.color.transparent)
+            setStatus(imgStatus, message)
         }
     }
 }
