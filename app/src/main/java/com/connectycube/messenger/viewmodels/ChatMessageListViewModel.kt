@@ -1,22 +1,27 @@
 package com.connectycube.messenger.viewmodels
 
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
+import android.app.Application
+import androidx.lifecycle.*
 import androidx.lifecycle.Transformations.map
-import androidx.lifecycle.ViewModel
 import com.connectycube.chat.model.ConnectycubeChatDialog
 import com.connectycube.chat.model.ConnectycubeChatMessage
+import com.connectycube.messenger.R
 import com.connectycube.messenger.data.ChatMessageRepository
+import com.connectycube.messenger.data.UserRepository
 import com.connectycube.messenger.utilities.convertToMessage
+import com.connectycube.messenger.vo.Resource
+import com.connectycube.users.model.ConnectycubeUser
 import java.util.concurrent.atomic.AtomicBoolean
 
 private const val PAGE_SIZE = 20
 
 class ChatMessageListViewModel internal constructor(
+    applicationContext: Application,
     private val repository: ChatMessageRepository,
+    private val usersRepository: UserRepository,
     private val chat: ConnectycubeChatDialog
 ) :
-    ViewModel() {
+    AndroidViewModel(applicationContext) {
     private val scrollAtomic = AtomicBoolean()
     var scroll: Boolean
         get() = scrollAtomic.getAndSet(false)
@@ -37,6 +42,27 @@ class ChatMessageListViewModel internal constructor(
         val dialogName = MutableLiveData<ConnectycubeChatDialog>()
         dialogName.value = chat
         return dialogName
+    }
+
+    fun getOccupants(chatDialog: ConnectycubeChatDialog): LiveData<Resource<List<ConnectycubeUser>>> {
+        val result = MediatorLiveData<Resource<List<ConnectycubeUser>>>()
+        result.value = Resource.loading(null)
+
+        val source = usersRepository.getUsersByIds(*chatDialog.occupants.toIntArray())
+        result.addSource(source) {
+            if (it.isNullOrEmpty()) {
+                result.value = Resource.error(
+                    getApplication<Application>().getString(R.string.error_while_loading_users),
+                    null
+                )
+            } else {
+                result.value = Resource.success(it
+                    .map { user -> user.conUser })
+                result.removeSource(source)
+            }
+        }
+
+        return result
     }
 
     fun postItem(message: ConnectycubeChatMessage) {

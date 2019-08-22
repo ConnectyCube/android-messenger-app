@@ -2,11 +2,16 @@ package com.connectycube.messenger
 
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.graphics.Rect
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.lifecycle.Observer
+import androidx.lifecycle.observe
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.connectycube.chat.ConnectycubeChatService
@@ -21,28 +26,22 @@ import com.connectycube.messenger.adapters.ChatMessageAdapter
 import com.connectycube.messenger.adapters.ClickListener
 import com.connectycube.messenger.api.ConnectycubeMessageSender
 import com.connectycube.messenger.paging.Status
-import com.connectycube.messenger.utilities.InjectorUtils
-import com.connectycube.messenger.utilities.PermissionsHelper
-import com.connectycube.messenger.utilities.REQUEST_ATTACHMENT_IMAGE_CONTACTS
-import com.connectycube.messenger.viewmodels.ChatMessageListViewModel
-import kotlinx.android.synthetic.main.activity_chatmessages.*
-import timber.log.Timber
-import com.zhihu.matisse.listener.OnCheckedListener
-import android.content.pm.ActivityInfo
-import android.view.Window
-import android.widget.Toast
-import androidx.appcompat.app.ActionBar
-import androidx.lifecycle.observe
-import com.connectycube.messenger.utilities.Glide4Engine
+import com.connectycube.messenger.utilities.*
 import com.connectycube.messenger.viewmodels.AttachmentViewModel
+import com.connectycube.messenger.viewmodels.ChatMessageListViewModel
+import com.connectycube.users.model.ConnectycubeUser
 import com.google.android.material.button.MaterialButton.ICON_GRAVITY_START
 import com.google.android.material.button.MaterialButton.ICON_GRAVITY_TEXT_END
-import com.zhihu.matisse.internal.entity.CaptureStrategy
 import com.zhihu.matisse.Matisse
 import com.zhihu.matisse.MimeType
-import kotlinx.android.synthetic.main.activity_chat_dialog_details.*
+import com.zhihu.matisse.internal.entity.CaptureStrategy
+import com.zhihu.matisse.listener.OnCheckedListener
+import kotlinx.android.synthetic.main.activity_chatmessages.*
+import kotlinx.android.synthetic.main.activity_chatmessages.avatar_img
+import kotlinx.android.synthetic.main.activity_chatmessages.back_btn
 import kotlinx.android.synthetic.main.activity_chatmessages.progressbar
 import kotlinx.android.synthetic.main.activity_chatmessages.toolbar
+import timber.log.Timber
 
 
 const val REQUEST_CODE_CHOOSE = 23
@@ -67,7 +66,6 @@ class ChatMessageActivity : BaseChatActivity() {
         super.onCreate(savedInstanceState)
         Timber.d("onCreate")
         setContentView(R.layout.activity_chatmessages)
-        initToolbar()
         chatDialog = intent.getSerializableExtra(EXTRA_CHAT) as ConnectycubeChatDialog
         chatDialog.initForChat(ConnectycubeChatService.getInstance())
         chatDialog.addMessageListener(messageListener)
@@ -75,18 +73,41 @@ class ChatMessageActivity : BaseChatActivity() {
         messageSender = ConnectycubeMessageSender(this, chatDialog)
         modelChatMessageList = getChatMessageListViewModel()
         modelChatMessageList.unreadCounter = chatDialog.unreadMessageCount
+        initToolbar()
         initManagers()
         initChatAdapter()
     }
 
     private fun initToolbar() {
-        title = ""
         setSupportActionBar(toolbar)
+        back_btn.setOnClickListener { onBackPressed() }
+        toolbar_layout.setOnClickListener { startChatDetailsActivity() }
+        loadChatDialogPhoto(this, chatDialog.isPrivate, chatDialog.photo, avatar_img)
+
+        chat_message_name.text = chatDialog.name
+        if (!chatDialog.isPrivate) {
+            modelChatMessageList.getOccupants(chatDialog).observe(this, Observer { resource ->
+                when (resource.status) {
+                    com.connectycube.messenger.vo.Status.LOADING -> {
+                    }
+                    com.connectycube.messenger.vo.Status.ERROR -> {
+                        Toast.makeText(this, resource.message, Toast.LENGTH_LONG).show()
+                    }
+                    com.connectycube.messenger.vo.Status.SUCCESS -> {
+                        val occupants: List<ConnectycubeUser>? = resource.data
+                        occupants?.let {
+                            val membersNames: List<String> = occupants.map { it.fullName ?: it.login }
+                            chat_message_members.text = membersNames.joinToString()
+                        }
+                    }
+                }
+            })
+        }
     }
 
     private fun getChatMessageListViewModel(): ChatMessageListViewModel {
         val chatMessageListViewModel: ChatMessageListViewModel by viewModels {
-            InjectorUtils.provideChatMessageListViewModelFactory(this, chatDialog)
+            InjectorUtils.provideChatMessageListViewModelFactory(this.application, chatDialog)
         }
         return chatMessageListViewModel
     }
@@ -265,6 +286,24 @@ class ChatMessageActivity : BaseChatActivity() {
         messages_recycleview.smoothScrollToPosition(0)
     }
 
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.chat_message_activity, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.menu_action_video -> {
+                Toast.makeText(this, R.string.coming_soon, Toast.LENGTH_SHORT).show()
+                true
+            }
+            R.id.menu_action_audio -> {
+                Toast.makeText(this, R.string.coming_soon, Toast.LENGTH_SHORT).show()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -299,6 +338,13 @@ class ChatMessageActivity : BaseChatActivity() {
                 }
             }
         }
+    }
+
+    fun startChatDetailsActivity() {
+        val intent = Intent(this, ChatDialogDetailsActivity::class.java)
+        intent.putExtra(EXTRA_CHAT_DIALOG_ID, chatDialog.dialogId)
+        startActivity(intent)
+        overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_top)
     }
 
     override fun onRequestPermissionsResult(

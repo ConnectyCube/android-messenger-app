@@ -37,6 +37,8 @@
 
     <!--Menu-->
     <string name="menu_chat_dialog_logout">Logout</string>
+    <string name="menu_chat_message_video">Video call</string>
+    <string name="menu_chat_message_audio">Audio call</string>
 
     <!--ChatDialogs-->
     <string name="chat_login">Login…</string>
