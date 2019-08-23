@@ -139,7 +139,10 @@ class ChatDialogDetailsActivity : BaseChatActivity(),
 
     private fun attachData(chatDialog: ConnectycubeChatDialog) {
         currentChatDialog = chatDialog
-        if (currentChatDialog.isPrivate) edit_group_name_btn.visibility = View.INVISIBLE
+        if (currentChatDialog.isPrivate) {
+            edit_group_name_btn.isClickable = false
+            edit_group_name_btn.alpha = 0.3f
+        }
         chatDialogDetailsViewModel.getUsers(chatDialog).observe(this, Observer { resource ->
             when (resource.status) {
                 Status.LOADING -> {
