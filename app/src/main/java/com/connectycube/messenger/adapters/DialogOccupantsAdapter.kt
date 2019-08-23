@@ -9,6 +9,7 @@ import com.connectycube.messenger.R
 import com.connectycube.messenger.utilities.getPrettyLastActivityDate
 import com.connectycube.messenger.utilities.loadUserAvatar
 import com.connectycube.users.model.ConnectycubeUser
+import java.util.*
 
 const val MENU_ITEM_ADMIN_ADD: Int = 0
 const val MENU_ITEM_ADMIN_REMOVE: Int = 1
@@ -141,7 +142,8 @@ internal class DialogOccupantsAdapter(
                 txtName.text = connectycubeUser.fullName
                 txtLastActivityTitle.visibility = View.VISIBLE
                 txtLastActivity.visibility = View.VISIBLE
-                txtLastActivity.text = getPrettyLastActivityDate(activityContext, connectycubeUser.lastRequestAt)
+                txtLastActivity.text =
+                    getPrettyLastActivityDate(activityContext, connectycubeUser.lastRequestAt ?: Date())
             }
 
             when {
