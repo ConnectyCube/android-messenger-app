@@ -8,7 +8,7 @@
             android:width="150dp"
             android:height="150dp"
             android:drawable="@mipmap/ic_launcher"
-            android:top="@dimen/margin_big"
+            android:top="@dimen/margin_splash_bg"
             android:gravity="center_horizontal"
             tools:ignore="UnusedAttribute"/>
 
