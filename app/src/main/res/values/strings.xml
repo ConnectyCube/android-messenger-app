@@ -46,6 +46,7 @@
 
     <!--ChatMessages-->
     <string name="chat_text_hint">Message</string>
+    <string name="chat_typing">%s is typing…</string>
     <string name="message_attachment">Attachment</string>
     <string name="loading_attachment_error">Loading attachment error %s</string>
     <string name="fbd_scroll_counter_label">%s new</string>

@@ -69,10 +69,10 @@ class ChatDialogDetailsActivity : BaseChatActivity(),
     }
 
     private fun editGroupName() {
-        currentChatDialog.let {
-            val intent = Intent(this, EditTextActivity::class.java)
+        currentChatDialog.run {
+            val intent = Intent(this@ChatDialogDetailsActivity, EditTextActivity::class.java)
             intent.putExtra(EXTRA_TITLE, getText(R.string.edit_group_name))
-            intent.putExtra(EXTRA_EXIST_VALUE, it.name)
+            intent.putExtra(EXTRA_EXIST_VALUE, name)
             intent.putExtra(EXTRA_MAX_LENGTH, MAX_DIALOG_NAME_LENGTH)
             intent.putExtra(EXTRA_HINT, getText(R.string.group_name))
             intent.putExtra(EXTRA_DESCRIPTION, getText(R.string.put_name_for_group))
@@ -139,6 +139,7 @@ class ChatDialogDetailsActivity : BaseChatActivity(),
 
     private fun attachData(chatDialog: ConnectycubeChatDialog) {
         currentChatDialog = chatDialog
+        if (currentChatDialog.isPrivate) edit_group_name_btn.visibility = View.INVISIBLE
         chatDialogDetailsViewModel.getUsers(chatDialog).observe(this, Observer { resource ->
             when (resource.status) {
                 Status.LOADING -> {
