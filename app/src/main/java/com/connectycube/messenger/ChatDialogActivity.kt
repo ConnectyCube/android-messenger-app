@@ -72,6 +72,7 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
 
     private fun subscribeUi() {
         Timber.d("subscribeUi")
+        showProgress(progressbar)
         chatDialogListViewModel.chatLiveDataLazy.observe(this) { resource ->
             when (resource.status) {
                 Status.SUCCESS -> {
@@ -80,7 +81,7 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
                     Timber.d("chatDialogListViewModel.getChats() = $listChatDialogs" + ", conUser= " + listChatDialogs!![0])
                     updateDialogAdapter(listChatDialogs)
                 }
-                Status.LOADING -> showProgress(progressbar)
+                Status.LOADING -> Timber.d("Status.LOADING")
                 Status.ERROR -> hideProgress(progressbar)
             }
         }

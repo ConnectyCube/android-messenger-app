@@ -22,4 +22,17 @@ class MessageConverters {
         val gson = Gson()
         return gson.toJson(chat)
     }
+
+    @TypeConverter
+    fun fromIdsListString(value: String): List<Int> {
+        val listType = object : TypeToken<List<Int>>() {
+        }.type
+        return Gson().fromJson(value, listType)
+    }
+
+    @TypeConverter
+    fun fromIdsListString(list: List<Int>): String {
+        val gson = Gson()
+        return gson.toJson(list)
+    }
 }
