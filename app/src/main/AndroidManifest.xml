@@ -27,7 +27,11 @@
             </intent-filter>
         </activity>
         <activity android:name=".ChatDialogActivity"/>
-        <activity android:name=".ChatMessageActivity"/>
+        <activity
+                android:name=".ChatMessageActivity"
+                android:theme="@style/AppTheme.NoActionBar"
+                android:launchMode="singleTask"
+                android:windowSoftInputMode="stateHidden|adjustResize"/>
         <activity android:name=".CreateChatDialogActivity"/>
         <activity
                 android:name=".ChatDialogDetailsActivity"
