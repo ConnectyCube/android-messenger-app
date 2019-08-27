@@ -9,6 +9,7 @@ const val CUBE_USER_LOGIN = "cube_user_login"
 const val CUBE_USER_PASSWORD = "cube_user_password"
 const val CUBE_USER_ID = "cube_user_id"
 const val CUBE_USER_NAME = "cube_user_name"
+const val CUBE_USER_AVATAR = "cube_user_avatar"
 
 class SharedPreferencesManager private constructor(val applicationContext: Context) {
 
@@ -33,6 +34,7 @@ class SharedPreferencesManager private constructor(val applicationContext: Conte
         editor.putString(CUBE_USER_PASSWORD, user.password)
         editor.putInt(CUBE_USER_ID, user.id)
         editor.putString(CUBE_USER_NAME, user.fullName)
+        editor.putString(CUBE_USER_AVATAR, user.avatar)
         editor.apply()
     }
 
@@ -42,6 +44,13 @@ class SharedPreferencesManager private constructor(val applicationContext: Conte
         editor.remove(CUBE_USER_PASSWORD)
         editor.remove(CUBE_USER_ID)
         editor.remove(CUBE_USER_NAME)
+        editor.remove(CUBE_USER_AVATAR)
+        editor.apply()
+    }
+
+    fun updateUserName(user: ConnectycubeUser) {
+        val editor = sharedPreferences.edit()
+        editor.putString(CUBE_USER_NAME, user.fullName)
         editor.apply()
     }
 
@@ -57,6 +66,7 @@ class SharedPreferencesManager private constructor(val applicationContext: Conte
                 it.password = sharedPreferences.getString(CUBE_USER_PASSWORD, null)
                 it.id = sharedPreferences.getInt(CUBE_USER_ID, 0)
                 it.fullName = sharedPreferences.getString(CUBE_USER_NAME, null)
+                it.avatar = sharedPreferences.getString(CUBE_USER_AVATAR, null)
             }
         }
         return currentUser

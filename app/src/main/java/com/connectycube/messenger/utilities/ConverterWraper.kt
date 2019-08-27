@@ -15,6 +15,10 @@ fun convertToUsers(list: ArrayList<ConnectycubeUser>): List<User> {
     return users
 }
 
+fun convertToUser(user: ConnectycubeUser): User {
+    return User(user.id, user.login, user.fullName, user)
+}
+
 fun convertToChats(list: ArrayList<ConnectycubeChatDialog>): List<Chat> {
     val chats = ArrayList<Chat>()
     list.forEach {

@@ -36,6 +36,18 @@ class ConnectycubeService {
                 })
     }
 
+    fun updateUserName(userId: Int, newName: String): LiveData<ApiResponse<User>> {
+        val user = ConnectycubeUser(userId).also { it.fullName = newName }
+        return InjectorUtils.provideConnectycubeServiceForType<ConnectycubeUser, User>()
+            .perform(
+                ConnectycubeUsers.updateUser(user),
+                object : Converter<User, ConnectycubeUser>() {
+                    override fun convertTo(response: ConnectycubeUser): User {
+                        return convertToUser(response)
+                    }
+                })
+    }
+
     fun loadChatsSlice(): LiveData<ApiResponse<List<Chat>>> {
         val requestGetBuilder = RequestGetBuilder().apply { limit = 10 }
         return InjectorUtils.provideConnectycubeServiceForType<ArrayList<ConnectycubeChatDialog>, List<Chat>>()

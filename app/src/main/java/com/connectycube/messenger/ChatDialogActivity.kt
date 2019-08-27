@@ -56,15 +56,20 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
 
     override fun onStart() {
         super.onStart()
+        setCurrentUser()
         currentDialogId?.let { chatDialogListViewModel.updateChat(currentDialogId!!) }
     }
 
     private fun initToolbar() {
         setSupportActionBar(toolbar)
         toolbar.setOnClickListener { startSettingsActivity() }
+        setCurrentUser()
+    }
+
+    private fun setCurrentUser() {
         val currentUser = getCurrentUser()
-        loadUserAvatar(this, currentUser, avatar_img)
         current_user_name.text = currentUser.fullName?: currentUser.login
+        loadUserAvatar(this, currentUser, avatar_img)
     }
 
     private fun initDialogsRecyclerView() {

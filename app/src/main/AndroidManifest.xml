@@ -44,7 +44,7 @@
                 android:windowSoftInputMode="adjustResize" />
         <activity
                 android:name=".SettingsActivity"
-                android:theme="@style/AppTheme.NoActionBar" />
+                android:label="SettingsActivity" />
 
         <provider
                 android:name="androidx.core.content.FileProvider"

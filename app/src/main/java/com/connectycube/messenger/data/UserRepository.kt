@@ -12,13 +12,31 @@ import kotlinx.coroutines.withContext
  * Repository that handles Users objects.
  */
 
-class UserRepository private constructor(private val userDao: UserDao, private val appExecutors: AppExecutors) {
+class UserRepository private constructor(
+    private val userDao: UserDao,
+    private val appExecutors: AppExecutors
+) {
     val service: ConnectycubeService = ConnectycubeService()
 
     suspend fun saveUser(user: User) {
         withContext(Dispatchers.IO) {
             userDao.insert(user)
         }
+    }
+
+    fun updateUserName(userId: Int, newName: String): LiveData<Resource<User>> {
+        return object : NetworkBoundResource<User, User>(appExecutors) {
+            override fun saveCallResult(item: User) {
+                userDao.insert(item)
+            }
+
+            override fun shouldFetch(data: User?, newData: User?) =
+                data?.conUser?.fullName != newData?.conUser?.fullName
+
+            override fun loadFromDb() = userDao.getUser(userId)
+
+            override fun createCall() = service.updateUserName(userId, newName)
+        }.asLiveData()
     }
 
     fun getUser(userId: Int) = userDao.getUser(userId)

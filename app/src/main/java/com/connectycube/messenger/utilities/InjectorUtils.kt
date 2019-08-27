@@ -19,6 +19,11 @@ object InjectorUtils {
         )
     }
 
+    fun provideUserViewModelFactory(application: Application, userId: Int): UserDetailsViewModelFactory {
+        val repository = getUserRepository(application.baseContext)
+        return UserDetailsViewModelFactory(application, userId, repository)
+    }
+
     fun provideChatDialogListViewModelFactory(context: Context): ChatDialogListViewModelFactory {
         val repository = getChatRepository(context)
         return ChatDialogListViewModelFactory(repository)
