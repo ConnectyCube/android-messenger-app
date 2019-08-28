@@ -43,8 +43,7 @@ class UserDetailsViewModel internal constructor(
     }
 
     fun updateName(newName: String) {
-        val source =
-            userRepository.updateUserName(userId, newName)
+        val source = userRepository.updateUserName(userId, newName)
         liveDataUser().addSource(source) {
             if (it == null) {
                 liveDataUser().value = Resource.error(
@@ -58,15 +57,21 @@ class UserDetailsViewModel internal constructor(
         }
     }
 
+    fun updateAvatar(newAvatar: String) {
+        val source = userRepository.uploadUserAvatar(userId, newAvatar)
+        liveDataUser().addSource(source) {
+            if (it.status == Status.SUCCESS) {
+                liveDataUser().value = Resource.success(it.data)
+                liveDataUser().removeSource(source)
+            } else {
+                liveDataUser().value = it
+            }
+        }
+    }
+
+
     private fun liveDataUser(): MediatorLiveData<Resource<ConnectycubeUser>> {
         return liveDataUser as MediatorLiveData<Resource<ConnectycubeUser>>
     }
-
-//
-//    fun updateAvatar(userId: Int, newAvatar: String) {
-//        chatRepository.updateChatName(dialogId, newName) { error, chat ->
-//            liveDialog().postValue(Resource.error(error, chat.cubeChat))
-//        }
-//    }
 
 }

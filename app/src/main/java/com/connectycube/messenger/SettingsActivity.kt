@@ -9,23 +9,21 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.lifecycle.observe
 import com.connectycube.chat.ConnectycubeChatService
-import com.connectycube.messenger.api.UserService
-import com.connectycube.messenger.utilities.InjectorUtils
-import com.connectycube.messenger.utilities.SharedPreferencesManager
-import com.connectycube.messenger.utilities.loadUserAvatar
+import com.connectycube.messenger.utilities.*
 import com.connectycube.messenger.viewmodels.UserDetailsViewModel
 import com.connectycube.messenger.vo.Status
 import com.connectycube.users.model.ConnectycubeUser
+import com.yalantis.ucrop.UCrop
+import com.zhihu.matisse.Matisse
 import kotlinx.android.synthetic.main.activity_settings.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import timber.log.Timber
 
 const val MAX_USER_NAME_LENGTH = 60
 const val REQUEST_EDIT_USER_NAME = 100
+const val EXTRA_LOGOUT = "chat_logout"
 
 class SettingsActivity : BaseChatActivity() {
+    private val permissionsHelper = PermissionsHelper(this)
     var currentUser: ConnectycubeUser? = null
     private val userDetailsViewModel: UserDetailsViewModel by viewModels {
         InjectorUtils.provideUserViewModelFactory(
@@ -61,11 +59,14 @@ class SettingsActivity : BaseChatActivity() {
                         Timber.d("currentUser= $currentUser")
                         loadUserAvatar(this, currentUser!!, avatar_img)
                         user_name_txt.text = currentUser?.fullName ?: currentUser?.login
-                        user_id.text = currentUser?.id.toString()
                     }
                 }
                 Status.LOADING -> {
                     showProgress(progressbar)
+                    if (resource.progress != null) {
+                        if (progressbar.isIndeterminate) progressbar.isIndeterminate = false
+                        progressbar.progress = resource.progress
+                    } else if (!progressbar.isIndeterminate) progressbar.isIndeterminate = true
                 }
                 Status.ERROR -> {
                     hideProgress(progressbar)
@@ -77,7 +78,9 @@ class SettingsActivity : BaseChatActivity() {
 
     private fun updateUserData(updatedUser: ConnectycubeUser) {
         currentUser = updatedUser
-        SharedPreferencesManager.getInstance(applicationContext).updateUserName(updatedUser)
+        SharedPreferencesManager.getInstance(applicationContext).updateCurrentUserName(updatedUser)
+        SharedPreferencesManager.getInstance(applicationContext)
+            .updateCurrentUserAvatar(updatedUser)
     }
 
     private fun editName() {
@@ -94,19 +97,9 @@ class SettingsActivity : BaseChatActivity() {
     }
 
     private fun editAvatar() {
-
-    }
-
-    private fun logout() {
-        showProgress(progressbar)
-        GlobalScope.launch(Dispatchers.Main) {
-            UserService.instance.ultimateLogout(applicationContext)
-            SharedPreferencesManager.getInstance(applicationContext).deleteCurrentUser()
-            startLoginActivity()
-            hideProgress(progressbar)
-
-            finish()
-        }
+        if (permissionsHelper.areAllImageGranted()) {
+            requestImage(this)
+        } else permissionsHelper.requestImagePermissions()
     }
 
     private fun startNameUpdate(newName: String?) {
@@ -118,6 +111,12 @@ class SettingsActivity : BaseChatActivity() {
         }
     }
 
+    private fun startAvatarUpdate(path: String?) {
+        path?.let {
+            userDetailsViewModel.updateAvatar(path)
+        }
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_CANCELED || data == null) return
@@ -126,13 +125,38 @@ class SettingsActivity : BaseChatActivity() {
             REQUEST_EDIT_USER_NAME -> {
                 startNameUpdate(data.getStringExtra(EXTRA_DATA))
             }
+            REQUEST_CODE_CHOOSE -> {
+                if (Matisse.obtainPathResult(data) != null) {
+                    cropImage(this, Matisse.obtainPathResult(data).iterator().next())
+                }
+            }
+            UCrop.REQUEST_CROP -> {
+                val resultUri = UCrop.getOutput(data)
+                resultUri?.let {
+                    startAvatarUpdate(resultUri.path)
+                }
+            }
         }
     }
 
-    private fun startLoginActivity() {
-        val intent = Intent(this, LoginActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        this.startActivity(intent)
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>, grantResults: IntArray
+    ) {
+        when (requestCode) {
+            REQUEST_PERMISSION_IMAGE -> {
+                // If request is cancelled, the result arrays are empty.
+                if (permissionsHelper.areAllImageGranted()) {
+                    Timber.d("permission was granted")
+                } else {
+                    Timber.d("permission is denied")
+                }
+                return
+            }
+            else -> {
+                // Ignore all other requests.
+            }
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -154,6 +178,13 @@ class SettingsActivity : BaseChatActivity() {
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun logout() {
+        val resultIntent = Intent()
+        resultIntent.putExtra(EXTRA_LOGOUT, true)
+        setResult(Activity.RESULT_OK, resultIntent)
+        finish()
     }
 
     override fun finish() {

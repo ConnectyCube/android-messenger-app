@@ -1,5 +1,6 @@
 package com.connectycube.messenger
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -31,6 +32,7 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 
 const val EXTRA_CHAT = "chat_dialog"
+const val REQUEST_SETTING = 8
 
 class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapterCallback {
 
@@ -68,7 +70,7 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
 
     private fun setCurrentUser() {
         val currentUser = getCurrentUser()
-        current_user_name.text = currentUser.fullName?: currentUser.login
+        current_user_name.text = currentUser.fullName ?: currentUser.login
         loadUserAvatar(this, currentUser, avatar_img)
     }
 
@@ -117,9 +119,22 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
         }
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == Activity.RESULT_CANCELED || data == null) return
+
+        when (requestCode) {
+            REQUEST_SETTING -> {
+                if (data.getBooleanExtra(EXTRA_LOGOUT, false)) {
+                    logout()
+                }
+            }
+        }
+    }
+
     fun startSettingsActivity() {
         val intent = Intent(this, SettingsActivity::class.java)
-        startActivity(intent)
+        startActivityForResult(intent, REQUEST_SETTING)
         overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_top)
     }
 
@@ -177,6 +192,25 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
         startMain.addCategory(Intent.CATEGORY_HOME)
         startMain.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         startActivity(startMain)
+    }
+
+    private fun logout() {
+        showProgress(progressbar)
+        chatDialogListViewModel.chatLiveDataLazy.removeObservers(this)
+        GlobalScope.launch(Dispatchers.Main) {
+            UserService.instance.ultimateLogout(applicationContext)
+            SharedPreferencesManager.getInstance(applicationContext).deleteCurrentUser()
+            startLoginActivity()
+            hideProgress(progressbar)
+
+            finish()
+        }
+    }
+
+    private fun startLoginActivity() {
+        val intent = Intent(this, LoginActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        this.startActivity(intent)
     }
 
     private inner class AllMessageListener : ChatDialogMessageListener {

@@ -64,7 +64,8 @@ class LoginActivity : BaseChatActivity() {
 
                 val userRaw: User? = listUser!!.find { it.login == user.login }
                 Timber.d("proceed loginTo user= $userRaw" + ", conUser= " + userRaw!!.conUser)
-                signInRestIdNeed(userRaw.conUser)
+                val userToLogin = userRaw.conUser.also {it.password = user.password}
+                signInRestIdNeed(userToLogin)
             }
         }
     }

@@ -48,9 +48,15 @@ class SharedPreferencesManager private constructor(val applicationContext: Conte
         editor.apply()
     }
 
-    fun updateUserName(user: ConnectycubeUser) {
+    fun updateCurrentUserName(user: ConnectycubeUser) {
         val editor = sharedPreferences.edit()
         editor.putString(CUBE_USER_NAME, user.fullName)
+        editor.apply()
+    }
+
+    fun updateCurrentUserAvatar(user: ConnectycubeUser) {
+        val editor = sharedPreferences.edit()
+        editor.putString(CUBE_USER_AVATAR, user.avatar)
         editor.apply()
     }
 

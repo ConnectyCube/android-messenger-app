@@ -1,10 +1,12 @@
 package com.connectycube.messenger.data
 
 import androidx.lifecycle.LiveData
-import com.connectycube.messenger.api.ConnectycubeService
+import androidx.lifecycle.MediatorLiveData
+import com.connectycube.messenger.api.*
 import com.connectycube.messenger.vo.AppExecutors
 import com.connectycube.messenger.vo.NetworkBoundResource
 import com.connectycube.messenger.vo.Resource
+import com.connectycube.users.model.ConnectycubeUser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -31,12 +33,37 @@ class UserRepository private constructor(
             }
 
             override fun shouldFetch(data: User?, newData: User?) =
-                data?.conUser?.fullName != newData?.conUser?.fullName
+                data?.conUser?.fullName != newName
 
             override fun loadFromDb() = userDao.getUser(userId)
 
             override fun createCall() = service.updateUserName(userId, newName)
         }.asLiveData()
+    }
+
+    fun uploadUserAvatar(userId: Int, newAvatar: String): LiveData<Resource<ConnectycubeUser>> {
+        val result = MediatorLiveData<Resource<ConnectycubeUser>>()
+        result.value = Resource.loading(null)
+
+        val apiResponse = service.updateUserAvatar(userId, newAvatar)
+        result.addSource(apiResponse) { response ->
+            when (response) {
+                is ApiSuccessResponse -> {
+                    appExecutors.diskIO().execute { userDao.insert(response.body) }
+                    result.value = Resource.success(response.body.conUser)
+                }
+                is ApiEmptyResponse -> {
+                    result.value = Resource.success(null)
+                }
+                is ApiProgressResponse -> {
+                    result.value = Resource.loadingProgress(null, response.progress)
+                }
+                is ApiErrorResponse -> {
+                    result.value = Resource.error(response.errorMessage, null)
+                }
+            }
+        }
+        return result
     }
 
     fun getUser(userId: Int) = userDao.getUser(userId)

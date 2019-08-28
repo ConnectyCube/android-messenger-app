@@ -11,6 +11,7 @@ import com.connectycube.core.helper.StringifyArrayList
 import com.connectycube.chat.model.ConnectycubeChatMessage
 import com.connectycube.chat.request.MessageGetBuilder
 import com.connectycube.core.request.RequestGetBuilder
+import com.connectycube.messenger.api.utils.PerformerTask.uploadUserAvatarTask
 import com.connectycube.messenger.data.Chat
 import com.connectycube.messenger.data.Message
 import com.connectycube.messenger.data.User
@@ -46,6 +47,19 @@ class ConnectycubeService {
                         return convertToUser(response)
                     }
                 })
+    }
+
+    fun updateUserAvatar(userId: Int, newAvatarPath: String): LiveData<ApiResponse<User>> {
+        val file = File(newAvatarPath)
+        val service =
+            InjectorUtils.provideConnectycubeServiceProgressForType<ConnectycubeUser, User>()
+        return service.perform(
+            uploadUserAvatarTask(userId, file, true) {service.progressCallBack.onProgressUpdate(it)},
+            object : Converter<User, ConnectycubeUser>() {
+                override fun convertTo(response: ConnectycubeUser): User {
+                    return convertToUser(response)
+                }
+            })
     }
 
     fun loadChatsSlice(): LiveData<ApiResponse<List<Chat>>> {
