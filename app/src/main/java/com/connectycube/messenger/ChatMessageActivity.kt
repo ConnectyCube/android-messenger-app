@@ -2,7 +2,6 @@ package com.connectycube.messenger
 
 import android.app.Activity
 import android.content.Intent
-import android.content.pm.ActivityInfo
 import android.graphics.Rect
 import android.os.Bundle
 import android.text.Editable
@@ -36,9 +35,6 @@ import com.connectycube.users.model.ConnectycubeUser
 import com.google.android.material.button.MaterialButton.ICON_GRAVITY_START
 import com.google.android.material.button.MaterialButton.ICON_GRAVITY_TEXT_END
 import com.zhihu.matisse.Matisse
-import com.zhihu.matisse.MimeType
-import com.zhihu.matisse.internal.entity.CaptureStrategy
-import com.zhihu.matisse.listener.OnCheckedListener
 import kotlinx.android.synthetic.main.activity_chatmessages.*
 import kotlinx.android.synthetic.main.activity_chatmessages.avatar_img
 import kotlinx.android.synthetic.main.activity_chatmessages.back_btn
@@ -49,8 +45,6 @@ import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
-
-const val REQUEST_CODE_CHOOSE = 23
 const val TYPING_INTERVAL_MS: Long = 900
 
 class ChatMessageActivity : BaseChatActivity() {
@@ -250,7 +244,7 @@ class ChatMessageActivity : BaseChatActivity() {
     fun onAttachClick(view: View) {
         if (permissionsHelper.areAllImageGranted()) {
             Timber.d("onAttachClick areAllImageGranted")
-            requestImageDevice()
+            requestImage(this)
         } else permissionsHelper.requestImagePermissions()
     }
 
@@ -261,36 +255,6 @@ class ChatMessageActivity : BaseChatActivity() {
 
     private fun onMessageClicked(message: ConnectycubeChatMessage) {
         Timber.d("message= " + message)
-    }
-
-    fun requestImageDevice() {
-        Matisse.from(this@ChatMessageActivity)
-            .choose(MimeType.ofImage(), false)
-            .countable(false)
-            .capture(true)
-            .captureStrategy(
-                CaptureStrategy(true, "com.connectycube.messenger.fileprovider")
-            )
-            .maxSelectable(1)
-//                .addFilter(GifSizeFilter(320, 320, 5 * Filter.K * Filter.K))
-            .gridExpectedSize(
-                resources.getDimensionPixelSize(R.dimen.grid_expected_size)
-            )
-            .restrictOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
-            .thumbnailScale(0.85f)
-            .imageEngine(Glide4Engine())
-            .setOnSelectedListener { uriList, pathList ->
-                // DO SOMETHING IMMEDIATELY HERE
-                Timber.d("onSelected= pathList=$pathList")
-            }
-            .originalEnable(true)
-            .maxOriginalSize(10)
-//                .autoHideToolbarOnSingleTap(true)
-            .setOnCheckedListener(OnCheckedListener { isChecked ->
-                // DO SOMETHING IMMEDIATELY HERE
-                Timber.d("isChecked= isChecked=$isChecked")
-            })
-            .forResult(REQUEST_CODE_CHOOSE)
     }
 
     fun sendChatMessage(text: String = "", attachment: ConnectycubeAttachment? = null) {
@@ -383,7 +347,7 @@ class ChatMessageActivity : BaseChatActivity() {
         permissions: Array<String>, grantResults: IntArray
     ) {
         when (requestCode) {
-            REQUEST_ATTACHMENT_IMAGE_CONTACTS -> {
+            REQUEST_PERMISSION_IMAGE -> {
                 // If request is cancelled, the result arrays are empty.
                 if (permissionsHelper.areAllImageGranted()) {
                     Timber.d("permission was granted")

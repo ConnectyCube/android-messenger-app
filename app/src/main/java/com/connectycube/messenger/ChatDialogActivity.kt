@@ -1,12 +1,10 @@
 package com.connectycube.messenger
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View
 import androidx.activity.viewModels
-import androidx.appcompat.app.ActionBar
 import androidx.lifecycle.observe
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,16 +18,21 @@ import com.connectycube.messenger.adapters.ChatDialogAdapter
 import com.connectycube.messenger.api.UserService
 import com.connectycube.messenger.utilities.InjectorUtils
 import com.connectycube.messenger.utilities.SharedPreferencesManager
+import com.connectycube.messenger.utilities.loadUserAvatar
 import com.connectycube.messenger.viewmodels.ChatDialogListViewModel
 import com.connectycube.messenger.vo.Status
 import com.connectycube.users.model.ConnectycubeUser
 import kotlinx.android.synthetic.main.activity_chatdialogs.*
+import kotlinx.android.synthetic.main.activity_chatdialogs.progressbar
+import kotlinx.android.synthetic.main.activity_chatdialogs.avatar_img
+import kotlinx.android.synthetic.main.activity_chatdialogs.toolbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
 const val EXTRA_CHAT = "chat_dialog"
+const val REQUEST_SETTING_SCREEN = 50
 
 class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapterCallback {
 
@@ -55,13 +58,20 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
 
     override fun onStart() {
         super.onStart()
+        setCurrentUser()
         currentDialogId?.let { chatDialogListViewModel.updateChat(currentDialogId!!) }
     }
 
     private fun initToolbar() {
-        supportActionBar?.displayOptions =
-            ActionBar.DISPLAY_SHOW_TITLE or ActionBar.DISPLAY_USE_LOGO or ActionBar.DISPLAY_SHOW_HOME
-        title = getCurrentUser().fullName
+        setSupportActionBar(toolbar)
+        toolbar.setOnClickListener { startSettingsActivity() }
+        setCurrentUser()
+    }
+
+    private fun setCurrentUser() {
+        val currentUser = getCurrentUser()
+        current_user_name.text = currentUser.fullName ?: currentUser.login
+        loadUserAvatar(this, currentUser, avatar_img)
     }
 
     private fun initDialogsRecyclerView() {
@@ -107,6 +117,25 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
                 it
             )
         }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == Activity.RESULT_CANCELED || data == null) return
+
+        when (requestCode) {
+            REQUEST_SETTING_SCREEN -> {
+                if (data.getBooleanExtra(EXTRA_LOGOUT, false)) {
+                    logout()
+                }
+            }
+        }
+    }
+
+    fun startSettingsActivity() {
+        val intent = Intent(this, SettingsActivity::class.java)
+        startActivityForResult(intent, REQUEST_SETTING_SCREEN)
+        overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_top)
     }
 
     override fun onDestroy() {
@@ -157,21 +186,12 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
         startActivity(intent)
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.chat_dialog_activity, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.menu_chat_dialog_logout -> {
-                logout()
-                item.isEnabled = false
-                invalidateOptionsMenu()
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
+    override fun onBackPressed() {
+        //go home
+        val startMain = Intent(Intent.ACTION_MAIN)
+        startMain.addCategory(Intent.CATEGORY_HOME)
+        startMain.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        startActivity(startMain)
     }
 
     private fun logout() {
@@ -187,14 +207,6 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
         }
     }
 
-    override fun onBackPressed() {
-        //go home
-        val startMain = Intent(Intent.ACTION_MAIN)
-        startMain.addCategory(Intent.CATEGORY_HOME)
-        startMain.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        startActivity(startMain)
-    }
-
     private fun startLoginActivity() {
         val intent = Intent(this, LoginActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -202,11 +214,20 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
     }
 
     private inner class AllMessageListener : ChatDialogMessageListener {
-        override fun processError(p0: String?, p1: ChatException?, p2: ConnectycubeChatMessage?, p3: Int?) {
+        override fun processError(
+            dialogId: String?,
+            ex: ChatException?,
+            msg: ConnectycubeChatMessage?,
+            senderId: Int?
+        ) {
             Timber.d("processError")
         }
 
-        override fun processMessage(dialogId: String, chatMessage: ConnectycubeChatMessage, senderId: Int?) {
+        override fun processMessage(
+            dialogId: String,
+            chatMessage: ConnectycubeChatMessage,
+            senderId: Int?
+        ) {
             Timber.d("processMessage chatMessage= " + chatMessage.body + ", from senderId $senderId")
             if (senderId != ConnectycubeChatService.getInstance().user.id) {
                 Timber.d("processMessage chatDialogListViewModel.updateChat chatMessage= " + chatMessage.body)

@@ -51,6 +51,12 @@
     <string name="loading_attachment_error">Loading attachment error %s</string>
     <string name="fbd_scroll_counter_label">%s new</string>
 
+    <!--Settings-->
+    <string name="edit_username">Edit User Name</string>
+    <string name="user_name_hint">User Name</string>
+    <string name="username_description">Enter user name</string>
+    <string name="username_can_not_be_empty">User name can not be empty</string>
+
     <!-- Errors -->
     <string name="error_credentials_empty">The App class should contain ConnectyCube credentials. Register new account and application at https://admin.connectycube.com
         then put Application credentials from Overview page + Account key from https://admin.connectycube.com/account/settings</string>
