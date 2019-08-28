@@ -11,7 +11,7 @@ import java.util.*
 
 fun convertToUsers(list: ArrayList<ConnectycubeUser>): List<User> {
     val users = ArrayList<User>()
-    list.forEach { users.add(User(it.id, it.login, it.fullName, it)) }
+    list.forEach { users.add(convertToUser(it)) }
     return users
 }
 

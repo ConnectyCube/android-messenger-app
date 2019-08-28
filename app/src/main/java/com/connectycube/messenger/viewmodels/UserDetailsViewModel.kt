@@ -58,7 +58,7 @@ class UserDetailsViewModel internal constructor(
     }
 
     fun updateAvatar(newAvatar: String) {
-        val source = userRepository.uploadUserAvatar(userId, newAvatar)
+        val source = userRepository.updateUserAvatar(userId, newAvatar)
         liveDataUser().addSource(source) {
             if (it.status == Status.SUCCESS) {
                 liveDataUser().value = Resource.success(it.data)

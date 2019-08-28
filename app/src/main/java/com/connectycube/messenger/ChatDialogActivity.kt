@@ -32,7 +32,7 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 
 const val EXTRA_CHAT = "chat_dialog"
-const val REQUEST_SETTING = 8
+const val REQUEST_SETTING_SCREEN = 50
 
 class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapterCallback {
 
@@ -124,7 +124,7 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
         if (resultCode == Activity.RESULT_CANCELED || data == null) return
 
         when (requestCode) {
-            REQUEST_SETTING -> {
+            REQUEST_SETTING_SCREEN -> {
                 if (data.getBooleanExtra(EXTRA_LOGOUT, false)) {
                     logout()
                 }
@@ -134,7 +134,7 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
 
     fun startSettingsActivity() {
         val intent = Intent(this, SettingsActivity::class.java)
-        startActivityForResult(intent, REQUEST_SETTING)
+        startActivityForResult(intent, REQUEST_SETTING_SCREEN)
         overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_top)
     }
 

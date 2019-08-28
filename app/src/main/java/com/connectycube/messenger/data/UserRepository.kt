@@ -41,7 +41,7 @@ class UserRepository private constructor(
         }.asLiveData()
     }
 
-    fun uploadUserAvatar(userId: Int, newAvatar: String): LiveData<Resource<ConnectycubeUser>> {
+    fun updateUserAvatar(userId: Int, newAvatar: String): LiveData<Resource<ConnectycubeUser>> {
         val result = MediatorLiveData<Resource<ConnectycubeUser>>()
         result.value = Resource.loading(null)
 
