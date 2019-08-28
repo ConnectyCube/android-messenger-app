@@ -57,9 +57,10 @@ class CreateChatDialogActivity : BaseChatActivity(), CheckableUsersAdapter.Check
             selectedUsers = liveSelectedUsers
             invalidateOptionsMenu()
         }
+        createChatDialogViewModel.updateSelectedUsersStates()
 
         createChatDialogViewModel.getUsers().observe(this) { result ->
-            when(result.status){
+            when (result.status) {
                 Status.LOADING -> showProgress(progressbar)
                 Status.ERROR -> hideProgress(progressbar)
                 Status.SUCCESS -> {

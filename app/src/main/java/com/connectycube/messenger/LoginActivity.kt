@@ -64,7 +64,7 @@ class LoginActivity : BaseChatActivity() {
 
                 val userRaw: User? = listUser!!.find { it.login == user.login }
                 Timber.d("proceed loginTo user= $userRaw" + ", conUser= " + userRaw!!.conUser)
-                val userToLogin = userRaw.conUser.also {it.password = user.password}
+                val userToLogin = userRaw.conUser.also { it.password = user.password }
                 signInRestIdNeed(userToLogin)
             }
         }
@@ -140,7 +140,7 @@ class LoginActivity : BaseChatActivity() {
 
     private fun initUserAdapter() {
         val userList: ArrayList<String> = ArrayList(users.size)
-        users.forEachIndexed { index, _ -> userList.add(String.format(getString(R.string.user), index + 1)) }
+        users.forEach { userList.add(it.login) }
         adapter = ArrayAdapter(this, R.layout.list_item_user_simple, userList)
         list_users.adapter = adapter
         list_users.choiceMode = ListView.CHOICE_MODE_SINGLE

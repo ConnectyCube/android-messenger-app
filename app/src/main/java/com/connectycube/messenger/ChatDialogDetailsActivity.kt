@@ -20,7 +20,6 @@ import com.connectycube.users.model.ConnectycubeUser
 import kotlinx.android.synthetic.main.activity_chat_dialog_details.*
 import kotlinx.android.synthetic.main.activity_chat_dialog_details.add_occupants_img
 import kotlinx.android.synthetic.main.activity_chat_dialog_details.avatar_img
-import kotlinx.android.synthetic.main.activity_chat_dialog_details.chat_dialog_id
 import kotlinx.android.synthetic.main.activity_chat_dialog_details.chat_dialog_name_txt
 import kotlinx.android.synthetic.main.activity_chat_dialog_details.description_txt
 import kotlinx.android.synthetic.main.activity_chat_dialog_details.edit_grop_description_btn
@@ -56,7 +55,6 @@ class ChatDialogDetailsActivity : BaseChatActivity(),
     private fun initToolbar() {
         setSupportActionBar(toolbar)
         back_btn.setOnClickListener { onBackPressed() }
-        open_chat_dialog_btn.setOnClickListener { startChatDialog() }
         edit_group_name_btn.setOnClickListener { editGroupName() }
         edit_grop_description_btn.setOnClickListener { editGroupDescription() }
         edit_avatar_btn.setOnClickListener { editGroupPhoto() }
@@ -91,14 +89,6 @@ class ChatDialogDetailsActivity : BaseChatActivity(),
             intent.putExtra(EXTRA_DESCRIPTION, getText(R.string.put_there_some_information_about_group))
 
             startActivityForResult(intent, REQUEST_EDIT_DESCRIPTION)
-        }
-    }
-
-    private fun startChatDialog() {
-        currentChatDialog.let {
-            val intent = Intent(this, ChatMessageActivity::class.java)
-            intent.putExtra(EXTRA_CHAT, it)
-            startActivity(intent)
         }
     }
 
@@ -175,7 +165,6 @@ class ChatDialogDetailsActivity : BaseChatActivity(),
         edit_avatar_btn.visibility = if (chatDialog.type == ConnectycubeDialogType.PRIVATE) View.GONE else View.VISIBLE
 
         chat_dialog_name_txt.text = chatDialog.name
-        chat_dialog_id.text = getString(R.string.id_format, chatDialog.dialogId)
         loadChatDialogPhoto(this, chatDialog.isPrivate, chatDialog.photo, avatar_img)
     }
 

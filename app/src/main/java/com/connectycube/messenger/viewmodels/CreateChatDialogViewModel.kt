@@ -42,6 +42,10 @@ class CreateChatDialogViewModel internal constructor(
         return result
     }
 
+    fun updateSelectedUsersStates() {
+        liveSelectedUsers.postValue(liveSelectedUsers.value ?: arrayListOf())
+    }
+
     fun updateUserSelection(user: ConnectycubeUser, isSelected: Boolean) {
         val selectedUsers: ArrayList<ConnectycubeUser> = liveSelectedUsers.value ?: arrayListOf()
 

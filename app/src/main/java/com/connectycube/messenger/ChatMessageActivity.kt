@@ -383,6 +383,7 @@ class ChatMessageActivity : BaseChatActivity() {
 
     inner class ChatTypingListener : ChatDialogTypingListener {
         override fun processUserIsTyping(dialogId: String?, userId: Int?) {
+            if (userId == ConnectycubeChatService.getInstance().user.id) return
             var userStatus = occupants[userId]?.fullName ?: occupants[userId]?.login
             userStatus?.let {
                 userStatus = getString(R.string.chat_typing, userStatus)

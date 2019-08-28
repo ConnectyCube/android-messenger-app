@@ -167,7 +167,7 @@ class ChatMessageAdapter(
     }
 
     fun formatDate(seconds: Long): String {
-        return DateUtils.formatDateTime(context, seconds * 1000L, DateUtils.FORMAT_ABBREV_TIME)
+        return DateUtils.formatDateTime(context, seconds * 1000L, DateUtils.FORMAT_SHOW_TIME)
     }
 
     private fun markAsReadMessage(chatMessage: ConnectycubeChatMessage) {
