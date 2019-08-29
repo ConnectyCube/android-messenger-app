@@ -25,12 +25,13 @@ import com.connectycube.messenger.utilities.loadChatMessagePhoto
 import timber.log.Timber
 
 
-typealias ClickListener = (ConnectycubeChatMessage) -> Unit
+typealias AttachmentClickListener = (ConnectycubeAttachment) -> Unit
+
 
 class ChatMessageAdapter(
     val context: Context,
     var chatDialog: ConnectycubeChatDialog,
-    private val clickListener: ClickListener
+    private val attachmentClickListener: (ConnectycubeAttachment) -> Unit
 ) : PagedListAdapter<ConnectycubeChatMessage, RecyclerView.ViewHolder>(diffCallback) {
     val IN_PROGRESS = -1
     val TEXT_OUTCOMING = 1
@@ -95,11 +96,6 @@ class ChatMessageAdapter(
         val message = getItem(position)
         with(holder) {
             bindTo(message!!)
-            message.let {
-                itemView.setOnClickListener {
-                    clickListener(message)
-                }
-            }
         }
     }
 
@@ -109,7 +105,7 @@ class ChatMessageAdapter(
             bindTo(message!!)
             message.let {
                 itemView.setOnClickListener {
-                    clickListener(message)
+                    attachmentClickListener(message.attachments.first())
                 }
             }
         }
@@ -132,8 +128,9 @@ class ChatMessageAdapter(
 
     fun setStatus(imgStatus: ImageView?, msg: ConnectycubeChatMessage) {
         when {
-            messageIsRead(msg) -> imgStatus?.setImageResource(R.drawable.ic_check_double_16)
-            messageIsDelivered(msg) -> imgStatus?.setImageResource(R.drawable.ic_check_black_16dp)
+            messageIsRead(msg) -> imgStatus?.setImageResource(R.drawable.ic_check_double_color_16)
+            messageIsDelivered(msg) -> imgStatus?.setImageResource(R.drawable.ic_check_double_16)
+            messageIsSent(msg) -> imgStatus?.setImageResource(R.drawable.ic_check_black_16dp)
             else -> imgStatus?.setImageResource(android.R.color.transparent)
         }
     }
@@ -210,6 +207,10 @@ class ChatMessageAdapter(
         }
     }
 
+    private fun messageIsSent(message: ConnectycubeChatMessage): Boolean {
+        return message.deliveredIds?.contains(localUserId)?: false
+    }
+
     private fun messageIsRead(message: ConnectycubeChatMessage): Boolean {
         if (chatDialog.isPrivate) return message.readIds != null &&
                 (message.recipientId == null || message.readIds.contains(message.recipientId))
@@ -217,8 +218,7 @@ class ChatMessageAdapter(
     }
 
     private fun messageIsDelivered(message: ConnectycubeChatMessage): Boolean {
-        if (chatDialog.isPrivate) return message.deliveredIds != null &&
-                (message.recipientId == null || message.deliveredIds.contains(message.recipientId))
+        if (chatDialog.isPrivate) return message.deliveredIds?.contains(message.recipientId)?: false
         return message.deliveredIds != null && message.deliveredIds.any { it in occupantIds }
     }
 

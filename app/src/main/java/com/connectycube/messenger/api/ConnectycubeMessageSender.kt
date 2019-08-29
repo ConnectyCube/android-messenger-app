@@ -12,7 +12,6 @@ import timber.log.Timber
 
 class ConnectycubeMessageSender(private val context: Context, private val dialog: ConnectycubeChatDialog) {
 
-
     fun sendChatMessage(
         text: String? = "",
         attachment: ConnectycubeAttachment? = null
@@ -28,6 +27,8 @@ class ConnectycubeMessageSender(private val context: Context, private val dialog
         chatMessage.setSaveToHistory(true)
         chatMessage.dateSent = System.currentTimeMillis() / 1000
         chatMessage.isMarkable = true
+
+        if(dialog.isPrivate) chatMessage.recipientId = dialog.recipientId
 
         if (ConnectycubeDialogType.PRIVATE != dialog.getType() && !dialog.isJoined()) {
             Toast.makeText(context, "You're not joined a group chat yet, try again later", Toast.LENGTH_SHORT).show()

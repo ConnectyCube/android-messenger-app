@@ -51,6 +51,9 @@
                 android:screenOrientation="portrait"
                 android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
 
+        <activity android:name=".AttachmentPreviewActivity"
+                android:label="AttachmentPreviewActivity"/>
+
         <provider
                 android:name="androidx.core.content.FileProvider"
                 android:authorities="${applicationId}.fileprovider"

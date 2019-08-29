@@ -73,3 +73,17 @@ fun loadUserAvatar(activityContext: Context, connectycubeUser: ConnectycubeUser,
         .apply(RequestOptions.circleCropTransform())
         .into(imageView)
 }
+
+fun loadAttachImagePreview(url: String?, imageView: ImageView, ctx: Context) {
+    val placeholder = R.drawable.ic_image_black_24dp
+    val requestOptions = RequestOptions().transform(RoundedCorners(16))
+
+    Glide.with(ctx)
+        .load(url)
+        .placeholder(placeholder)
+        .dontTransform()
+        .apply(requestOptions)
+        .error(placeholder)
+        .diskCacheStrategy(DiskCacheStrategy.ALL)
+        .into(imageView)
+}
