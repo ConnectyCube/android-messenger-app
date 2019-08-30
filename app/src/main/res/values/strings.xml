@@ -34,6 +34,7 @@
     <string name="title_current_user">Logged in as %1$s</string>
     <string name="action_start_logout">Logout</string>
     <string name="action_create">Create</string>
+    <string name="action_close">Close</string>
 
     <!--Menu-->
     <string name="menu_chat_dialog_logout">Logout</string>

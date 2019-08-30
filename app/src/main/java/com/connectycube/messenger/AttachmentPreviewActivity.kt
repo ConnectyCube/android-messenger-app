@@ -13,7 +13,12 @@ class AttachmentPreviewActivity : BaseChatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_attachment_preview)
         initToolBar()
+        initView()
         loadAttachment()
+    }
+
+    private fun initView() {
+        close_btn.setOnClickListener { onBackPressed() }
     }
 
     private fun initToolBar() {
