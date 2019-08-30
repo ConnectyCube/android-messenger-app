@@ -1,5 +1,6 @@
 package com.connectycube.messenger
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
@@ -89,13 +90,31 @@ class CreateChatDialogActivity : BaseChatActivity(), CheckableUsersAdapter.Check
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             android.R.id.home -> finish()
-            R.id.action_done -> createChatDialog()
+            R.id.action_done -> startCreateChatDialogDetailActivity()
         }
 
         return super.onOptionsItemSelected(item)
     }
 
-    private fun createChatDialog() {
+    private fun startCreateChatDialogDetailActivity() {
+        val intent = Intent(this, CreateChatDialogDetailActivity::class.java)
+        startActivityForResult(intent, REQUEST_CREATE_DIALOG_DETAILS)
+    }
+
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == Activity.RESULT_CANCELED || data == null) return
+        when (requestCode) {
+            REQUEST_CREATE_DIALOG_DETAILS -> {
+                val name = data.getStringExtra(EXTRA_DIALOG_NAME)
+                val avatar = data.getStringExtra(EXTRA_DIALOG_AVATAR)
+                createChatDialog(name = name)
+            }
+        }
+    }
+
+    private fun createChatDialog(name: String?, avatar: String? = null) {
         createChatDialogViewModel.createNewChatDialog().observe(this) { resource ->
             when {
                 resource.status == Status.SUCCESS -> {
