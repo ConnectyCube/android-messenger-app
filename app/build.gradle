@@ -14,6 +14,13 @@ android {
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = [
+                        "room.incremental": "true"]
+            }
+        }
+
     }
     buildTypes {
         release {
@@ -32,41 +39,23 @@ android {
 
 ext {
     sdkVersion = '1.8.0'
-    roomVersion = '2.1.0'
+    roomVersion = '2.2.0-beta01'
     lifecycleVersion = '2.2.0-alpha02'
     workVersion = '2.1.0'
-    materialVersion = '1.1.0-alpha07'
+    materialVersion = '1.1.0-alpha09'
     paging_version = "2.1.0"
-    glideVersion = '4.9.0'
-    recyclerViewVersion = '1.1.0-beta01'
-    matisseVersion = '0.5.1-beta1'
+    recyclerViewVersion = '1.1.0-beta03'
 }
 
 dependencies { configuration ->
     connectycubeComponents(configuration, sdkVersion)
-    androidRoomComponents(configuration, roomVersion)
-    implementation "androidx.lifecycle:lifecycle-extensions:$lifecycleVersion"
-    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion"
-    implementation "androidx.activity:activity-ktx:1.1.0-alpha01"
-    implementation "androidx.work:work-runtime-ktx:$workVersion"
-    implementation "androidx.paging:paging-runtime-ktx:$paging_version"
-    implementation "androidx.recyclerview:recyclerview:$recyclerViewVersion"
-    implementation 'com.android.support:multidex:1.0.3'
+    androidJetPackComponents(configuration, roomVersion, lifecycleVersion, paging_version, workVersion)
+    androidXComponents(configuration)
+    kotlinComponents(configuration, kotlin_version)
+    externalMediaComponents(configuration)
+
     implementation "com.google.android.material:material:$materialVersion"
     implementation 'com.jakewharton.timber:timber:4.7.1'
-    implementation "com.zhihu.android:matisse:$matisseVersion"
-    implementation 'com.github.yalantis:ucrop:2.2.3'
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.1.1'
-    implementation 'androidx.appcompat:appcompat:1.0.2'
-    implementation 'androidx.core:core-ktx:1.0.2'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta2'
-    implementation "com.github.bumptech.glide:glide:$glideVersion"
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test:runner:1.2.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 }
 
 private static void connectycubeComponents(configuration, version) {
@@ -74,7 +63,33 @@ private static void connectycubeComponents(configuration, version) {
     configuration.implementation "com.connectycube:connectycube-android-sdk-storage:$version"
 }
 
-private static void androidRoomComponents(configuration, roomVersion) {
+private static void androidJetPackComponents(configuration, roomVersion, lifecycleVersion,
+                                             paging_version, workVersion) {
     configuration.kapt "androidx.room:room-compiler:$roomVersion"
     configuration.implementation "androidx.room:room-runtime:$roomVersion"
+    configuration.implementation "androidx.lifecycle:lifecycle-extensions:$lifecycleVersion"
+    configuration.implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion"
+    configuration.implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion"
+    configuration.implementation "androidx.paging:paging-runtime-ktx:$paging_version"
+    configuration.implementation "androidx.work:work-runtime-ktx:$workVersion"
+}
+
+private static void androidXComponents(configuration) {
+    configuration.implementation "androidx.multidex:multidex:2.0.1"
+    configuration.implementation "androidx.activity:activity-ktx:1.1.0-alpha02"
+    configuration.implementation "androidx.recyclerview:recyclerview:1.1.0-beta03"
+    configuration.implementation 'androidx.appcompat:appcompat:1.0.2'
+    configuration.implementation 'androidx.core:core-ktx:1.0.2'
+    configuration.implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta2'
+}
+
+private static void kotlinComponents(configuration, kotlin_version) {
+    configuration.implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    configuration.implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.1.1'
+}
+
+private static void externalMediaComponents(configuration) {
+    configuration.implementation "com.zhihu.android:matisse:0.5.1-beta1"
+    configuration.implementation 'com.github.yalantis:ucrop:2.2.3'
+    configuration.implementation "com.github.bumptech.glide:glide:4.9.0"
 }
