@@ -31,7 +31,7 @@ typealias AttachmentClickListener = (ConnectycubeAttachment) -> Unit
 class ChatMessageAdapter(
     val context: Context,
     var chatDialog: ConnectycubeChatDialog,
-    private val attachmentClickListener: (ConnectycubeAttachment) -> Unit
+    private val attachmentClickListener: AttachmentClickListener
 ) : PagedListAdapter<ConnectycubeChatMessage, RecyclerView.ViewHolder>(diffCallback) {
     val IN_PROGRESS = -1
     val TEXT_OUTCOMING = 1

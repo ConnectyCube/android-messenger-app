@@ -93,7 +93,7 @@ class ChatDialogDetailsActivity : BaseChatActivity(),
     }
 
     private fun initUserAdapter() {
-        occupantsAdapter = DialogOccupantsAdapter(this, this)
+        occupantsAdapter = DialogOccupantsAdapter(this, this, ::onOccupantClicked)
     }
 
     private fun initViews() {
@@ -173,11 +173,22 @@ class ChatDialogDetailsActivity : BaseChatActivity(),
     }
 
     private fun getViewModel(dialogId: String): ChatDialogDetailsViewModel {
-        val chatMessageListViewModel: ChatDialogDetailsViewModel by viewModels {
+        val dialogViewModel: ChatDialogDetailsViewModel by viewModels {
             InjectorUtils.provideChatDialogDetailsViewModelFactory(this.application, dialogId)
         }
 
-        return chatMessageListViewModel
+        return dialogViewModel
+    }
+
+    private fun onOccupantClicked(user: ConnectycubeUser) {
+        startOccupantPreview(user)
+    }
+
+    private fun startOccupantPreview(user: ConnectycubeUser) {
+        val intent = Intent(this, OccupantPreviewActivity::class.java)
+        intent.putExtra(EXTRA_USER, user)
+        startActivity(intent)
+        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

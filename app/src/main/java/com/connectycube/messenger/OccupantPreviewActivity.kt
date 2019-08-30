@@ -1,0 +1,56 @@
+package com.connectycube.messenger
+
+import android.os.Bundle
+import android.view.MenuItem
+import android.view.View
+import com.connectycube.chat.ConnectycubeChatService
+import com.connectycube.messenger.utilities.getPrettyLastActivityDate
+import com.connectycube.messenger.utilities.loadUserAvatar
+import com.connectycube.users.model.ConnectycubeUser
+import kotlinx.android.synthetic.main.activity_occupant_preview.*
+import java.util.*
+
+const val EXTRA_USER = "extra_user"
+
+class OccupantPreviewActivity : BaseChatActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_occupant_preview)
+        initToolBar()
+        initView()
+        initUser()
+    }
+
+    private fun initToolBar() {
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+    }
+
+    private fun initView() {
+        close_btn.setOnClickListener { onBackPressed() }
+    }
+
+    private fun initUser() {
+        val user: ConnectycubeUser = intent.getSerializableExtra(EXTRA_USER) as ConnectycubeUser
+        user_name_txt.text = user.fullName ?: user.login
+        loadUserAvatar(this, user, avatar_img)
+
+        val isCurrentUser = user.id == ConnectycubeChatService.getInstance().user.id
+        if (!isCurrentUser) {
+            last_activity_title_txt.visibility = View.VISIBLE
+            last_activity_text_view.text =
+                getPrettyLastActivityDate(this, user.lastRequestAt ?: Date())
+        }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            android.R.id.home -> {
+                onBackPressed()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+}
