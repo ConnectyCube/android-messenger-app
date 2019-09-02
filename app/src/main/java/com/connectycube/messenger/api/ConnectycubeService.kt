@@ -187,6 +187,14 @@ class ConnectycubeService {
         return updateChatDialog(chatDialog, requestBuilder)
     }
 
+    fun addDialogOccupants(dialogId: String, vararg usersIds: Int, callback: ResponsePerformer.Callback<Chat>) {
+        val chatDialog = ConnectycubeChatDialog(dialogId)
+        val requestBuilder = DialogRequestBuilder()
+
+        requestBuilder.addUsers(*usersIds)
+        updateChatDialogSync(chatDialog, requestBuilder, callback)
+    }
+
     fun removeDialogOccupants(dialogId: String, vararg usersIds: Int): LiveData<ApiResponse<Chat>> {
         val chatDialog = ConnectycubeChatDialog(dialogId)
         val requestBuilder = DialogRequestBuilder()

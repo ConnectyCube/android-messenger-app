@@ -56,7 +56,13 @@ class ChatRepository private constructor(private val chatDao: ChatDao, private v
 
             override fun saveCallResult(item: Chat) {
                 newChatDialogId = item.chatId
-                chatDao.insert(item)
+                //TODO VT to save correct name for private dialog (delete TODO code after server fix and uncomment stable code)
+                item.cubeChat.name = chat.name
+                val createdDialog = item.copy(name = chat.name)
+                chatDao.insert(createdDialog)
+                //TODO end
+
+//                chatDao.insert(item)
             }
 
             override fun shouldFetch(data: Chat?, newData: Chat?) = data == null
@@ -116,6 +122,10 @@ class ChatRepository private constructor(private val chatDao: ChatDao, private v
 
     fun addChatOccupants(chatId: String, vararg usersIds: Int): LiveData<Resource<Chat>> {
         return updateChat(chatId) {service.addDialogOccupants(chatId, *usersIds)}
+    }
+
+    fun addChatOccupants(chatId: String, vararg usersIds: Int, errorAction: Function2<String, Chat, Unit>) {
+        service.addDialogOccupants(chatId, usersIds = *usersIds, callback = getRrequestProcessor(chatId, errorAction))
     }
 
     fun removeChatOccupants(chatId: String, vararg usersIds: Int): LiveData<Resource<Chat>> {
