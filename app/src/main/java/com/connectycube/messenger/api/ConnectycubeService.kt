@@ -285,4 +285,20 @@ class ConnectycubeService {
                 }, callback
             )
     }
+
+    fun uploadAvatar(avatarPath: String): LiveData<ApiResponse<String>> {
+        val file = File(avatarPath)
+        val service =
+            InjectorUtils.provideConnectycubeServiceProgressForType<ConnectycubeFile, String>()
+        return service.perform(
+            ConnectycubeStorage.uploadFileTask(
+                file,
+                true
+            ) { service.progressCallBack.onProgressUpdate(it) },
+            object : Converter<String, ConnectycubeFile>() {
+                override fun convertTo(response: ConnectycubeFile): String {
+                    return response.publicUrl
+                }
+            })
+    }
 }

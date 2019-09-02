@@ -44,6 +44,9 @@
     <!--ChatDialogs-->
     <string name="chat_login">Login…</string>
     <string name="chat_list_empty">There are no any chats yet</string>
+    <string name="load_avatar_error">Loading avatar error %s</string>
+    <string name="load_avatar_success">Loading avatar success</string>
+    <string name="group_name_error">Name cannot be empty</string>
 
     <!--ChatMessages-->
     <string name="chat_text_hint">Message</string>
@@ -53,10 +56,20 @@
     <string name="fbd_scroll_counter_label">%s new</string>
 
     <!--Settings-->
+    <string name="settings_label">Settings</string>
     <string name="edit_username">Edit User Name</string>
     <string name="user_name_hint">User Name</string>
     <string name="username_description">Enter user name</string>
     <string name="username_can_not_be_empty">User name can not be empty</string>
+
+    <!--AttachmentPreview-->
+    <string name="attachment_preview_label">Attachment Preview</string>
+
+    <!--OccupantPreview-->
+    <string name="occupant_preview_label">Occupant Preview</string>
+
+    <!--CreateChatDialogDetail-->
+    <string name="create_chat_detail_preview_label">Group Details</string>
 
     <!-- Errors -->
     <string name="error_credentials_empty">The App class should contain ConnectyCube credentials. Register new account and application at https://admin.connectycube.com

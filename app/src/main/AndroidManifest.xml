@@ -44,7 +44,7 @@
                 android:windowSoftInputMode="adjustResize" />
         <activity
                 android:name=".SettingsActivity"
-                android:label="Settings" />
+                android:label="@string/settings_label" />
 
         <activity
                 android:name="com.yalantis.ucrop.UCropActivity"
@@ -53,15 +53,15 @@
 
         <activity
                 android:name=".AttachmentPreviewActivity"
-                android:label="AttachmentPreview" />
+                android:label="@string/attachment_preview_label" />
 
         <activity
                 android:name=".OccupantPreviewActivity"
-                android:label="OccupantPreview" />
+                android:label="@string/occupant_preview_label" />
 
         <activity
                 android:name=".CreateChatDialogDetailActivity"
-                android:label="CreateChatDialogDetail" />
+                android:label="@string/create_chat_detail_preview_label" />
 
         <provider
                 android:name="androidx.core.content.FileProvider"

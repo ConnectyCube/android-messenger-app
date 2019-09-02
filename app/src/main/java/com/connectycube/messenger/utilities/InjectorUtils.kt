@@ -83,4 +83,13 @@ object InjectorUtils {
         val repository = getAttachmentViewRepository()
         return AttachmentViewModelFactory(application, repository)
     }
+
+    private fun getAvatarRepositoryViewRepository(): AvatarRepository {
+        return AvatarRepository.getInstance()
+    }
+
+    fun provideCreateDialogDetailsViewModelFactory(application: Application): CreateDialogDetailsViewModelFactory {
+        val repository = getAvatarRepositoryViewRepository()
+        return CreateDialogDetailsViewModelFactory(application, repository)
+    }
 }

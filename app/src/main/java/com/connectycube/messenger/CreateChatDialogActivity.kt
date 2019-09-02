@@ -19,8 +19,10 @@ import com.connectycube.messenger.viewmodels.CreateChatDialogViewModel
 import com.connectycube.messenger.vo.Status
 import com.connectycube.users.model.ConnectycubeUser
 import kotlinx.android.synthetic.main.activity_create_chat.*
+import timber.log.Timber
 
-class CreateChatDialogActivity : BaseChatActivity(), CheckableUsersAdapter.CheckableUsersAdapterCallback {
+class CreateChatDialogActivity : BaseChatActivity(),
+    CheckableUsersAdapter.CheckableUsersAdapterCallback {
 
     private val createChatDialogViewModel: CreateChatDialogViewModel by viewModels {
         InjectorUtils.provideCreateChatDialogViewModelFactory(this.application)
@@ -90,7 +92,11 @@ class CreateChatDialogActivity : BaseChatActivity(), CheckableUsersAdapter.Check
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             android.R.id.home -> finish()
-            R.id.action_done -> startCreateChatDialogDetailActivity()
+            R.id.action_done -> {
+                val isPrivate = selectedUsers.size < 2
+                if (!isPrivate) startCreateChatDialogDetailActivity()
+                else createChatDialog()
+            }
         }
 
         return super.onOptionsItemSelected(item)
@@ -109,13 +115,14 @@ class CreateChatDialogActivity : BaseChatActivity(), CheckableUsersAdapter.Check
             REQUEST_CREATE_DIALOG_DETAILS -> {
                 val name = data.getStringExtra(EXTRA_DIALOG_NAME)
                 val avatar = data.getStringExtra(EXTRA_DIALOG_AVATAR)
-                createChatDialog(name = name)
+                createChatDialog(name, avatar)
             }
         }
     }
 
-    private fun createChatDialog(name: String?, avatar: String? = null) {
-        createChatDialogViewModel.createNewChatDialog().observe(this) { resource ->
+    private fun createChatDialog(name: String? = null, avatar: String? = null) {
+        Timber.d("name= $name, avatar= $avatar")
+        createChatDialogViewModel.createNewChatDialog(name, avatar).observe(this) { resource ->
             when {
                 resource.status == Status.SUCCESS -> {
                     hideProgress(progressbar)
