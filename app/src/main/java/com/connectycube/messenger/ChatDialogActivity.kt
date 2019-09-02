@@ -56,8 +56,8 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
         subscribeUi()
     }
 
-    override fun onStart() {
-        super.onStart()
+    override fun onResume() {
+        super.onResume()
         setCurrentUser()
         currentDialogId?.let { chatDialogListViewModel.updateChat(currentDialogId!!) }
     }

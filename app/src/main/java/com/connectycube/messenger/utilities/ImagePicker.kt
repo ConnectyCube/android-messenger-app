@@ -1,8 +1,11 @@
 package com.connectycube.messenger.utilities
 
 import android.app.Activity
+import android.content.Context
+import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.net.Uri
+import android.widget.Toast
 import com.connectycube.messenger.R
 import com.yalantis.ucrop.UCrop
 import com.zhihu.matisse.Matisse
@@ -58,4 +61,14 @@ fun cropImage(activity: Activity, path: String) {
         .withOptions(options)
         .withAspectRatio(ratioX, ratioY)
         .start(activity)
+}
+
+fun handleCropError(ctx: Context, result: Intent) {
+    val cropError = UCrop.getError(result)
+    if (cropError != null) {
+        Timber.d("handleCropError: $cropError")
+        Toast.makeText(ctx, cropError.message, Toast.LENGTH_LONG).show()
+    } else {
+        Timber.d("handleCropError: unexpected error")
+    }
 }

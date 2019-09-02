@@ -6,18 +6,32 @@
         android:layout_height="match_parent"
         android:background="@color/splash_screen_bg">
 
+    <ProgressBar
+            android:id="@+id/progressbar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/white"
+            android:indeterminate="false"
+            android:max="100"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:ignore="MissingConstraints"
+            tools:visibility="visible" />
+
     <ImageView
             android:id="@+id/avatar_img"
             android:layout_width="150dp"
             android:layout_height="150dp"
+            android:background="@drawable/ic_avatar_placeholder_group"
             android:scaleType="centerCrop"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.2"
-            tools:ignore="ContentDescription"
-            tools:src="@drawable/ic_launcher_background" />
+            tools:ignore="ContentDescription" />
 
     <ImageView
             android:id="@+id/edit_avatar_btn"
@@ -40,14 +54,14 @@
             android:layout_marginRight="8dp"
             android:gravity="center"
             android:hint="Group name"
+            android:importantForAutofill="no"
             android:inputType="text"
             android:textColor="@color/dark_grey"
             android:textSize="22sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/avatar_img"
-            tools:text="Group name"
-            android:importantForAutofill="no" />
+            tools:text="Group name" />
 
     <androidx.appcompat.widget.AppCompatImageButton
             android:id="@+id/edit_group_name_btn"
