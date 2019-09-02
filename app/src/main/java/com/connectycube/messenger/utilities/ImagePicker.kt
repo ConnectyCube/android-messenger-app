@@ -45,13 +45,17 @@ fun requestImage(activity: Activity) {
 }
 
 fun cropImage(activity: Activity, path: String) {
-    val ratioX = 16f
-    val ratioY = 9f
+    val ratioX = 3f
+    val ratioY = 4f
     val maxWidth = 600
     val maxHeight = 800
+    val options = UCrop.Options()
+    options.setCircleDimmedLayer(true)
     val sourceUri = Uri.fromFile(File(path))
-    UCrop.of(sourceUri, sourceUri)
+    val destinationFileName = "croppedImage.jpg"
+    val destination = Uri.fromFile(File(activity.cacheDir, destinationFileName))
+    UCrop.of(sourceUri, destination)
+        .withOptions(options)
         .withAspectRatio(ratioX, ratioY)
-        .withMaxResultSize(maxWidth, maxHeight)
         .start(activity)
 }

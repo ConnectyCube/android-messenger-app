@@ -44,12 +44,24 @@
                 android:windowSoftInputMode="adjustResize" />
         <activity
                 android:name=".SettingsActivity"
-                android:label="SettingsActivity" />
+                android:label="Settings" />
 
         <activity
                 android:name="com.yalantis.ucrop.UCropActivity"
                 android:screenOrientation="portrait"
-                android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+                android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+
+        <activity
+                android:name=".AttachmentPreviewActivity"
+                android:label="AttachmentPreview" />
+
+        <activity
+                android:name=".OccupantPreviewActivity"
+                android:label="OccupantPreview" />
+
+        <activity
+                android:name=".CreateChatDialogDetailActivity"
+                android:label="CreateChatDialogDetail" />
 
         <provider
                 android:name="androidx.core.content.FileProvider"

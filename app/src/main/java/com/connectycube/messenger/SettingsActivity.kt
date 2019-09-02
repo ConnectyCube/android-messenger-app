@@ -136,6 +136,19 @@ class SettingsActivity : BaseChatActivity() {
                     startAvatarUpdate(resultUri.path)
                 }
             }
+            UCrop.RESULT_ERROR -> {
+                handleCropError(data)
+            }
+        }
+    }
+
+    private fun handleCropError(result: Intent) {
+        val cropError = UCrop.getError(result)
+        if (cropError != null) {
+            Timber.d("handleCropError: $cropError")
+            Toast.makeText(this, cropError.message, Toast.LENGTH_LONG).show()
+        } else {
+            Timber.d("handleCropError: unexpected error")
         }
     }
 

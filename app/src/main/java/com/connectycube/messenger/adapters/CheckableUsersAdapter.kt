@@ -37,7 +37,7 @@ class CheckableUsersAdapter(
             context,
             user,
             isUserChecked(user),
-            CompoundButton.OnCheckedChangeListener { _, checked -> setUserChecked(user, checked) })
+            View.OnClickListener { setUserChecked(user, !isUserChecked(user)) })
     }
 
     private fun isUserChecked(user: ConnectycubeUser): Boolean {
@@ -67,7 +67,7 @@ class CheckableUsersAdapter(
             activityContext: Context,
             connectycubeUser: ConnectycubeUser,
             isSelected: Boolean,
-            onCheckedChangeListener: CompoundButton.OnCheckedChangeListener
+            onClickListener: View.OnClickListener
         ) {
             loadUserAvatar(
                 activityContext,
@@ -79,7 +79,10 @@ class CheckableUsersAdapter(
             txtLastActivity.text = getPrettyLastActivityDate(activityContext, connectycubeUser.lastRequestAt ?: Date())
 
             checkBox.isChecked = isSelected
-            checkBox.setOnCheckedChangeListener(onCheckedChangeListener)
+            itemView.setOnClickListener {
+                onClickListener.onClick(it)
+                checkBox.isChecked = isUserChecked(connectycubeUser)
+            }
         }
     }
 
