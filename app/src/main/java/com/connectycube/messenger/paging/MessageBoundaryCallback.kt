@@ -77,7 +77,6 @@ class MessageBoundaryCallback(
     }
 
     override fun onItemAtFrontLoaded(itemAtFront: ConnectycubeChatMessage) {
-        // ignored, since we only ever append to what's in the DB
         Timber.d("onItemAtFrontLoaded= ${itemAtFront.body}")
         helper.runIfNotRunning(PagingRequestHelper.RequestType.AFTER) {
             chatMessageApi.getTopAfter(
