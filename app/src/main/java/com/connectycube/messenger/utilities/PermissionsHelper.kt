@@ -8,7 +8,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 
 
-const val REQUEST_ATTACHMENT_IMAGE_CONTACTS = 100
+const val REQUEST_PERMISSION_IMAGE = 100
 
 class PermissionsHelper(val context: Activity) {
     private val permissions: ArrayList<String> = arrayListOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -22,7 +22,7 @@ class PermissionsHelper(val context: Activity) {
     }
 
     fun requestImagePermissions() {
-        requestPermissions(REQUEST_ATTACHMENT_IMAGE_CONTACTS, permissions)
+        requestPermissions(REQUEST_PERMISSION_IMAGE, permissions)
     }
 
     private fun requestPermissions(requestCode: Int, permissions: ArrayList<String>) {

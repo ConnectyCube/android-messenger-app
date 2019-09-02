@@ -15,9 +15,12 @@ const val MENU_ITEM_ADMIN_ADD: Int = 0
 const val MENU_ITEM_ADMIN_REMOVE: Int = 1
 const val MENU_ITEM_OCCUPANT_REMOVE: Int = 2
 
+typealias ClickListener = (ConnectycubeUser) -> Unit
+
 internal class DialogOccupantsAdapter(
     private val context: Context,
-    private val callback: DialogOccupantsAdapterCallback
+    private val callback: DialogOccupantsAdapterCallback,
+    private val listener: ClickListener
 ) : RecyclerView.Adapter<DialogOccupantsAdapter.DialogOccupantViewHolder>() {
 
     private var items: List<ConnectycubeUser> = mutableListOf()
@@ -37,36 +40,39 @@ internal class DialogOccupantsAdapter(
 
     override fun onBindViewHolder(holder: DialogOccupantViewHolder, position: Int) {
         val user = getItem(position)
-        holder.bind(
-            context,
-            user,
-            object : DialogOccupantViewHolder.DialogOccupantViewHolderCallback {
-                override fun isUserCreator(connectycubeUser: ConnectycubeUser): Boolean {
-                    return isCreator(connectycubeUser)
-                }
+        with(holder) {
+            bind(
+                context,
+                user,
+                object : DialogOccupantViewHolder.DialogOccupantViewHolderCallback {
+                    override fun isUserCreator(connectycubeUser: ConnectycubeUser): Boolean {
+                        return isCreator(connectycubeUser)
+                    }
 
-                override fun isUserAdmin(connectycubeUser: ConnectycubeUser): Boolean {
-                    return isAdmin(connectycubeUser)
-                }
+                    override fun isUserAdmin(connectycubeUser: ConnectycubeUser): Boolean {
+                        return isAdmin(connectycubeUser)
+                    }
 
-                override fun isCurrentUser(connectycubeUser: ConnectycubeUser): Boolean {
-                    return isUserCurrentUser(connectycubeUser)
-                }
+                    override fun isCurrentUser(connectycubeUser: ConnectycubeUser): Boolean {
+                        return isUserCurrentUser(connectycubeUser)
+                    }
 
-                override fun onItemAddAdmin(connectycubeUser: ConnectycubeUser) {
-                    onAddUserToAdmins(connectycubeUser.id)
-                }
+                    override fun onItemAddAdmin(connectycubeUser: ConnectycubeUser) {
+                        onAddUserToAdmins(connectycubeUser.id)
+                    }
 
-                override fun onItemRemoveAdmin(connectycubeUser: ConnectycubeUser) {
-                    onRemoveUserFromAdmins(connectycubeUser.id)
-                }
+                    override fun onItemRemoveAdmin(connectycubeUser: ConnectycubeUser) {
+                        onRemoveUserFromAdmins(connectycubeUser.id)
+                    }
 
-                override fun onItemRemoveOccupant(connectycubeUser: ConnectycubeUser) {
-                    onRemoveUserFromOccupants(connectycubeUser.id)
-                }
-            },
-            getCurrentUser()
-        )
+                    override fun onItemRemoveOccupant(connectycubeUser: ConnectycubeUser) {
+                        onRemoveUserFromOccupants(connectycubeUser.id)
+                    }
+                },
+                getCurrentUser()
+            )
+            itemView.setOnClickListener { listener(user) }
+        }
     }
 
     private fun getCurrentUser(): ConnectycubeUser {

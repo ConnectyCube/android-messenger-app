@@ -15,7 +15,6 @@ import com.connectycube.messenger.R
 import com.connectycube.messenger.utilities.getPrettyDate
 import com.connectycube.messenger.utilities.loadChatDialogPhoto
 
-const val MENU_ITEM_DETAILS: Int = 0
 const val MENU_ITEM_DELETE: Int = 1
 
 internal class ChatDialogAdapter(private val context: Context) :
@@ -43,10 +42,6 @@ internal class ChatDialogAdapter(private val context: Context) :
                 override fun onItemSelected(chatDialog: ConnectycubeChatDialog) {
                     onChatDialogSelected(chatDialog)
                 }
-
-                override fun onItemViewDetails(chatDialog: ConnectycubeChatDialog) {
-                    onChatDialogPreview(chatDialog)
-                }
             })
     }
 
@@ -56,10 +51,6 @@ internal class ChatDialogAdapter(private val context: Context) :
 
     private fun onChatDialogDelete(chatDialog: ConnectycubeChatDialog) {
         callback?.onChatDialogDelete(chatDialog)
-    }
-
-    private fun onChatDialogPreview(chatDialog: ConnectycubeChatDialog) {
-        callback?.onChatDialogDetails(chatDialog)
     }
 
     override fun onCurrentListChanged(
@@ -135,20 +126,14 @@ internal class ChatDialogAdapter(private val context: Context) :
         }
 
         override fun onCreateContextMenu(menu: ContextMenu?, v: View?, menuInfo: ContextMenu.ContextMenuInfo?) {
-            menu?.add(Menu.NONE, MENU_ITEM_DETAILS, Menu.NONE, R.string.view_details)?.setOnMenuItemClickListener(this)
             menu?.add(Menu.NONE, MENU_ITEM_DELETE, Menu.NONE, R.string.delete)?.setOnMenuItemClickListener(this)
         }
 
         override fun onMenuItemClick(item: MenuItem?): Boolean {
             when (item?.itemId) {
-                MENU_ITEM_DETAILS -> notifyItemDetails()
                 MENU_ITEM_DELETE -> notifyItemDelete()
             }
             return true
-        }
-
-        private fun notifyItemDetails() {
-            model?.let { callback?.onItemViewDetails(it) }
         }
 
         private fun notifyItemDelete() {
@@ -162,7 +147,6 @@ internal class ChatDialogAdapter(private val context: Context) :
         internal interface ChatDialogViewHolderCallback {
             fun onItemSelected(chatDialog: ConnectycubeChatDialog)
             fun onItemDelete(chatDialog: ConnectycubeChatDialog)
-            fun onItemViewDetails(chatDialog: ConnectycubeChatDialog)
         }
     }
 
@@ -182,6 +166,5 @@ internal class ChatDialogAdapter(private val context: Context) :
         fun onChatDialogSelected(chatDialog: ConnectycubeChatDialog)
         fun onChatDialogsListUpdated(currentList: List<ConnectycubeChatDialog>)
         fun onChatDialogDelete(chatDialog: ConnectycubeChatDialog)
-        fun onChatDialogDetails(chatDialog: ConnectycubeChatDialog)
     }
 }

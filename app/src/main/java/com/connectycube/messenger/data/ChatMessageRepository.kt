@@ -54,6 +54,25 @@ class ChatMessageRepository(
         }
     }
 
+    fun updateItemSentStatus(itemId: String, userId: Int) {
+        appExecutors.diskIO().execute {
+            db.runInTransaction {
+                Timber.d("updateItemSentStatus itemId= $itemId, userId= $userId")
+                val message: Message? = db.messageDao().loadItem(itemId)
+                message?.let {
+                    val needUpdate = message.cubeMessage.readIds == null &&
+                            (message.cubeMessage.deliveredIds == null || !message.cubeMessage.deliveredIds.contains(userId))
+                    Timber.d("updateItemSentStatus needUpdate= $needUpdate")
+                    if (needUpdate) {
+                        if (message.cubeMessage.deliveredIds != null) message.cubeMessage.deliveredIds.add(userId)
+                        else message.cubeMessage.deliveredIds = listOf(userId)
+                        db.messageDao().update(message)
+                    }
+                }
+            }
+        }
+    }
+
     fun updateItemReadStatus(itemId: String, userId: Int) {
         appExecutors.diskIO().execute {
             db.runInTransaction {

@@ -2,7 +2,6 @@ package com.connectycube.messenger
 
 import android.app.Activity
 import android.content.Intent
-import android.content.pm.ActivityInfo
 import android.graphics.Rect
 import android.os.Bundle
 import android.text.Editable
@@ -18,15 +17,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.connectycube.chat.ConnectycubeChatService
 import com.connectycube.chat.exception.ChatException
-import com.connectycube.chat.listeners.ChatDialogMessageListener
-import com.connectycube.chat.listeners.ChatDialogTypingListener
-import com.connectycube.chat.listeners.MessageStatusListener
+import com.connectycube.chat.listeners.*
 import com.connectycube.chat.model.ConnectycubeAttachment
 import com.connectycube.chat.model.ConnectycubeChatDialog
 import com.connectycube.chat.model.ConnectycubeChatMessage
 import com.connectycube.chat.model.ConnectycubeDialogType
 import com.connectycube.messenger.adapters.ChatMessageAdapter
-import com.connectycube.messenger.adapters.ClickListener
+import com.connectycube.messenger.adapters.AttachmentClickListener
 import com.connectycube.messenger.api.ConnectycubeMessageSender
 import com.connectycube.messenger.paging.Status
 import com.connectycube.messenger.utilities.*
@@ -36,9 +33,6 @@ import com.connectycube.users.model.ConnectycubeUser
 import com.google.android.material.button.MaterialButton.ICON_GRAVITY_START
 import com.google.android.material.button.MaterialButton.ICON_GRAVITY_TEXT_END
 import com.zhihu.matisse.Matisse
-import com.zhihu.matisse.MimeType
-import com.zhihu.matisse.internal.entity.CaptureStrategy
-import com.zhihu.matisse.listener.OnCheckedListener
 import kotlinx.android.synthetic.main.activity_chatmessages.*
 import kotlinx.android.synthetic.main.activity_chatmessages.avatar_img
 import kotlinx.android.synthetic.main.activity_chatmessages.back_btn
@@ -49,15 +43,14 @@ import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
-
-const val REQUEST_CODE_CHOOSE = 23
 const val TYPING_INTERVAL_MS: Long = 900
 
 class ChatMessageActivity : BaseChatActivity() {
 
-    private val clickListener: ClickListener = this::onMessageClicked
+    private val attachmentClickListener: AttachmentClickListener = this::onMessageAttachmentClicked
     private val messageListener: ChatDialogMessageListener = ChatMessageListener()
     private val messageStatusListener: MessageStatusListener = ChatMessagesStatusListener()
+    private val messageSentListener: ChatDialogMessageSentListener = ChatMessagesSentListener()
     private val messageTypingListener: ChatDialogTypingListener = ChatTypingListener()
     private val permissionsHelper = PermissionsHelper(this)
     private lateinit var chatAdapter: ChatMessageAdapter
@@ -140,7 +133,7 @@ class ChatMessageActivity : BaseChatActivity() {
     }
 
     private fun initChatAdapter() {
-        chatAdapter = ChatMessageAdapter(this, chatDialog, clickListener)
+        chatAdapter = ChatMessageAdapter(this, chatDialog, attachmentClickListener)
         scroll_fb.setOnClickListener { scrollDown() }
         val layoutManager = LinearLayoutManager(this)
         layoutManager.stackFromEnd = false
@@ -232,13 +225,14 @@ class ChatMessageActivity : BaseChatActivity() {
     fun initManagers() {
         ConnectycubeChatService.getInstance().messageStatusesManager.addMessageStatusListener(messageStatusListener)
         chatDialog.addIsTypingListener(messageTypingListener)
-
+        chatDialog.addMessageSentListener(messageSentListener)
     }
 
     fun unregisterChatManagers() {
         ConnectycubeChatService.getInstance().messageStatusesManager.removeMessageStatusListener(messageStatusListener)
         chatDialog.removeMessageListrener(messageListener)
         chatDialog.removeIsTypingListener(messageTypingListener)
+        chatDialog.removeMessageSentListener(messageSentListener)
     }
 
     override fun onDestroy() {
@@ -250,7 +244,7 @@ class ChatMessageActivity : BaseChatActivity() {
     fun onAttachClick(view: View) {
         if (permissionsHelper.areAllImageGranted()) {
             Timber.d("onAttachClick areAllImageGranted")
-            requestImageDevice()
+            requestImage(this)
         } else permissionsHelper.requestImagePermissions()
     }
 
@@ -259,38 +253,16 @@ class ChatMessageActivity : BaseChatActivity() {
         if (text.isNotEmpty()) sendChatMessage(text)
     }
 
-    private fun onMessageClicked(message: ConnectycubeChatMessage) {
-        Timber.d("message= " + message)
+    private fun onMessageAttachmentClicked(attach: ConnectycubeAttachment) {
+        Timber.d("message attachment= " + attach)
+        startAttachmentPreview(attach)
     }
 
-    fun requestImageDevice() {
-        Matisse.from(this@ChatMessageActivity)
-            .choose(MimeType.ofImage(), false)
-            .countable(false)
-            .capture(true)
-            .captureStrategy(
-                CaptureStrategy(true, "com.connectycube.messenger.fileprovider")
-            )
-            .maxSelectable(1)
-//                .addFilter(GifSizeFilter(320, 320, 5 * Filter.K * Filter.K))
-            .gridExpectedSize(
-                resources.getDimensionPixelSize(R.dimen.grid_expected_size)
-            )
-            .restrictOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
-            .thumbnailScale(0.85f)
-            .imageEngine(Glide4Engine())
-            .setOnSelectedListener { uriList, pathList ->
-                // DO SOMETHING IMMEDIATELY HERE
-                Timber.d("onSelected= pathList=$pathList")
-            }
-            .originalEnable(true)
-            .maxOriginalSize(10)
-//                .autoHideToolbarOnSingleTap(true)
-            .setOnCheckedListener(OnCheckedListener { isChecked ->
-                // DO SOMETHING IMMEDIATELY HERE
-                Timber.d("isChecked= isChecked=$isChecked")
-            })
-            .forResult(REQUEST_CODE_CHOOSE)
+    private fun startAttachmentPreview(attach: ConnectycubeAttachment) {
+        val intent = Intent(this, AttachmentPreviewActivity::class.java)
+        intent.putExtra(EXTRA_URL, attach.url)
+        startActivity(intent)
+        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
     }
 
     fun sendChatMessage(text: String = "", attachment: ConnectycubeAttachment? = null) {
@@ -383,7 +355,7 @@ class ChatMessageActivity : BaseChatActivity() {
         permissions: Array<String>, grantResults: IntArray
     ) {
         when (requestCode) {
-            REQUEST_ATTACHMENT_IMAGE_CONTACTS -> {
+            REQUEST_PERMISSION_IMAGE -> {
                 // If request is cancelled, the result arrays are empty.
                 if (permissionsHelper.areAllImageGranted()) {
                     Timber.d("permission was granted")
@@ -419,6 +391,7 @@ class ChatMessageActivity : BaseChatActivity() {
 
     inner class ChatTypingListener : ChatDialogTypingListener {
         override fun processUserIsTyping(dialogId: String?, userId: Int?) {
+            if (userId == ConnectycubeChatService.getInstance().user.id) return
             var userStatus = occupants[userId]?.fullName ?: occupants[userId]?.login
             userStatus?.let {
                 userStatus = getString(R.string.chat_typing, userStatus)
@@ -463,6 +436,18 @@ class ChatMessageActivity : BaseChatActivity() {
                 bottom = spaceHeight
             }
         }
+    }
+
+    inner class ChatMessagesSentListener : ChatDialogMessageSentListener {
+        override fun processMessageSent(dialogId: String, message: ConnectycubeChatMessage) {
+             Timber.d("processMessageSent $message")
+            modelChatMessageList.updateItemSentStatus(message.id, ConnectycubeChatService.getInstance().user.id)
+        }
+
+        override fun processMessageFailed(dialogId: String, message: ConnectycubeChatMessage) {
+            Timber.d("processMessageFailed $message")
+        }
+
     }
 
     inner class ChatMessagesStatusListener : MessageStatusListener {

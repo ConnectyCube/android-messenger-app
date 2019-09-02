@@ -18,23 +18,13 @@ import com.connectycube.messenger.viewmodels.ChatDialogDetailsViewModel
 import com.connectycube.messenger.vo.Status
 import com.connectycube.users.model.ConnectycubeUser
 import kotlinx.android.synthetic.main.activity_chat_dialog_details.*
-import kotlinx.android.synthetic.main.activity_chat_dialog_details.add_occupants_img
-import kotlinx.android.synthetic.main.activity_chat_dialog_details.avatar_img
-import kotlinx.android.synthetic.main.activity_chat_dialog_details.chat_dialog_id
-import kotlinx.android.synthetic.main.activity_chat_dialog_details.chat_dialog_name_txt
-import kotlinx.android.synthetic.main.activity_chat_dialog_details.description_txt
-import kotlinx.android.synthetic.main.activity_chat_dialog_details.edit_grop_description_btn
-import kotlinx.android.synthetic.main.activity_chat_dialog_details.group_description_layout
-import kotlinx.android.synthetic.main.activity_chat_dialog_details.occupants_progress
-import kotlinx.android.synthetic.main.activity_chat_dialog_details.occupants_recycler_view
-import kotlinx.android.synthetic.main.activity_chat_dialog_details.progressbar
-import kotlinx.android.synthetic.main.activity_chat_dialog_details.toolbar
 
 const val EXTRA_CHAT_DIALOG_ID = "chat_dialog_id"
 const val MAX_DIALOG_DESCRIPTION_LENGTH = 200
 const val MAX_DIALOG_NAME_LENGTH = 60
 const val REQUEST_EDIT_DESCRIPTION = 8
 const val REQUEST_EDIT_NAME = 9
+const val REQUEST_ADD_OCCUPANTS = 10
 
 class ChatDialogDetailsActivity : BaseChatActivity(),
     DialogOccupantsAdapter.DialogOccupantsAdapterCallback {
@@ -56,12 +46,10 @@ class ChatDialogDetailsActivity : BaseChatActivity(),
     private fun initToolbar() {
         setSupportActionBar(toolbar)
         back_btn.setOnClickListener { onBackPressed() }
-        open_chat_dialog_btn.setOnClickListener { startChatDialog() }
         edit_group_name_btn.setOnClickListener { editGroupName() }
         edit_grop_description_btn.setOnClickListener { editGroupDescription() }
         edit_avatar_btn.setOnClickListener { editGroupPhoto() }
         add_occupants_img.setOnClickListener { addOccupants() }
-
     }
 
     private fun editGroupPhoto() {
@@ -94,16 +82,8 @@ class ChatDialogDetailsActivity : BaseChatActivity(),
         }
     }
 
-    private fun startChatDialog() {
-        currentChatDialog.let {
-            val intent = Intent(this, ChatMessageActivity::class.java)
-            intent.putExtra(EXTRA_CHAT, it)
-            startActivity(intent)
-        }
-    }
-
     private fun initUserAdapter() {
-        occupantsAdapter = DialogOccupantsAdapter(this, this)
+        occupantsAdapter = DialogOccupantsAdapter(this, this, ::onOccupantClicked)
     }
 
     private fun initViews() {
@@ -175,20 +155,33 @@ class ChatDialogDetailsActivity : BaseChatActivity(),
         edit_avatar_btn.visibility = if (chatDialog.type == ConnectycubeDialogType.PRIVATE) View.GONE else View.VISIBLE
 
         chat_dialog_name_txt.text = chatDialog.name
-        chat_dialog_id.text = getString(R.string.id_format, chatDialog.dialogId)
         loadChatDialogPhoto(this, chatDialog.isPrivate, chatDialog.photo, avatar_img)
     }
 
     private fun addOccupants() {
-        Toast.makeText(this, R.string.coming_soon, Toast.LENGTH_LONG).show()
+        val intent = Intent(this, SelectUsersActivity::class.java)
+        intent.putIntegerArrayListExtra(EXTRA_FILTER_IDS, ArrayList(currentChatDialog.occupants))
+        startActivityForResult(intent, REQUEST_ADD_OCCUPANTS)
+        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
     }
 
     private fun getViewModel(dialogId: String): ChatDialogDetailsViewModel {
-        val chatMessageListViewModel: ChatDialogDetailsViewModel by viewModels {
+        val dialogViewModel: ChatDialogDetailsViewModel by viewModels {
             InjectorUtils.provideChatDialogDetailsViewModelFactory(this.application, dialogId)
         }
 
-        return chatMessageListViewModel
+        return dialogViewModel
+    }
+
+    private fun onOccupantClicked(user: ConnectycubeUser) {
+        startOccupantPreview(user)
+    }
+
+    private fun startOccupantPreview(user: ConnectycubeUser) {
+        val intent = Intent(this, OccupantPreviewActivity::class.java)
+        intent.putExtra(EXTRA_USER, user)
+        startActivity(intent)
+        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -201,6 +194,9 @@ class ChatDialogDetailsActivity : BaseChatActivity(),
             }
             REQUEST_EDIT_NAME -> {
                 startNameUpdate(data.getStringExtra(EXTRA_DATA))
+            }
+            REQUEST_ADD_OCCUPANTS -> {
+                startAddOccupants(data.getIntegerArrayListExtra(EXTRA_SELECTED_USERS))
             }
         }
     }
@@ -219,6 +215,13 @@ class ChatDialogDetailsActivity : BaseChatActivity(),
         } else if (currentChatDialog.description != newName) {
             chatDialogDetailsViewModel.updateGroupName(currentChatDialog.dialogId, newName)
         }
+    }
+
+    private fun startAddOccupants(selectedUsers: java.util.ArrayList<Int>) {
+        chatDialogDetailsViewModel.addOccupants(
+            currentChatDialog.dialogId,
+            *selectedUsers.toIntArray()
+        )
     }
 
     override fun onAddUserToAdmins(userId: Int) {
@@ -247,10 +250,6 @@ class ChatDialogDetailsActivity : BaseChatActivity(),
 
     override fun getCurrentUser(): ConnectycubeUser {
         return chatDialogDetailsViewModel.getCurrentUser()
-    }
-
-    private fun isCurrentUserCreator(): Boolean {
-        return isUserCreator(chatDialogDetailsViewModel.getCurrentUser())
     }
 
     override fun finish() {

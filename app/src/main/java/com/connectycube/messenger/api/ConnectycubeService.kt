@@ -11,6 +11,7 @@ import com.connectycube.core.helper.StringifyArrayList
 import com.connectycube.chat.model.ConnectycubeChatMessage
 import com.connectycube.chat.request.MessageGetBuilder
 import com.connectycube.core.request.RequestGetBuilder
+import com.connectycube.messenger.api.utils.PerformerTask.uploadUserAvatarTask
 import com.connectycube.messenger.data.Chat
 import com.connectycube.messenger.data.Message
 import com.connectycube.messenger.data.User
@@ -34,6 +35,31 @@ class ConnectycubeService {
                         return convertToUsers(response)
                     }
                 })
+    }
+
+    fun updateUserName(userId: Int, newName: String): LiveData<ApiResponse<User>> {
+        val user = ConnectycubeUser(userId).also { it.fullName = newName }
+        return InjectorUtils.provideConnectycubeServiceForType<ConnectycubeUser, User>()
+            .perform(
+                ConnectycubeUsers.updateUser(user),
+                object : Converter<User, ConnectycubeUser>() {
+                    override fun convertTo(response: ConnectycubeUser): User {
+                        return convertToUser(response)
+                    }
+                })
+    }
+
+    fun updateUserAvatar(userId: Int, newAvatarPath: String): LiveData<ApiResponse<User>> {
+        val file = File(newAvatarPath)
+        val service =
+            InjectorUtils.provideConnectycubeServiceProgressForType<ConnectycubeUser, User>()
+        return service.perform(
+            uploadUserAvatarTask(userId, file, true) {service.progressCallBack.onProgressUpdate(it)},
+            object : Converter<User, ConnectycubeUser>() {
+                override fun convertTo(response: ConnectycubeUser): User {
+                    return convertToUser(response)
+                }
+            })
     }
 
     fun loadChatsSlice(): LiveData<ApiResponse<List<Chat>>> {
@@ -161,6 +187,14 @@ class ConnectycubeService {
         return updateChatDialog(chatDialog, requestBuilder)
     }
 
+    fun addDialogOccupants(dialogId: String, vararg usersIds: Int, callback: ResponsePerformer.Callback<Chat>) {
+        val chatDialog = ConnectycubeChatDialog(dialogId)
+        val requestBuilder = DialogRequestBuilder()
+
+        requestBuilder.addUsers(*usersIds)
+        updateChatDialogSync(chatDialog, requestBuilder, callback)
+    }
+
     fun removeDialogOccupants(dialogId: String, vararg usersIds: Int): LiveData<ApiResponse<Chat>> {
         val chatDialog = ConnectycubeChatDialog(dialogId)
         val requestBuilder = DialogRequestBuilder()
@@ -258,5 +292,21 @@ class ConnectycubeService {
                     }
                 }, callback
             )
+    }
+
+    fun uploadAvatar(avatarPath: String): LiveData<ApiResponse<String>> {
+        val file = File(avatarPath)
+        val service =
+            InjectorUtils.provideConnectycubeServiceProgressForType<ConnectycubeFile, String>()
+        return service.perform(
+            ConnectycubeStorage.uploadFileTask(
+                file,
+                true
+            ) { service.progressCallBack.onProgressUpdate(it) },
+            object : Converter<String, ConnectycubeFile>() {
+                override fun convertTo(response: ConnectycubeFile): String {
+                    return response.publicUrl
+                }
+            })
     }
 }

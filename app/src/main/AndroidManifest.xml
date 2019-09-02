@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          xmlns:tools="http://schemas.android.com/tools"
-          package="com.connectycube.messenger">
+        xmlns:tools="http://schemas.android.com/tools"
+        package="com.connectycube.messenger">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
             android:name=".App"
@@ -18,27 +18,54 @@
             tools:ignore="GoogleAppIndexingWarning">
         <activity
                 android:name=".LoginActivity"
-                android:theme="@style/AppTheme.NoActionBar.Splash"
-                android:screenOrientation="portrait">
+                android:screenOrientation="portrait"
+                android:theme="@style/AppTheme.NoActionBar.Splash">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ChatDialogActivity"/>
+        <activity
+                android:name=".ChatDialogActivity"
+                android:label=""
+                android:theme="@style/AppTheme.NoActionBar" />
         <activity
                 android:name=".ChatMessageActivity"
-                android:theme="@style/AppTheme.NoActionBar"
                 android:launchMode="singleTask"
-                android:windowSoftInputMode="stateHidden|adjustResize"/>
-        <activity android:name=".CreateChatDialogActivity"/>
+                android:theme="@style/AppTheme.NoActionBar"
+                android:windowSoftInputMode="stateHidden|adjustResize" />
+        <activity android:name=".CreateChatDialogActivity" />
         <activity
                 android:name=".ChatDialogDetailsActivity"
-                android:theme="@style/AppTheme.NoActionBar"/>
+                android:theme="@style/AppTheme.NoActionBar" />
         <activity
                 android:name=".EditTextActivity"
-                android:windowSoftInputMode="adjustResize"/>
+                android:windowSoftInputMode="adjustResize" />
+        <activity
+                android:name=".SettingsActivity"
+                android:label="@string/settings_label" />
+
+        <activity
+                android:name="com.yalantis.ucrop.UCropActivity"
+                android:screenOrientation="portrait"
+                android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+
+        <activity
+                android:name=".AttachmentPreviewActivity"
+                android:label="@string/attachment_preview_label" />
+
+        <activity
+                android:name=".OccupantPreviewActivity"
+                android:label="@string/occupant_preview_label" />
+
+        <activity
+                android:name=".CreateChatDialogDetailActivity"
+                android:label="@string/create_chat_detail_preview_label" />
+
+        <activity
+                android:name=".SelectUsersActivity"
+                android:label="@string/title_select_users_activity" />
 
         <provider
                 android:name="androidx.core.content.FileProvider"
@@ -47,7 +74,7 @@
                 android:grantUriPermissions="true">
             <meta-data
                     android:name="android.support.FILE_PROVIDER_PATHS"
-                    android:resource="@xml/file_paths_public"/>
+                    android:resource="@xml/file_paths_public" />
         </provider>
     </application>
 

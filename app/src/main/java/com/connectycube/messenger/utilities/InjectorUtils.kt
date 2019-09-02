@@ -19,6 +19,11 @@ object InjectorUtils {
         )
     }
 
+    fun provideUserViewModelFactory(application: Application, userId: Int): UserDetailsViewModelFactory {
+        val repository = getUserRepository(application.baseContext)
+        return UserDetailsViewModelFactory(application, userId, repository)
+    }
+
     fun provideChatDialogListViewModelFactory(context: Context): ChatDialogListViewModelFactory {
         val repository = getChatRepository(context)
         return ChatDialogListViewModelFactory(repository)
@@ -61,6 +66,11 @@ object InjectorUtils {
         return CreateChatDialogViewModelFactory(application, usersRepository, chatRepository)
     }
 
+    fun provideSelectUsersViewModelFactory(application: Application): SelectUsersViewModelFactory {
+        val usersRepository = getUserRepository(application.baseContext)
+        return SelectUsersViewModelFactory(application, usersRepository)
+    }
+
     fun provideChatDialogDetailsViewModelFactory(
         application: Application,
         dialogId: String
@@ -77,5 +87,14 @@ object InjectorUtils {
     fun provideAttachmentViewModelFactory(application: Application): AttachmentViewModelFactory {
         val repository = getAttachmentViewRepository()
         return AttachmentViewModelFactory(application, repository)
+    }
+
+    private fun getAvatarRepositoryViewRepository(): AvatarRepository {
+        return AvatarRepository.getInstance()
+    }
+
+    fun provideCreateDialogDetailsViewModelFactory(application: Application): CreateDialogDetailsViewModelFactory {
+        val repository = getAvatarRepositoryViewRepository()
+        return CreateDialogDetailsViewModelFactory(application, repository)
     }
 }

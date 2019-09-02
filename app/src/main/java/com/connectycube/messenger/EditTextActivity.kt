@@ -57,7 +57,6 @@ class EditTextActivity : BaseChatActivity() {
 
         edit_text.setText(intent.getStringExtra(EXTRA_EXIST_VALUE))
         description_txt.text = intent.getStringExtra(EXTRA_DESCRIPTION)
-        cancel_btn.setOnClickListener { cancelEdit() }
         ok_btn.setOnClickListener { applyEdit(edit_text.text) }
     }
 

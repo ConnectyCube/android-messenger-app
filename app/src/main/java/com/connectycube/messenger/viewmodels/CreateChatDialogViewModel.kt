@@ -42,6 +42,10 @@ class CreateChatDialogViewModel internal constructor(
         return result
     }
 
+    fun updateSelectedUsersStates() {
+        liveSelectedUsers.postValue(liveSelectedUsers.value ?: arrayListOf())
+    }
+
     fun updateUserSelection(user: ConnectycubeUser, isSelected: Boolean) {
         val selectedUsers: ArrayList<ConnectycubeUser> = liveSelectedUsers.value ?: arrayListOf()
 
@@ -54,7 +58,7 @@ class CreateChatDialogViewModel internal constructor(
         return currentUser.login == user.login
     }
 
-    fun createNewChatDialog(): LiveData<Resource<ConnectycubeChatDialog>> {
+    fun createNewChatDialog(name: String? = null, avatar: String? = null): LiveData<Resource<ConnectycubeChatDialog>> {
         if (liveSelectedUsers.value == null) return MutableLiveData(
             Resource.error(
                 getApplication<Application>().getString(R.string.select_users_choose_users),
@@ -65,6 +69,8 @@ class CreateChatDialogViewModel internal constructor(
         val array = arrayOfNulls<ConnectycubeUser>(liveSelectedUsers.value!!.size)
         liveSelectedUsers.value?.toArray(array)
         val chatDialog: ConnectycubeChatDialog = DialogUtils.buildDialog(*array)
+        name?.let{chatDialog.name = name}
+        avatar?.let{chatDialog.photo = avatar}
         return Transformations.map(
             chatRepository.createChatDialog(
                 Chat(

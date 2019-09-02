@@ -1,5 +1,6 @@
 package com.connectycube.messenger
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
@@ -18,8 +19,10 @@ import com.connectycube.messenger.viewmodels.CreateChatDialogViewModel
 import com.connectycube.messenger.vo.Status
 import com.connectycube.users.model.ConnectycubeUser
 import kotlinx.android.synthetic.main.activity_create_chat.*
+import timber.log.Timber
 
-class CreateChatDialogActivity : BaseChatActivity(), CheckableUsersAdapter.CheckableUsersAdapterCallback {
+class CreateChatDialogActivity : BaseChatActivity(),
+    CheckableUsersAdapter.CheckableUsersAdapterCallback {
 
     private val createChatDialogViewModel: CreateChatDialogViewModel by viewModels {
         InjectorUtils.provideCreateChatDialogViewModelFactory(this.application)
@@ -57,9 +60,10 @@ class CreateChatDialogActivity : BaseChatActivity(), CheckableUsersAdapter.Check
             selectedUsers = liveSelectedUsers
             invalidateOptionsMenu()
         }
+        createChatDialogViewModel.updateSelectedUsersStates()
 
         createChatDialogViewModel.getUsers().observe(this) { result ->
-            when(result.status){
+            when (result.status) {
                 Status.LOADING -> showProgress(progressbar)
                 Status.ERROR -> hideProgress(progressbar)
                 Status.SUCCESS -> {
@@ -88,14 +92,37 @@ class CreateChatDialogActivity : BaseChatActivity(), CheckableUsersAdapter.Check
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             android.R.id.home -> finish()
-            R.id.action_done -> createChatDialog()
+            R.id.action_done -> {
+                val isPrivate = selectedUsers.size < 2
+                if (!isPrivate) startCreateChatDialogDetailActivity()
+                else createChatDialog()
+            }
         }
 
         return super.onOptionsItemSelected(item)
     }
 
-    private fun createChatDialog() {
-        createChatDialogViewModel.createNewChatDialog().observe(this) { resource ->
+    private fun startCreateChatDialogDetailActivity() {
+        val intent = Intent(this, CreateChatDialogDetailActivity::class.java)
+        startActivityForResult(intent, REQUEST_CREATE_DIALOG_DETAILS)
+    }
+
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == Activity.RESULT_CANCELED || data == null) return
+        when (requestCode) {
+            REQUEST_CREATE_DIALOG_DETAILS -> {
+                val name = data.getStringExtra(EXTRA_DIALOG_NAME)
+                val avatar = data.getStringExtra(EXTRA_DIALOG_AVATAR)
+                createChatDialog(name, avatar)
+            }
+        }
+    }
+
+    private fun createChatDialog(name: String? = null, avatar: String? = null) {
+        Timber.d("name= $name, avatar= $avatar")
+        createChatDialogViewModel.createNewChatDialog(name, avatar).observe(this) { resource ->
             when {
                 resource.status == Status.SUCCESS -> {
                     hideProgress(progressbar)

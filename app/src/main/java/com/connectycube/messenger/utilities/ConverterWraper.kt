@@ -11,8 +11,12 @@ import java.util.*
 
 fun convertToUsers(list: ArrayList<ConnectycubeUser>): List<User> {
     val users = ArrayList<User>()
-    list.forEach { users.add(User(it.id, it.login, it.fullName, it)) }
+    list.forEach { users.add(convertToUser(it)) }
     return users
+}
+
+fun convertToUser(user: ConnectycubeUser): User {
+    return User(user.id, user.login, user.fullName, user)
 }
 
 fun convertToChats(list: ArrayList<ConnectycubeChatDialog>): List<Chat> {
