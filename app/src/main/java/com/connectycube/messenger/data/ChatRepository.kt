@@ -118,6 +118,10 @@ class ChatRepository private constructor(private val chatDao: ChatDao, private v
         return updateChat(chatId) {service.addDialogOccupants(chatId, *usersIds)}
     }
 
+    fun addChatOccupants(chatId: String, vararg usersIds: Int, errorAction: Function2<String, Chat, Unit>) {
+        service.addDialogOccupants(chatId, usersIds = *usersIds, callback = getRrequestProcessor(chatId, errorAction))
+    }
+
     fun removeChatOccupants(chatId: String, vararg usersIds: Int): LiveData<Resource<Chat>> {
         return updateChat(chatId) {service.removeDialogOccupants(chatId, *usersIds)}
     }
