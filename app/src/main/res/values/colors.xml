@@ -13,4 +13,7 @@
     <color name="unread_messages_date">@color/unread_messages_budge</color>
 
     <color name="splash_screen_bg">#e9f7ec</color>
+
+    <color name="dark">#000000</color>
+    <color name="dark_transparent">#E6000000</color>
 </resources>

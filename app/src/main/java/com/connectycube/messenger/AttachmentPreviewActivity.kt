@@ -1,7 +1,9 @@
 package com.connectycube.messenger
 
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.MenuItem
+import androidx.core.content.ContextCompat
 import com.connectycube.messenger.utilities.loadAttachImagePreview
 import kotlinx.android.synthetic.main.activity_attachment_preview.*
 
@@ -13,16 +15,19 @@ class AttachmentPreviewActivity : BaseChatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_attachment_preview)
         initToolBar()
-        initView()
         loadAttachment()
-    }
-
-    private fun initView() {
-        close_btn.setOnClickListener { onBackPressed() }
     }
 
     private fun initToolBar() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setBackgroundDrawable(
+            ColorDrawable(
+                ContextCompat.getColor(
+                    this,
+                    R.color.dark_transparent
+                )
+            )
+        )
     }
 
     private fun loadAttachment() {

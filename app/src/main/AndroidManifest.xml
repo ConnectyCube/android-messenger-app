@@ -53,7 +53,8 @@
 
         <activity
                 android:name=".AttachmentPreviewActivity"
-                android:label="@string/attachment_preview_label" />
+                android:label="@string/attachment_preview_label"
+                android:theme="@style/AppTheme.DarkTitle" />
 
         <activity
                 android:name=".OccupantPreviewActivity"
