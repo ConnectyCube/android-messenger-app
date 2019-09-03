@@ -40,7 +40,7 @@ class ChatMessageAdapter(
     val ATTACH_IMAGE_INCOMING = 4
 
     val localUserId = ConnectycubeChatService.getInstance().user.id
-    val occupantIds = chatDialog.occupants.apply { remove(localUserId) }
+    val occupantIds:List<Int> = ArrayList<Int>(chatDialog.occupants).apply { remove(localUserId) }
     private var networkState: NetworkState? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
