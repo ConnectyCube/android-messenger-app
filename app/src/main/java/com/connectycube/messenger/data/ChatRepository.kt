@@ -105,7 +105,7 @@ class ChatRepository private constructor(private val chatDao: ChatDao, private v
     }
 
     fun updateChatName(chatId: String, newChatName: String, errorAction: Function2<String, Chat, Unit>) {
-        service.updateDialogName(chatId, newChatName, getRrequestProcessor(chatId, errorAction))
+        service.updateDialogName(chatId, newChatName, getRequestProcessor(chatId, errorAction))
     }
 
     fun updateChatDescription(chatId: String, newChatDescription: String): LiveData<Resource<Chat>> {
@@ -113,7 +113,7 @@ class ChatRepository private constructor(private val chatDao: ChatDao, private v
     }
 
     fun updateChatDescription(chatId: String, newChatDescription: String, errorAction: Function2<String, Chat, Unit>) {
-        service.updateDialogDescription(chatId, newChatDescription, getRrequestProcessor(chatId, errorAction))
+        service.updateDialogDescription(chatId, newChatDescription, getRequestProcessor(chatId, errorAction))
     }
 
     fun updateChatPhoto(chatId: String, newChatPhoto: String): LiveData<Resource<Chat>> {
@@ -125,7 +125,7 @@ class ChatRepository private constructor(private val chatDao: ChatDao, private v
     }
 
     fun addChatOccupants(chatId: String, vararg usersIds: Int, errorAction: Function2<String, Chat, Unit>) {
-        service.addDialogOccupants(chatId, usersIds = *usersIds, callback = getRrequestProcessor(chatId, errorAction))
+        service.addDialogOccupants(chatId, usersIds = *usersIds, callback = getRequestProcessor(chatId, errorAction))
     }
 
     fun removeChatOccupants(chatId: String, vararg usersIds: Int): LiveData<Resource<Chat>> {
@@ -133,7 +133,7 @@ class ChatRepository private constructor(private val chatDao: ChatDao, private v
     }
 
     fun removeChatOccupants(chatId: String, vararg usersIds: Int, errorAction: Function2<String, Chat, Unit>) {
-        service.removeDialogOccupants(chatId, usersIds = *usersIds, callback = getRrequestProcessor(chatId, errorAction))
+        service.removeDialogOccupants(chatId, usersIds = *usersIds, callback = getRequestProcessor(chatId, errorAction))
     }
 
     fun addChatAdmins(chatId: String, vararg usersIds: Int): LiveData<Resource<Chat>> {
@@ -141,7 +141,7 @@ class ChatRepository private constructor(private val chatDao: ChatDao, private v
     }
 
     fun addChatAdmins(chatId: String, vararg usersIds: Int, errorAction: Function2<String, Chat, Unit>) {
-        service.addDialogAdmins(chatId, usersIds = *usersIds, callback = getRrequestProcessor(chatId, errorAction))
+        service.addDialogAdmins(chatId, usersIds = *usersIds, callback = getRequestProcessor(chatId, errorAction))
     }
 
     fun removeChatAdmins(chatId: String, vararg usersIds: Int): LiveData<Resource<Chat>> {
@@ -149,7 +149,7 @@ class ChatRepository private constructor(private val chatDao: ChatDao, private v
     }
 
     fun removeChatAdmins(chatId: String, vararg usersIds: Int, errorAction: Function2<String, Chat, Unit>) {
-        service.removeDialogAdmins(chatId, usersIds = *usersIds, callback = getRrequestProcessor(chatId, errorAction))
+        service.removeDialogAdmins(chatId, usersIds = *usersIds, callback = getRequestProcessor(chatId, errorAction))
     }
 
     private fun updateChat(chatId: String, function: Function0<LiveData<ApiResponse<Chat>>>): LiveData<Resource<Chat>> {
@@ -167,7 +167,7 @@ class ChatRepository private constructor(private val chatDao: ChatDao, private v
         }.asLiveData()
     }
 
-    private fun getRrequestProcessor(chatId: String, errorAction: Function2<String, Chat, Unit>): UpdateResourceProcessor<Chat> {
+    private fun getRequestProcessor(chatId: String, errorAction: Function2<String, Chat, Unit>): UpdateResourceProcessor<Chat> {
         return object : UpdateResourceProcessor<Chat>(appExecutors){
             override fun processError(errorMessage: String) {
                 errorAction.invoke(errorMessage, chatDao.getChatValue(chatId))
