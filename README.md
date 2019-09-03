@@ -2,9 +2,35 @@
 
 This project contains a chat messenger & video calling open source demo app for Android written on Kotlin and based on [ConnectyCube](https://connectycube.com/) communication platform.
 
+<img src="https://developers.connectycube.com/docs/_images/code_samples/android_codesample_messenger_demo1.jpg" width=180 />&nbsp;&nbsp;&nbsp;
+<img src="https://developers.connectycube.com/docs/_images/code_samples/android_codesample_messenger_demo2.jpg" width=180 />&nbsp;&nbsp;&nbsp;
+<img src="https://developers.connectycube.com/docs/_images/code_samples/android_codesample_messenger_demo3.jpg" width=180 />
+
 ## Features 
 - Chat 
 - Video chat (coming soon)
+
+## Technical specification:
+- Language - [Kotlin](https://kotlinlang.org) (with using coroutines)
+- Support library - [androidx](https://developer.android.com/jetpack/androidx)
+
+## Used Android Architecture Components:
+- [LiveData](https://developer.android.com/topic/libraries/architecture/livedata) - Notify views when underlying database changes
+- [ViewModel](https://developer.android.com/topic/libraries/architecture/viewmodel) - Manage UI-related data in a lifecycle-conscious way
+- [Room](https://developer.android.com/topic/libraries/architecture/room) - Fluent SQLite database access
+- [Paging](https://developer.android.com/topic/libraries/architecture/paging) - Gradually load information on demand from data source
+- [WorkManager](https://developer.android.com/topic/libraries/architecture/workmanager) - Manage Android background jobs
+
+## Project contains the following features implemented:
+- Edit username and avatar
+- Chat dialogs creation (private and group)
+- Group chat: edit group name, description; add/remove participants; add/remove admins
+- Group chat info
+- Send messages
+- File attachments (only Image)
+- Sent/Delivered/Read messages statuses
+- ‘Is typing’ statuses
+
 
 ## How to run:
 
@@ -12,7 +38,7 @@ This project contains a chat messenger & video calling open source demo app for 
 
 2. Put Application credentials from Overview page + Account key from <https://admin.connectycube.com/account/settings> to **app/src/main/java/com/connectycube/messenger/utilities/SettingsProvider.kt** class
 
-3. Follow to <https://admin.connectycube.com> and create users in **Users** module. Then put to the **user_configiration.json** file at least 2 and max 5 users with format *[\"login\":{\"password\":userId}]*, for ex. *"userchatLogin1":{"userchatPassword1":310}*.
+3. Follow to <https://admin.connectycube.com> and create users in **Users** module. Then put to the **app/src/main/assets/user_configiration.json** file at least 2 and max 5 users with format *[\"login\":{\"password\":userId}]*, for ex. *"userchatLogin1":{"userchatPassword1":310}*.
 
 4. Run project.
 
