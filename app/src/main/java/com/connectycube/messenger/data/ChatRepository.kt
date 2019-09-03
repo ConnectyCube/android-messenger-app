@@ -174,7 +174,7 @@ class ChatRepository private constructor(private val chatDao: ChatDao, private v
             }
 
             override fun saveCallResult(item: Chat) {
-                chatDao.insert(item)
+                chatDao.update(item)
             }
         }
     }
