@@ -7,6 +7,7 @@ import com.connectycube.chat.model.ConnectycubeChatDialog
 import com.connectycube.chat.model.ConnectycubeChatMessage
 import com.connectycube.messenger.R
 import com.connectycube.messenger.data.ChatMessageRepository
+import com.connectycube.messenger.data.ChatRepository
 import com.connectycube.messenger.data.UserRepository
 import com.connectycube.messenger.utilities.convertToMessage
 import com.connectycube.messenger.vo.Resource
@@ -19,6 +20,7 @@ class ChatMessageListViewModel internal constructor(
     applicationContext: Application,
     private val repository: ChatMessageRepository,
     private val usersRepository: UserRepository,
+    private val chatRepository: ChatRepository,
     private val chat: ConnectycubeChatDialog
 ) :
     AndroidViewModel(applicationContext) {
@@ -62,6 +64,25 @@ class ChatMessageListViewModel internal constructor(
             }
         }
 
+        return result
+    }
+
+    fun getChatDialog(dialogId: String): LiveData<Resource<ConnectycubeChatDialog>> {
+        val result = MediatorLiveData<Resource<ConnectycubeChatDialog>>()
+        result.value = Resource.loading(null)
+
+        val source = chatRepository.getChat(dialogId)
+        result.addSource(source) { chatDialog ->
+
+            if (chatDialog == null) {
+                result.value = Resource.error(
+                    getApplication<Application>().getString(R.string.something_went_wrong_try_again_later),
+                    null
+                )
+            } else {
+                result.value = Resource.success(chatDialog.cubeChat)
+            }
+        }
         return result
     }
 

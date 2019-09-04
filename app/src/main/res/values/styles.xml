@@ -13,6 +13,12 @@
         <item name="windowNoTitle">true</item>
     </style>
 
+    <style name="AppTheme.DarkTitle">
+        <item name="colorPrimary">@color/dark</item>
+        <item name="colorPrimaryDark">@color/dark</item>
+        <item name="colorAccent">@color/dark</item>
+    </style>
+
     <style name="AppTheme.NoActionBar.Splash">
         <item name="android:windowBackground">@drawable/splash_background</item>
     </style>

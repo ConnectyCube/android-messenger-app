@@ -73,15 +73,4 @@
             app:layout_constraintTop_toBottomOf="@+id/user_name_txt"
             tools:text="Yesterday at 19:20 PM" />
 
-    <Button
-            android:id="@+id/close_btn"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/margin_normal"
-            android:text="@string/action_close"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            tools:ignore="ButtonStyle" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>

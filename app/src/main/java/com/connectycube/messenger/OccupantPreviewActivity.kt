@@ -18,16 +18,11 @@ class OccupantPreviewActivity : BaseChatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_occupant_preview)
         initToolBar()
-        initView()
         initUser()
     }
 
     private fun initToolBar() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-    }
-
-    private fun initView() {
-        close_btn.setOnClickListener { onBackPressed() }
     }
 
     private fun initUser() {
@@ -53,4 +48,8 @@ class OccupantPreviewActivity : BaseChatActivity() {
         }
     }
 
+    override fun finish() {
+        super.finish()
+        overridePendingTransition(0, R.anim.slide_out_right)
+    }
 }

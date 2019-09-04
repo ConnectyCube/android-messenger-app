@@ -23,6 +23,9 @@ interface ChatDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(chat: Chat)
 
+    @Update(onConflict = OnConflictStrategy.REPLACE)
+    fun update(chat: Chat)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAll(chats: List<Chat>)
 
