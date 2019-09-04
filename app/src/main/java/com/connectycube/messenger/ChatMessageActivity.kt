@@ -343,15 +343,25 @@ class ChatMessageActivity : BaseChatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.menu_action_video -> {
-                Toast.makeText(this, R.string.coming_soon, Toast.LENGTH_SHORT).show()
+                startCall(chatDialog.occupants, 1)
+//                Toast.makeText(this, R.string.coming_soon, Toast.LENGTH_SHORT).show()
                 true
             }
             R.id.menu_action_audio -> {
-                Toast.makeText(this, R.string.coming_soon, Toast.LENGTH_SHORT).show()
+                startCall(chatDialog.occupants, 2)
+//                Toast.makeText(this, R.string.coming_soon, Toast.LENGTH_SHORT).show()
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun startCall(occupants: List<Int>, callType: Int) {
+        val intent = Intent(this, CallService::class.java)
+        intent.action = ACTION_SELECT_MEMBERS
+        intent.putIntegerArrayListExtra(EXTRA_OCCUPANTS, ArrayList(occupants.filter { ConnectycubeChatService.getInstance().user.id != it }))
+        intent.putExtra(EXTRA_CALL_TYPE, callType)
+        startService(intent)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
