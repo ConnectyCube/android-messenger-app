@@ -87,6 +87,13 @@
             </intent-filter>
         </service>
 
+        <activity
+            android:name=".SelectCallMembersActivity"
+            android:label="@string/title_select_call_members" />
+
+
+        <service android:name=".CallService" />
+
         <provider
                 android:name="androidx.core.content.FileProvider"
                 android:authorities="${applicationId}.fileprovider"
