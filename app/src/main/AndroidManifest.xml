@@ -67,6 +67,7 @@
         <activity
                 android:name=".SelectUsersActivity"
                 android:label="@string/title_select_users_activity" />
+        <activity android:name=".CallActivity" />
 
         <activity
             android:name=".SelectCallMembersActivity"

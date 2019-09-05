@@ -8,6 +8,10 @@
     <color name="dark_grey">#6e6e6e</color>
     <color name="blue_light">#acc3e8</color>
     <color name="pink_light">#debbf0</color>
+    <color name="red">#eb4034</color>
+    <color name="red_light">#f7746a</color>
+    <color name="green">#8ae356</color>
+    <color name="green_light">#b7f294</color>
 
     <color name="unread_messages_budge">#43A238</color>
     <color name="unread_messages_date">@color/unread_messages_budge</color>

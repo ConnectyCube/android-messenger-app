@@ -103,4 +103,9 @@ object InjectorUtils {
         val repository = getAvatarRepositoryViewRepository()
         return CreateDialogDetailsViewModelFactory(application, repository)
     }
+
+    fun provideCallViewModelFactory(application: Application): CallViewModelFactory {
+        val userRepository = getUserRepository(application)
+        return CallViewModelFactory(application, userRepository)
+    }
 }

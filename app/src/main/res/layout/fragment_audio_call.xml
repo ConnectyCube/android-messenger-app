@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    <LinearLayout
+            android:id="@+id/layout_call"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="70dp"
+            android:layout_marginBottom="409dp"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingLeft="64dp"
+            android:paddingRight="64dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+        <include layout="@layout/outgoing_view" />
+
+        <TextView
+                android:id="@+id/text_on_call"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="48dp"
+                android:text="@string/incoming_audio_call_opponents"
+                android:textColor="@color/dark_grey"
+                android:textSize="16sp" />
+
+        <TextView
+                android:id="@+id/text_other_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center"
+                android:textColor="@color/dark"
+                android:textSize="16sp"
+                tools:text="Amanda, Brad, Celesta" />
+
+    </LinearLayout>
+
+
+    <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/button_hangup"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginBottom="@dimen/margin_big"
+            android:background="@drawable/selector_call_finish"
+            android:padding="16dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_call_end_black_24dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
