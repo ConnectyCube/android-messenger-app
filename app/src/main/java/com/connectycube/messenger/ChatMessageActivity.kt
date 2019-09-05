@@ -27,6 +27,8 @@ import com.connectycube.core.exception.ResponseException
 import com.connectycube.messenger.adapters.ChatMessageAdapter
 import com.connectycube.messenger.adapters.AttachmentClickListener
 import com.connectycube.messenger.api.ConnectycubeMessageSender
+import com.connectycube.messenger.helpers.startAudioCall
+import com.connectycube.messenger.helpers.startVideoCall
 import com.connectycube.messenger.paging.Status
 import com.connectycube.messenger.utilities.*
 import com.connectycube.messenger.viewmodels.AttachmentViewModel
@@ -35,7 +37,6 @@ import com.connectycube.users.model.ConnectycubeUser
 import com.google.android.material.button.MaterialButton.ICON_GRAVITY_START
 import com.google.android.material.button.MaterialButton.ICON_GRAVITY_TEXT_END
 import com.zhihu.matisse.Matisse
-import kotlinx.android.synthetic.main.activity_chat_dialog_details.*
 import kotlinx.android.synthetic.main.activity_chatmessages.*
 import kotlinx.android.synthetic.main.activity_chatmessages.avatar_img
 import kotlinx.android.synthetic.main.activity_chatmessages.back_btn
@@ -343,25 +344,17 @@ class ChatMessageActivity : BaseChatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.menu_action_video -> {
-                startCall(chatDialog.occupants, 1)
+                startVideoCall(this, ArrayList(chatDialog.occupants.filter { it != ConnectycubeChatService.getInstance().user.id }))
 //                Toast.makeText(this, R.string.coming_soon, Toast.LENGTH_SHORT).show()
                 true
             }
             R.id.menu_action_audio -> {
-                startCall(chatDialog.occupants, 2)
+                startAudioCall(this, ArrayList(chatDialog.occupants.filter { it != ConnectycubeChatService.getInstance().user.id }))
 //                Toast.makeText(this, R.string.coming_soon, Toast.LENGTH_SHORT).show()
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
-    }
-
-    private fun startCall(occupants: List<Int>, callType: Int) {
-        val intent = Intent(this, CallService::class.java)
-        intent.action = ACTION_SELECT_MEMBERS
-        intent.putIntegerArrayListExtra(EXTRA_OCCUPANTS, ArrayList(occupants.filter { ConnectycubeChatService.getInstance().user.id != it }))
-        intent.putExtra(EXTRA_CALL_TYPE, callType)
-        startService(intent)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

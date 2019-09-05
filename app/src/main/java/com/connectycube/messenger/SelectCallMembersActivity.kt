@@ -1,6 +1,5 @@
 package com.connectycube.messenger
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -10,6 +9,9 @@ import androidx.lifecycle.observe
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.connectycube.messenger.adapters.CheckableUsersAdapter
+import com.connectycube.messenger.helpers.EXTRA_CALL_TYPE
+import com.connectycube.messenger.helpers.EXTRA_OCCUPANTS
+import com.connectycube.messenger.helpers.startCall
 import com.connectycube.messenger.utilities.InjectorUtils
 import com.connectycube.messenger.viewmodels.SelectCallMembersViewModel
 import com.connectycube.messenger.vo.Status
@@ -83,6 +85,10 @@ class SelectCallMembersActivity : BaseChatActivity(), CheckableUsersAdapter.Chec
 
     override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
         val menuItemDone: MenuItem? = menu?.findItem(R.id.action_done)
+        when(intent.getIntExtra(EXTRA_CALL_TYPE, -1)){
+            1 -> menuItemDone?.icon = resources.getDrawable(R.drawable.ic_video_call_white_24dp)
+            2 -> menuItemDone?.icon = resources.getDrawable(R.drawable.ic_phone_white_24dp)
+        }
         menuItemDone?.isVisible = selectedUsers.isNotEmpty()
 
         return super.onPrepareOptionsMenu(menu)
@@ -91,21 +97,14 @@ class SelectCallMembersActivity : BaseChatActivity(), CheckableUsersAdapter.Chec
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             android.R.id.home -> finish()
-            R.id.action_done -> startGroupCall()
+            R.id.action_done -> startCall()
         }
 
         return super.onOptionsItemSelected(item)
     }
 
-    private fun startGroupCall() {
-        val serviceIntent = Intent(this, CallService::class.java)
-        serviceIntent.action = ACTION_START_CALL
-        serviceIntent.putIntegerArrayListExtra(
-            EXTRA_OCCUPANTS,
-            ArrayList(selectedUsers.map { it.id })
-        )
-        serviceIntent.putExtra(EXTRA_CALL_TYPE, intent.getIntExtra(EXTRA_CALL_TYPE, -1))
-        startService(serviceIntent)
+    private fun startCall() {
+        startCall(this, ArrayList(selectedUsers.map { it.id }), intent.getIntExtra(EXTRA_CALL_TYPE, -1))
         finish()
     }
 

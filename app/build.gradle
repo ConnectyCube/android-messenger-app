@@ -35,6 +35,11 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 ext {
@@ -56,11 +61,17 @@ dependencies { configuration ->
 
     implementation "com.google.android.material:material:$materialVersion"
     implementation 'com.jakewharton.timber:timber:4.7.1'
+
+    implementation "com.google.android.gms:play-services-gcm:17.0.0"
+    implementation "com.google.firebase:firebase-messaging:20.0.0"
+    implementation "com.google.firebase:firebase-core:17.2.0"
 }
 
 private static void connectycubeComponents(configuration, version) {
     configuration.implementation "com.connectycube:connectycube-android-sdk-chat:$version"
     configuration.implementation "com.connectycube:connectycube-android-sdk-storage:$version"
+    configuration.implementation "com.connectycube:connectycube-android-sdk-videochat:$version"
+    configuration.implementation "com.connectycube:connectycube-android-sdk-pushnotifications:$version"
 }
 
 private static void androidJetPackComponents(configuration, roomVersion, lifecycleVersion,
@@ -94,3 +105,5 @@ private static void externalMediaComponents(configuration) {
     configuration.implementation "com.github.bumptech.glide:glide:4.9.0"
     configuration.implementation 'com.github.chrisbanes:PhotoView:2.1.4'
 }
+
+apply plugin: 'com.google.gms.google-services'
