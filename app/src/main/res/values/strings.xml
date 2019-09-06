@@ -110,6 +110,8 @@
     <string name="outgoing_call_ringing">Ringing</string>
 
     <string name="title_incoming_call">Incoming call</string>
+    <string name="title_video_call">Video call</string>
+    <string name="title_audio_call">Audio call</string>
 
 
     <!-- Errors -->

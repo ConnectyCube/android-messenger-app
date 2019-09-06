@@ -5,7 +5,6 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
-import com.connectycube.messenger.IncomingCallFragment
 import com.connectycube.messenger.R
 import com.connectycube.messenger.data.UserRepository
 import com.connectycube.messenger.vo.Resource
@@ -16,7 +15,20 @@ class CallViewModel internal constructor(
     private val userRepo: UserRepository
 ) :
     AndroidViewModel(applicationContext) {
-    val incomingCallAction = MutableLiveData<IncomingCallFragment.CallAction>()
+
+
+    val incomingCallAction = MutableLiveData<CallUserAction>()
+    val callUserAction = MutableLiveData<CallUserAction>()
+    val callSessionAction = MutableLiveData<CallSessionAction>()
+
+    enum class CallUserAction {
+        ACCEPT, REJECT, HANGUP
+    }
+
+    enum class CallSessionAction {
+        CALL_STARTED, CALL_STOPPED
+    }
+
 
     fun getOpponents(vararg opponentsIds: Int): LiveData<Resource<List<ConnectycubeUser>>> {
         val result = MediatorLiveData<Resource<List<ConnectycubeUser>>>()

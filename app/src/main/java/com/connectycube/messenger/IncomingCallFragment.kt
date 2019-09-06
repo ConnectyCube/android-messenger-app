@@ -24,10 +24,6 @@ class IncomingCallFragment : Fragment(R.layout.fragment_incoming_call) {
 
     private lateinit var callViewModel: CallViewModel
 
-    enum class CallAction {
-        ACCEPT, REJECT
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         retainInstance = true
         super.onCreate(savedInstanceState)
@@ -60,10 +56,9 @@ class IncomingCallFragment : Fragment(R.layout.fragment_incoming_call) {
                         result.data!!.first { it.id == session.callerID }
                     loadUserAvatar(context!!, callerUser, image_avatar)
                     text_name.text = callerUser.fullName ?: callerUser.login
-                    val opponents =
+                    val opponentsFiltered =
                         result.data.filterNot { it.id != session.callerID || it.id != ConnectycubeChatService.getInstance().user.id }
-                    val names =
-                        opponents.map { it.fullName ?: it.login }.joinToString()
+                    val names = opponentsFiltered.joinToString { it.fullName ?: it.login }
                     if (names.isNotEmpty()) {
                         text_on_call.visibility = View.VISIBLE
                         text_other_name.text = names
@@ -88,11 +83,11 @@ class IncomingCallFragment : Fragment(R.layout.fragment_incoming_call) {
     }
 
     private fun reject() {
-        callViewModel.incomingCallAction.value = CallAction.REJECT
+        callViewModel.incomingCallAction.value = CallViewModel.CallUserAction.REJECT
     }
 
     private fun accept() {
-        callViewModel.incomingCallAction.value = CallAction.ACCEPT
+        callViewModel.incomingCallAction.value = CallViewModel.CallUserAction.ACCEPT
     }
 
 }

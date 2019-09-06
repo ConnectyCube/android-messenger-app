@@ -14,6 +14,7 @@ import com.connectycube.messenger.viewmodels.CallViewModel
 import com.connectycube.videochat.*
 import com.connectycube.videochat.callbacks.RTCClientSessionCallbacks
 import com.connectycube.videochat.callbacks.RTCSessionEventsCallback
+import com.connectycube.videochat.callbacks.RTCSessionStateCallback
 import timber.log.Timber
 import java.util.HashMap
 
@@ -22,7 +23,7 @@ const val MAX_OPPONENTS = 4
 const val EXTRA_IS_INCOMING_CALL = "conversation_type"
 
 class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSessionCallbacks,
-    RTCSessionEventsCallback {
+    RTCSessionEventsCallback, RTCSessionStateCallback<RTCSession> {
 
     private val callViewModel: CallViewModel by viewModels {
         InjectorUtils.provideCallViewModelFactory(this.application)
@@ -42,6 +43,7 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
 
     private fun initSession() {
         currentSession = RTCSessionManager.getInstance(this).currentCall
+        currentSession?.addSessionCallbacksListener(this@CallActivity)
     }
 
     private fun initFields() {
@@ -86,22 +88,33 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
         if (isInComingCall) {
             initIncomingStopCallTask()
             startIncomingCallFragment()
-            subscribeStartCallScreen()
+            subscribeIncomingScreen()
         } else {
             startAudioManager()
-            startOutgoingFragment()
+            startCall()
         }
     }
 
-    private fun subscribeStartCallScreen() {
+    private fun subscribeIncomingScreen() {
         callViewModel.incomingCallAction.observeOnce(this, Observer {
             it?.let {
                 when (it) {
-                    IncomingCallFragment.CallAction.ACCEPT -> {
-                        startAudioManager()
-                        startCallFragment()
+                    CallViewModel.CallUserAction.ACCEPT -> {
+                        startCall()
                     }
-                    IncomingCallFragment.CallAction.REJECT -> rejectCurrentSession()
+                    CallViewModel.CallUserAction.REJECT -> rejectCurrentSession()
+                    else -> Timber.d("subscribeIncomingScreen not defined action $it")
+                }
+            }
+        })
+    }
+
+    private fun subscribeCallScreen() {
+        callViewModel.callUserAction.observeOnce(this, Observer {
+            it?.let {
+                when (it) {
+                    CallViewModel.CallUserAction.HANGUP -> hangUpCurrentSession()
+                    else -> Timber.d("subscribeIncomingScreen not defined action $it")
                 }
             }
         })
@@ -133,9 +146,10 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
         ).commitAllowingStateLoss()
     }
 
-    private fun startOutgoingFragment() {
+    private fun startCall() {
         startAudioManager()
         startCallFragment()
+        subscribeCallScreen()
     }
 
     fun rejectCurrentSession() {
@@ -163,7 +177,11 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
     override fun onUserNotAnswer(session: RTCSession?, userId: Int?) {
     }
 
-    override fun onSessionStartClose(session: RTCSession?) {
+    override fun onSessionStartClose(session: RTCSession) {
+        if (session == currentSession) {
+            currentSession?.removeSessionCallbacksListener(this@CallActivity)
+            callViewModel.callSessionAction.value = CallViewModel.CallSessionAction.CALL_STOPPED
+        }
     }
 
     override fun onReceiveHangUpFromUser(session: RTCSession?,
@@ -216,14 +234,26 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
     ) {
     }
 
+    fun hangUpCurrentSession() {
+        currentSession?.hangUp(HashMap<String, String>())
+    }
+
     private fun releaseCurrentCall() {
         audioManager?.stop()
         currentSession = null
         RTCSessionManager.getInstance(applicationContext).endCall()
     }
 
-    override fun onBackPressed() {
-        super.onBackPressed()
-        releaseCurrentCall()
+    override fun onDisconnectedFromUser(session: RTCSession?, userID: Int?) {
+    }
+
+    override fun onConnectedToUser(session: RTCSession?, userID: Int?) {
+        callViewModel.callSessionAction.value = CallViewModel.CallSessionAction.CALL_STARTED
+    }
+
+    override fun onConnectionClosedForUser(session: RTCSession?, userID: Int?) {
+    }
+
+    override fun onStateChanged(session: RTCSession?, state: BaseSession.RTCSessionState?) {
     }
 }
