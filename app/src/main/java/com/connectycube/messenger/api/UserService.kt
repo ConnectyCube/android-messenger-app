@@ -22,7 +22,6 @@ class UserService private constructor() {
 
     suspend fun ultimateLogout(applicationContext: Context) {
         ConnectycubeChatService.getInstance().destroy()
-        RTCSessionManager.getInstance().destroy()
         clearDatabaseAsync(applicationContext).await()
         signOut()
     }
