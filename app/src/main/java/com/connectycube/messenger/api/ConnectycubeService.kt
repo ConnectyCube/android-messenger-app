@@ -16,6 +16,8 @@ import com.connectycube.messenger.data.Chat
 import com.connectycube.messenger.data.Message
 import com.connectycube.messenger.data.User
 import com.connectycube.messenger.utilities.*
+import com.connectycube.pushnotifications.ConnectycubePushNotifications
+import com.connectycube.pushnotifications.model.ConnectycubeEvent
 import com.connectycube.storage.ConnectycubeStorage
 import com.connectycube.storage.model.ConnectycubeFile
 import com.connectycube.users.ConnectycubeUsers
@@ -308,5 +310,10 @@ class ConnectycubeService {
                     return response.publicUrl
                 }
             })
+    }
+
+    fun createPushEvent(event: ConnectycubeEvent, callback: ResponsePerformer.Callback<ConnectycubeEvent>?) {
+        InjectorUtils.provideSyncConnectycubeServiceForType<ConnectycubeEvent, ConnectycubeEvent>()
+            .perform(ConnectycubePushNotifications.createEvent(event), callback)
     }
 }

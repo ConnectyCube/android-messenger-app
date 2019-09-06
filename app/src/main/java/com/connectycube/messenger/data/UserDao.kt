@@ -28,4 +28,7 @@ interface UserDao {
 
     @Query("SELECT * FROM users WHERE id in (:usersIds)")
     fun getUsersByIds(vararg usersIds: Int): LiveData<List<User>>
+
+    @Query("SELECT * FROM users WHERE id in (:usersIds)")
+    fun getUsersByIdsSync(vararg usersIds: Int): List<User>
 }

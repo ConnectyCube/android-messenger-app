@@ -1,13 +1,21 @@
 package com.connectycube.messenger.helpers
 
 import android.content.Context
-import android.content.Intent
 import com.connectycube.chat.ConnectycubeChatService
 import com.connectycube.chat.WebRTCSignaling
+import com.connectycube.core.helper.StringifyArrayList
+import com.connectycube.messenger.R
+import com.connectycube.messenger.api.ConnectycubePushSender
+import com.connectycube.messenger.data.AppDatabase
+import com.connectycube.messenger.data.UserRepository
+import com.connectycube.pushnotifications.model.ConnectycubeEnvironment
+import com.connectycube.pushnotifications.model.ConnectycubeEvent
+import com.connectycube.pushnotifications.model.ConnectycubeNotificationType
 import com.connectycube.videochat.RTCClient
 import com.connectycube.videochat.RTCSession
 import com.connectycube.videochat.callbacks.RTCClientSessionCallbacks
 import com.connectycube.videochat.callbacks.RTCClientSessionCallbacksImpl
+import org.json.JSONObject
 import timber.log.Timber
 
 class RTCSessionManager {
@@ -24,12 +32,14 @@ class RTCSessionManager {
             }
     }
 
+    private var usersRepository: UserRepository? = null
     private var applicationContext: Context? = null
     private var sessionCallbackListener: RTCClientSessionCallbacks? = null
-    private var currentCall: RTCSession? = null
+    var currentCall: RTCSession? = null
 
     fun init(applicationContext: Context) {
         this.applicationContext = applicationContext
+        this.usersRepository = UserRepository.getInstance(AppDatabase.getInstance(applicationContext).userDao())
         this.sessionCallbackListener = RTCSessionCallbackListenerSimple()
 
         ConnectycubeChatService.getInstance()
@@ -48,8 +58,31 @@ class RTCSessionManager {
 
         currentCall = rtcSession
 
-        rtcSession.startCall(hashMapOf())
+//        rtcSession.startCall(hashMapOf())
         startCallActivity(false)
+
+        sendCallPushNotification(rtcSession.opponents, rtcSession.sessionID)
+    }
+
+    private fun sendCallPushNotification(opponents: List<Int>, sessionId: String) {
+        val event = ConnectycubeEvent()
+        event.userIds = StringifyArrayList(opponents)
+        event.environment = ConnectycubeEnvironment.DEVELOPMENT
+        event.notificationType = ConnectycubeNotificationType.PUSH
+
+        val json = JSONObject()
+        try {
+            json.put(PARAM_MESSAGE, applicationContext?.getString(R.string.you_have_got_new_incoming_call_open_app_to_manage_it))
+            // custom parameters
+            json.put(PARAM_NOTIFICATION_TYPE, NOTIFICATION_TYPE_CALL)
+            json.put(PARAM_CALL_ID, sessionId)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        event.message = json.toString()
+
+        ConnectycubePushSender().sendCallPushEvent(event)
     }
 
     fun receiveCall(rtcSession: RTCSession) {
@@ -84,6 +117,7 @@ class RTCSessionManager {
 
         applicationContext = null
         sessionCallbackListener = null
+        usersRepository = null
     }
 
     private inner class RTCSessionCallbackListenerSimple : RTCClientSessionCallbacksImpl() {

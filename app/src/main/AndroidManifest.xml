@@ -73,7 +73,7 @@
             android:label="@string/title_select_call_members" />
 
         <service
-            android:name="com.connectycube.pushnotifications.services.fcm.FcmPushListenerService">
+            android:name=".fcm.PushListenerService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
