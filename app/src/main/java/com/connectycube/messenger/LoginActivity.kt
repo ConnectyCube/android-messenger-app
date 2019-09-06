@@ -13,6 +13,7 @@ import com.connectycube.chat.ConnectycubeChatService
 import com.connectycube.core.EntityCallback
 import com.connectycube.core.exception.ResponseException
 import com.connectycube.messenger.data.User
+import com.connectycube.messenger.helpers.RTCSessionManager
 import com.connectycube.messenger.utilities.*
 import com.connectycube.messenger.viewmodels.UserListViewModel
 import com.connectycube.messenger.vo.Status
@@ -105,6 +106,7 @@ class LoginActivity : BaseChatActivity() {
             ConnectycubeChatService.getInstance().login(user, object : EntityCallback<Void> {
                 override fun onSuccess(void: Void?, bundle: Bundle?) {
                     hideProgress(progressbar)
+                    initCallManager()
                     startDialogs()
                 }
 
@@ -121,6 +123,10 @@ class LoginActivity : BaseChatActivity() {
             hideProgress(progressbar)
             startDialogs()
         }
+    }
+
+    private fun initCallManager() {
+        RTCSessionManager.getInstance().init(applicationContext)
     }
 
     fun startDialogs() {

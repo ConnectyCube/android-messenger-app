@@ -2,31 +2,73 @@ package com.connectycube.messenger.helpers
 
 import android.content.Context
 import android.content.Intent
+import com.connectycube.chat.ConnectycubeChatService
+import com.connectycube.chat.WebRTCSignaling
+import com.connectycube.videochat.RTCClient
 import com.connectycube.videochat.RTCSession
+import com.connectycube.videochat.callbacks.RTCClientSessionCallbacks
+import com.connectycube.videochat.callbacks.RTCClientSessionCallbacksImpl
 import timber.log.Timber
 
-class RTCSessionManager private constructor(val context: Context) { //TODO VT delete context from constructor
+class RTCSessionManager {
+
+    companion object {
+
+        // For Singleton instantiation
+        @Volatile
+        private var instance: RTCSessionManager? = null
+
+        fun getInstance() =
+            instance ?: synchronized(this) {
+                instance ?: RTCSessionManager().also { instance = it }
+            }
+    }
+
+    private var applicationContext: Context? = null
+    private var sessionCallbackListener: RTCClientSessionCallbacks? = null
     private var currentCall: RTCSession? = null
 
-    fun startCall(rtcSession: RTCSession){
+    fun init(applicationContext: Context) {
+        this.applicationContext = applicationContext
+        this.sessionCallbackListener = RTCSessionCallbackListenerSimple()
+
+        ConnectycubeChatService.getInstance()
+            .videoChatWebRTCSignalingManager?.addSignalingManagerListener { signaling, createdLocally ->
+            if (!createdLocally) {
+                RTCClient.getInstance(applicationContext).addSignaling(signaling as WebRTCSignaling)
+            }
+        }
+
+        RTCClient.getInstance(applicationContext).addSessionCallbacksListener(sessionCallbackListener)
+        RTCClient.getInstance(applicationContext).prepareToProcessCalls()
+    }
+
+    fun startCall(rtcSession: RTCSession) {
+        checkNotNull(applicationContext) { "RTCSessionManager should be initialized before start call" }
+
         currentCall = rtcSession
 
         rtcSession.startCall(hashMapOf())
         startCallActivity(false)
     }
 
-    fun receiveCall(rtcSession: RTCSession){
-        if (currentCall != null) return
+    fun receiveCall(rtcSession: RTCSession) {
+        if (currentCall != null) {
+            if (currentCall!!.sessionID != rtcSession.sessionID) {
+                rtcSession.rejectCall(hashMapOf())
+            }
+            return
+        }
 
         currentCall = rtcSession
         startCallActivity(true)
     }
 
-    fun endCall(){
+    fun endCall() {
         currentCall = null
     }
 
-    private fun startCallActivity(isIncomig: Boolean){
+    private fun startCallActivity(isIncomig: Boolean) {
         Timber.w("start call incoming - $isIncomig")
 
 //        val intent = Intent(context, CallActivity::class.java)
@@ -35,15 +77,28 @@ class RTCSessionManager private constructor(val context: Context) { //TODO VT de
 //        context.startActivity(intent)
     }
 
-    companion object {
+    fun destroy() {
+        RTCClient.getInstance(applicationContext)
+            .removeSessionsCallbacksListener(sessionCallbackListener)
+        RTCClient.getInstance(applicationContext).stopProcessCalls()
 
-        // For Singleton instantiation
-        @Volatile
-        private var instance: RTCSessionManager? = null
+        applicationContext = null
+        sessionCallbackListener = null
+    }
 
-        fun getInstance(context: Context) =
-            instance ?: synchronized(this) {
-                instance ?: RTCSessionManager(context).also { instance = it }
+    private inner class RTCSessionCallbackListenerSimple : RTCClientSessionCallbacksImpl() {
+        override fun onReceiveNewSession(session: RTCSession?) {
+            super.onReceiveNewSession(session)
+            session?.let { receiveCall(session) }
+        }
+
+        override fun onSessionClosed(session: RTCSession?) {
+            super.onSessionClosed(session)
+            if (session == null || currentCall == null) return
+
+            if (currentCall!!.sessionID == session.sessionID) {
+                endCall()
             }
+        }
     }
 }

@@ -21,7 +21,7 @@ fun startCall(context: Context, occupants: ArrayList<Int>, callType: Int) {
     val rtcClient = RTCClient.getInstance(context.applicationContext)
     val rtcSession = rtcClient.createNewSessionWithOpponents(occupants, rtcCallType)
 
-    RTCSessionManager.getInstance(context).startCall(rtcSession)
+    RTCSessionManager.getInstance().startCall(rtcSession)
 
     Toast.makeText(context, "members = $occupants, callType = $callType", Toast.LENGTH_LONG).show()
 }
