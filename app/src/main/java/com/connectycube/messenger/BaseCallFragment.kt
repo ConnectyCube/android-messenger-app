@@ -5,6 +5,8 @@ import android.view.View
 import androidx.annotation.LayoutRes
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
+import com.connectycube.messenger.helpers.RTCSessionManager
+import com.connectycube.messenger.utilities.InjectorUtils
 import com.connectycube.messenger.viewmodels.CallViewModel
 import com.connectycube.videochat.RTCSession
 
@@ -31,12 +33,12 @@ abstract class BaseCallFragment(
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-//        currentSession = RTCSessionManager.getInstance().getCurrentSession()
+        currentSession = RTCSessionManager.getInstance(activity!!.applicationContext).currentCall
         arguments?.let{
             isIncomingCall = it.getBoolean(EXTRA_IS_INCOMING_CALL)
         }
         activity?.let {
-            callViewModel = ViewModelProviders.of(it).get(CallViewModel::class.java)
+            callViewModel = ViewModelProviders.of(it, InjectorUtils.provideCallViewModelFactory(it.application)).get(CallViewModel::class.java)
         }
 
     }

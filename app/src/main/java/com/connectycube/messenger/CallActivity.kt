@@ -5,9 +5,9 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import androidx.lifecycle.whenCreated
 import com.connectycube.chat.ConnectycubeChatService
 import com.connectycube.chat.WebRTCSignaling
+import com.connectycube.messenger.helpers.RTCSessionManager
 import com.connectycube.messenger.utilities.InjectorUtils
 import com.connectycube.messenger.utilities.observeOnce
 import com.connectycube.messenger.viewmodels.CallViewModel
@@ -37,11 +37,11 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
         initFields()
         initCall()
         initAudioManager()
-        startCallFragment()
+        startFragment()
     }
 
     private fun initSession() {
-//        currentSession = RTCManager.getInstance.currentSession
+        currentSession = RTCSessionManager.getInstance(this).currentCall
     }
 
     private fun initFields() {
@@ -75,21 +75,32 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
         }
     }
 
-    private fun startCallFragment() {
+    private fun startAudioManager() {
+        audioManager?.start { selectedAudioDevice, availableAudioDevices ->
+            Timber.d("Audio device switched to  $selectedAudioDevice")
+
+        }
+    }
+
+    private fun startFragment() {
         if (isInComingCall) {
             initIncomingStopCallTask()
             startIncomingCallFragment()
             subscribeStartCallScreen()
         } else {
+            startAudioManager()
             startOutgoingFragment()
         }
     }
 
     private fun subscribeStartCallScreen() {
         callViewModel.incomingCallAction.observeOnce(this, Observer {
-            it?.let{
+            it?.let {
                 when (it) {
-                    IncomingCallFragment.CallAction.ACCEPT -> startOutgoingFragment()
+                    IncomingCallFragment.CallAction.ACCEPT -> {
+                        startAudioManager()
+                        startCallFragment()
+                    }
                     IncomingCallFragment.CallAction.REJECT -> rejectCurrentSession()
                 }
             }
@@ -107,7 +118,7 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
         }
     }
 
-    private fun startOutgoingFragment() {
+    private fun startCallFragment() {
         val isVideoCall =
             RTCTypes.ConferenceType.CONFERENCE_TYPE_VIDEO == currentSession?.conferenceType
         val conversationFragment = BaseCallFragment.createInstance(
@@ -120,6 +131,11 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
             conversationFragment,
             conversationFragment::class.java.simpleName
         ).commitAllowingStateLoss()
+    }
+
+    private fun startOutgoingFragment() {
+        startAudioManager()
+        startCallFragment()
     }
 
     fun rejectCurrentSession() {
@@ -189,10 +205,8 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
         Timber.d("onSessionClosed session= $session")
         if (session == currentSession) {
             Timber.d("release currentSession")
-            audioManager?.stop()
-            audioManager = null
-            currentSession = null
-//            RTCManager.session.clear()
+            releaseCurrentCall()
+            finish()
         }
     }
 
@@ -202,4 +216,14 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
     ) {
     }
 
+    private fun releaseCurrentCall() {
+        audioManager?.stop()
+        currentSession = null
+        RTCSessionManager.getInstance(applicationContext).endCall()
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        releaseCurrentCall()
+    }
 }

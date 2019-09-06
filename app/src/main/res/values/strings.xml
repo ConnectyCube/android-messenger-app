@@ -109,6 +109,8 @@
     <string name="incoming_audio_call_opponents">on call:</string>
     <string name="outgoing_call_ringing">Ringing</string>
 
+    <string name="title_incoming_call">Incoming call</string>
+
 
     <!-- Errors -->
     <string name="error_credentials_empty">The App class should contain ConnectyCube credentials. Register new account and application at https://admin.connectycube.com
@@ -136,5 +138,7 @@
         <item quantity="one">You can only select one media file</item>
         <item quantity="many">You can only select up to %1$d media files</item>
     </plurals>
+
+    <string name="sender_id"></string>
 
 </resources>

@@ -1,21 +1,21 @@
 package com.connectycube.messenger
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import androidx.annotation.NonNull
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import com.connectycube.messenger.viewmodels.CallViewModel
-import com.connectycube.videochat.RTCSession
-import com.connectycube.videochat.RTCTypes
 import androidx.lifecycle.ViewModelProviders
+import com.connectycube.chat.ConnectycubeChatService
+import com.connectycube.messenger.helpers.RTCSessionManager
 import com.connectycube.messenger.utilities.loadUserAvatar
-import com.connectycube.messenger.utilities.observeOnce
+import com.connectycube.messenger.viewmodels.CallViewModel
 import com.connectycube.messenger.vo.Status
 import com.connectycube.users.model.ConnectycubeUser
+import com.connectycube.videochat.RTCSession
+import com.connectycube.videochat.RTCTypes
 import kotlinx.android.synthetic.main.fragment_incoming_call.*
+
 
 class IncomingCallFragment : Fragment(R.layout.fragment_incoming_call) {
     private var currentSession: RTCSession? = null
@@ -31,27 +31,20 @@ class IncomingCallFragment : Fragment(R.layout.fragment_incoming_call) {
     override fun onCreate(savedInstanceState: Bundle?) {
         retainInstance = true
         super.onCreate(savedInstanceState)
+        val actionBar = (activity as AppCompatActivity).supportActionBar
+        actionBar?.setTitle(R.string.title_incoming_call)
     }
 
-//    override fun onCreateView(@NonNull inflater: LayoutInflater, container: ViewGroup?,
-//                              savedInstanceState: Bundle?
-//    ): View {
-//        val view = inflater.inflate(R.layout.fragment_incoming_call, container, false)
-//        initArguments()
-////        ringtonePlayer = RingtonePlayer(activity)
-//        return view
-//    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        initArguments()
         activity?.let {
+            currentSession = RTCSessionManager.getInstance(it.applicationContext).currentCall
             callViewModel = ViewModelProviders.of(it).get(CallViewModel::class.java)
         }
+        initArguments()
         initFields()
     }
 
     private fun initArguments() {
-        //        currentSession = RTCManager.getInstance().getCurrentSession()
         currentSession?.let {
             opponentsIds = it.opponents
             conferenceType = it.conferenceType
@@ -60,11 +53,21 @@ class IncomingCallFragment : Fragment(R.layout.fragment_incoming_call) {
 
     private fun initFields() {
         currentSession?.let { session ->
-            callViewModel.getOpponents(session.callerID).observeOnce(this, Observer {
-                if (it.status == Status.SUCCESS) {
+            val ids = ArrayList<Int>(session.opponents.apply { add(session.callerID) }).toIntArray()
+            callViewModel.getOpponents(*ids).observe(this, Observer { result ->
+                if (result.status == Status.SUCCESS) {
                     val callerUser: ConnectycubeUser =
-                        it.data!!.first { id == currentSession!!.callerID }
+                        result.data!!.first { it.id == session.callerID }
                     loadUserAvatar(context!!, callerUser, image_avatar)
+                    text_name.text = callerUser.fullName ?: callerUser.login
+                    val opponents =
+                        result.data.filterNot { it.id != session.callerID || it.id != ConnectycubeChatService.getInstance().user.id }
+                    val names =
+                        opponents.map { it.fullName ?: it.login }.joinToString()
+                    if (names.isNotEmpty()) {
+                        text_on_call.visibility = View.VISIBLE
+                        text_other_name.text = names
+                    }
                 }
             })
 
