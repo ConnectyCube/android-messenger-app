@@ -13,6 +13,9 @@
     <color name="green">#8ae356</color>
     <color name="green_light">#b7f294</color>
 
+    <color name="green_dark">#58a828</color>
+    <color name="green_dark_light">#6ec43b</color>
+
     <color name="unread_messages_budge">#43A238</color>
     <color name="unread_messages_date">@color/unread_messages_budge</color>
 
