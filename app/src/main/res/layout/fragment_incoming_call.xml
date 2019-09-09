@@ -5,18 +5,21 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+
     <LinearLayout
             android:id="@+id/layout_call"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_normal"
             android:gravity="center_horizontal"
             android:orientation="vertical"
             android:paddingLeft="64dp"
             android:paddingRight="64dp"
-            android:layout_marginTop="@dimen/margin_normal"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.15">
 
         <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/image_avatar"
@@ -69,7 +72,6 @@
                 tools:text="Amanda, Brad, Celesta" />
 
     </LinearLayout>
-
 
     <androidx.appcompat.widget.AppCompatImageButton
             android:id="@+id/button_reject_call"

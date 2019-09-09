@@ -20,4 +20,8 @@
 
     <color name="dark">#000000</color>
     <color name="dark_transparent">#E6000000</color>
+
+    <color name="black_60">#60000000</color>
+    <color name="grey_60">#60606060</color>
+    <color name="grey_30">#30606060</color>
 </resources>

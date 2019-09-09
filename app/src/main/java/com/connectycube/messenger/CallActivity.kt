@@ -1,6 +1,7 @@
 package com.connectycube.messenger
 
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -15,6 +16,7 @@ import com.connectycube.videochat.*
 import com.connectycube.videochat.callbacks.RTCClientSessionCallbacks
 import com.connectycube.videochat.callbacks.RTCSessionEventsCallback
 import com.connectycube.videochat.callbacks.RTCSessionStateCallback
+import kotlinx.android.synthetic.main.toolbar_call_activity.*
 import timber.log.Timber
 import java.util.HashMap
 
@@ -36,6 +38,7 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
         super.onCreate(savedInstanceState)
         initSession()
         initFields()
+        initToolbar()
         initCall()
         initAudioManager()
         startFragment()
@@ -48,6 +51,53 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
 
     private fun initFields() {
         isInComingCall = intent?.extras!!.getBoolean(EXTRA_IS_INCOMING_CALL)
+    }
+
+    private fun initToolbar() {
+        setSupportActionBar(toolbar)
+        toggle_speaker.setOnClickListener { switchAudioDevice() }
+        toggle_mute.setOnClickListener { setAudioMute(toggle_mute.isChecked) }
+        updateToolbar()
+    }
+
+    private fun updateToolbar(showFull: Boolean = false) {
+        currentSession?.let {
+            if (isInComingCall && !showFull) {
+                toggle_speaker.visibility = View.INVISIBLE
+                toggle_mute.visibility = View.INVISIBLE
+            } else {
+                toggle_mute.visibility = View.VISIBLE
+                if (it.isAudioCall) {
+                    toggle_speaker.visibility = View.VISIBLE
+                } else {
+                    toggle_speaker.visibility = View.INVISIBLE
+                }
+            }
+        }
+    }
+
+    private fun switchAudioDevice() {
+        audioManager?.apply {
+            if (selectedAudioDevice != AppRTCAudioManager.AudioDevice.SPEAKER_PHONE) {
+                selectAudioDevice(AppRTCAudioManager.AudioDevice.SPEAKER_PHONE)
+            } else {
+                when {
+                    audioDevices.contains(AppRTCAudioManager.AudioDevice.BLUETOOTH) -> selectAudioDevice(
+                        AppRTCAudioManager.AudioDevice.BLUETOOTH
+                    )
+                    audioDevices.contains(AppRTCAudioManager.AudioDevice.WIRED_HEADSET) -> selectAudioDevice(
+                        AppRTCAudioManager.AudioDevice.WIRED_HEADSET
+                    )
+                    else -> selectAudioDevice(AppRTCAudioManager.AudioDevice.EARPIECE)
+                }
+            }
+        }
+    }
+
+    private fun setAudioMute(isEnabled: Boolean) {
+        currentSession?.apply {
+            mediaStreamManager?.localAudioTrack?.setEnabled(isEnabled)
+        }
     }
 
     private fun initCall() {
@@ -73,6 +123,9 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
                 setOnWiredHeadsetStateListener { plugged, hasMicrophone ->
                     Timber.d("plugged= $plugged, hasMicrophone= $hasMicrophone")
                 }
+                setBluetoothAudioDeviceStateListener { connected ->
+                    Timber.d("connected= $connected")
+                }
             }
         }
     }
@@ -90,7 +143,6 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
             startIncomingCallFragment()
             subscribeIncomingScreen()
         } else {
-            startAudioManager()
             startCall()
         }
     }
@@ -147,6 +199,7 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
     }
 
     private fun startCall() {
+        updateToolbar(true)
         startAudioManager()
         startCallFragment()
         subscribeCallScreen()

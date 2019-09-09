@@ -112,7 +112,6 @@ abstract class BaseCallFragment(
     }
 
     private fun startInCallChronometer() {
-//        ToDo add rotate behavior
         inCallChronometer?.apply {
             visibility = View.VISIBLE
             base = SystemClock.elapsedRealtime()

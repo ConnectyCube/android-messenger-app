@@ -43,6 +43,8 @@
     <string name="action_create">Create</string>
     <string name="action_done">Done</string>
     <string name="action_close">Close</string>
+    <string name="action_toggle_speaker">Toggle speaker</string>
+    <string name="action_toggle_mute">Toggle mute</string>
 
     <!--Menu-->
     <string name="menu_chat_dialog_logout">Logout</string>
