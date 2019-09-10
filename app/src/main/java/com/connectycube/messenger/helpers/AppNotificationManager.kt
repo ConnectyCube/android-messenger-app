@@ -9,6 +9,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import com.connectycube.chat.ConnectycubeChatService
 import com.connectycube.messenger.LoginActivity
 import com.connectycube.messenger.R
 
@@ -50,10 +51,14 @@ class AppNotificationManager {
     }
 
     private fun showCallNotification(context: Context, message: String?, callId: String?) {
+        if (ConnectycubeChatService.getInstance().isLoggedIn) return
+
         val notificationManager = NotificationManagerCompat.from(context)
 
         val intent = Intent(context, LoginActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            action = Intent.ACTION_MAIN
+            addCategory(Intent.CATEGORY_LAUNCHER)
         }
 
         val pendingIntent: PendingIntent = PendingIntent.getActivity(context, 0, intent, 0)
@@ -63,13 +68,14 @@ class AppNotificationManager {
         }
 
         val builder = NotificationCompat.Builder(context, CALLS_CHANNEL_ID)
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(context.getString(R.string.incoming_call))
             .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setContentIntent(pendingIntent)
             .setVibrate(longArrayOf(500))
             .setLights(context.resources.getColor(R.color.colorPrimary), 2000, 2000)
+            .setColor(context.resources.getColor(R.color.colorPrimary))
             .setAutoCancel(true)
 
         notificationManager.notify(CALL_NOTIFICATION_ID, builder.build())
@@ -83,7 +89,9 @@ class AppNotificationManager {
         val channel = NotificationChannel(CALLS_CHANNEL_ID, name, importance)
         channel.description = descriptionText
         channel.vibrationPattern = longArrayOf(500)
+        channel.enableVibration(true)
         channel.lightColor = context.resources.getColor(R.color.colorPrimary)
+        channel.enableLights(true)
         notificationManager.createNotificationChannel(channel)
     }
 }

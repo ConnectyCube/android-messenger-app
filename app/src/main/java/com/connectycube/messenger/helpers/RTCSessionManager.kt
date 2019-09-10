@@ -6,8 +6,6 @@ import com.connectycube.chat.WebRTCSignaling
 import com.connectycube.core.helper.StringifyArrayList
 import com.connectycube.messenger.R
 import com.connectycube.messenger.api.ConnectycubePushSender
-import com.connectycube.messenger.data.AppDatabase
-import com.connectycube.messenger.data.UserRepository
 import com.connectycube.pushnotifications.model.ConnectycubeEnvironment
 import com.connectycube.pushnotifications.model.ConnectycubeEvent
 import com.connectycube.pushnotifications.model.ConnectycubeNotificationType
@@ -32,14 +30,12 @@ class RTCSessionManager {
             }
     }
 
-    private var usersRepository: UserRepository? = null
     private var applicationContext: Context? = null
     private var sessionCallbackListener: RTCClientSessionCallbacks? = null
     var currentCall: RTCSession? = null
 
     fun init(applicationContext: Context) {
         this.applicationContext = applicationContext
-        this.usersRepository = UserRepository.getInstance(AppDatabase.getInstance(applicationContext).userDao())
         this.sessionCallbackListener = RTCSessionCallbackListenerSimple()
 
         ConnectycubeChatService.getInstance()
@@ -58,7 +54,6 @@ class RTCSessionManager {
 
         currentCall = rtcSession
 
-//        rtcSession.startCall(hashMapOf())
         startCallActivity(false)
 
         sendCallPushNotification(rtcSession.opponents, rtcSession.sessionID)
@@ -117,7 +112,6 @@ class RTCSessionManager {
 
         applicationContext = null
         sessionCallbackListener = null
-        usersRepository = null
     }
 
     private inner class RTCSessionCallbackListenerSimple : RTCClientSessionCallbacksImpl() {
