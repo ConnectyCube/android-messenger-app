@@ -3,11 +3,14 @@ package com.connectycube.messenger
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.os.Handler
+import android.view.View
 import android.view.ViewTreeObserver
+import androidx.lifecycle.Observer
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import com.connectycube.messenger.adapters.VideoCallAdapter
+import com.connectycube.messenger.viewmodels.CallViewModel
 import com.connectycube.users.model.ConnectycubeUser
 import com.connectycube.videochat.BaseSession
 import com.connectycube.videochat.RTCSession
@@ -39,10 +42,15 @@ class VideoCallFragment :
             ColorDrawable(
                 ContextCompat.getColor(
                     context!!,
-                    R.color.black_60
+                    R.color.grey_30
                 )
             )
         )
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        subscribeModel()
     }
 
     override fun onStart() {
@@ -78,11 +86,27 @@ class VideoCallFragment :
         }
     }
 
+    private fun subscribeModel() {
+        callViewModel.callSessionAction.observe(this, Observer {
+            it?.let {
+                when (it) {
+                    CallViewModel.CallSessionAction.SWITCHED_CAMERA -> {
+                        isCameraFront = !isCameraFront
+                        val localView = getViewHolderForUser(currentUser.id)?.rtcView
+                        localView?.let {
+                            updateVideoView(it, isCameraFront)
+                        }
+                    }
+                    else -> Timber.d("ignore")
+                }
+            }
+        })
+    }
+
     override fun initWithOpponents(opponents: List<ConnectycubeUser>?) {
         opponents?.let {
             users.clear()
             users.addAll(opponents)
-//            setUsersToAdapter()
         }
     }
 
@@ -115,10 +139,9 @@ class VideoCallFragment :
     }
 
     private fun updateViewSizeIfNeed() {
-        val height = recycler_view_opponents.getHeight() / 2
-            initCurrentUserViewHeight(height)
-            videoCallAdapter.itemHeight = height
-
+        val height = recycler_view_opponents.height / 2
+        initCurrentUserViewHeight(height)
+        videoCallAdapter.itemHeight = height
     }
 
     private fun initCurrentUserViewHeight(height: Int) {

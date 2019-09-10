@@ -105,6 +105,7 @@
     <string name="call_status_disconnected">Disconnected</string>
     <string name="call_status_closed">Closed</string>
     <string name="call_status_hang_up">Hung up</string>
+    <string name="camera_switch_error">Failed to switch camera"</string>
 
     <string name="incoming_audio_call_title">Incoming Audio Call</string>
     <string name="incoming_video_call_title">Incoming Video Call</string>

@@ -17,6 +17,7 @@ import com.connectycube.videochat.callbacks.RTCClientSessionCallbacks
 import com.connectycube.videochat.callbacks.RTCSessionEventsCallback
 import com.connectycube.videochat.callbacks.RTCSessionStateCallback
 import kotlinx.android.synthetic.main.activity_call.*
+import org.webrtc.CameraVideoCapturer
 import timber.log.Timber
 import java.util.HashMap
 
@@ -32,6 +33,7 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
     }
     private var currentSession: RTCSession? = null
     private var audioManager: AppRTCAudioManager? = null
+    private val cameraSwitchHandler = CameraSwitchHandler()
     private var isInComingCall: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,6 +59,7 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
         setSupportActionBar(toolbar)
         toggle_speaker.setOnClickListener { switchAudioDevice() }
         toggle_mute.setOnClickListener { setAudioMute(toggle_mute.isChecked) }
+        toggle_camera.setOnClickListener { switchCamera() }
         updateToolbar()
     }
 
@@ -65,6 +68,7 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
             if (isInComingCall && !showFull) {
                 toggle_speaker.visibility = View.INVISIBLE
                 toggle_mute.visibility = View.INVISIBLE
+                toggle_camera.visibility = View.INVISIBLE
             } else {
                 toggle_mute.visibility = View.VISIBLE
                 if (it.isAudioCall) {
@@ -100,6 +104,11 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
         currentSession?.apply {
             mediaStreamManager?.localAudioTrack?.setEnabled(isEnabled)
         }
+    }
+
+    private fun switchCamera() {
+        (currentSession?.mediaStreamManager?.videoCapturer as RTCCameraVideoCapturer)
+            .switchCamera(cameraSwitchHandler)
     }
 
     private fun initCall() {
@@ -310,5 +319,21 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
     }
 
     override fun onStateChanged(session: RTCSession?, state: BaseSession.RTCSessionState?) {
+    }
+
+    inner class CameraSwitchHandler : CameraVideoCapturer.CameraSwitchHandler {
+        override fun onCameraSwitchDone(isFront: Boolean) {
+            toggle_camera.isEnabled = true
+            callViewModel.callSessionAction.value = CallViewModel.CallSessionAction.SWITCHED_CAMERA
+        }
+
+        override fun onCameraSwitchError(err: String?) {
+            Toast.makeText(
+                applicationContext, getString(R.string.camera_switch_error),
+                Toast.LENGTH_SHORT
+            ).show()
+            toggle_camera.isEnabled = true
+        }
+
     }
 }
