@@ -15,6 +15,7 @@ import com.connectycube.users.model.ConnectycubeUser
 import com.connectycube.videochat.RTCSession
 import com.connectycube.videochat.RTCTypes
 import kotlinx.android.synthetic.main.fragment_incoming_call.*
+import timber.log.Timber
 
 
 class IncomingCallFragment : Fragment(R.layout.fragment_incoming_call) {

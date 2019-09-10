@@ -13,15 +13,11 @@ class AudioCallFragment :
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initViews()
-        initButtons()
     }
 
-    private fun initViews() {
+    override fun initViews() {
         inCallChronometer = chronometer
-        if (isIncomingCall) {
-            layout_outgoing_view.visibility = View.GONE
-        }
+        super.initViews()
     }
 
     override fun initWithOpponents(opponents: List<ConnectycubeUser>?) {
@@ -29,11 +25,5 @@ class AudioCallFragment :
             opponents?.filterNot { it.id == ConnectycubeChatService.getInstance().user.id }
         val names = opponentsFiltered?.joinToString { it.fullName ?: it.login }
         text_other_name.text = names
-    }
-
-    private fun initButtons() {
-        button_hangup.setOnClickListener {
-            callViewModel.callUserAction.value = CallViewModel.CallUserAction.HANGUP
-        }
     }
 }

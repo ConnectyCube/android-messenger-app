@@ -16,7 +16,7 @@ import com.connectycube.videochat.*
 import com.connectycube.videochat.callbacks.RTCClientSessionCallbacks
 import com.connectycube.videochat.callbacks.RTCSessionEventsCallback
 import com.connectycube.videochat.callbacks.RTCSessionStateCallback
-import kotlinx.android.synthetic.main.toolbar_call_activity.*
+import kotlinx.android.synthetic.main.activity_call.*
 import timber.log.Timber
 import java.util.HashMap
 

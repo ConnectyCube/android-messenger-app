@@ -14,7 +14,7 @@
             android:orientation="vertical"
             android:paddingLeft="64dp"
             android:paddingRight="64dp"
-            app:layout_constraintBottom_toTopOf="@+id/button_hangup"
+            app:layout_constraintBottom_toTopOf="@+id/call_hang_up"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -54,15 +54,12 @@
     </LinearLayout>
 
 
-    <androidx.appcompat.widget.AppCompatImageButton
-            android:id="@+id/button_hangup"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
+    <include
+            android:id="@+id/call_hang_up"
+            layout="@layout/call_hang_up"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/margin_big"
-            android:background="@drawable/selector_call_finish"
-            android:padding="16dp"
-            android:scaleType="centerCrop"
-            android:src="@drawable/ic_call_end_black_24dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />

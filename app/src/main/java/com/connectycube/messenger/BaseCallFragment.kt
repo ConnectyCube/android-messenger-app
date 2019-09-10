@@ -18,7 +18,9 @@ import com.connectycube.messenger.vo.Status
 import com.connectycube.users.model.ConnectycubeUser
 import com.connectycube.videochat.BaseSession
 import com.connectycube.videochat.RTCSession
+import kotlinx.android.synthetic.main.call_hang_up.*
 import kotlinx.android.synthetic.main.outgoing_view.*
+import timber.log.Timber
 
 abstract class BaseCallFragment(
     @LayoutRes contentLayoutId: Int,
@@ -29,6 +31,7 @@ abstract class BaseCallFragment(
     protected var currentSession: RTCSession? = null
     protected var isIncomingCall: Boolean = false
     protected var inCallChronometer: Chronometer? = null
+    protected var currentUser: ConnectycubeUser = ConnectycubeChatService.getInstance().user
 
     companion object {
         fun createInstance(fragment: BaseCallFragment, isIncomingCall: Boolean): BaseCallFragment {
@@ -44,10 +47,10 @@ abstract class BaseCallFragment(
         super.onCreate(savedInstanceState)
         val actionBar = (activity as AppCompatActivity).supportActionBar
         actionBar?.setTitle(title)
+        currentSession = RTCSessionManager.getInstance(activity!!.applicationContext).currentCall
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        currentSession = RTCSessionManager.getInstance(activity!!.applicationContext).currentCall
         arguments?.let {
             isIncomingCall = it.getBoolean(EXTRA_IS_INCOMING_CALL)
         }
@@ -57,6 +60,8 @@ abstract class BaseCallFragment(
                 InjectorUtils.provideCallViewModelFactory(it.application)
             ).get(CallViewModel::class.java)
         }
+        initButtons()
+        initViews()
         initOpponents()
         subscribeCallSessionAction()
     }
@@ -87,6 +92,10 @@ abstract class BaseCallFragment(
                         val names = opponentsFiltered?.joinToString { it.fullName ?: it.login }
                         text_opponents_names.text = names
                     }
+                    resource.data?.let { list ->
+                        currentUser =
+                            list.first { it.id == ConnectycubeChatService.getInstance().user.id }
+                    }
                     initWithOpponents(resource.data)
                 }
             })
@@ -111,6 +120,12 @@ abstract class BaseCallFragment(
         })
     }
 
+    protected open fun initViews() {
+        if (isIncomingCall) {
+            layout_outgoing_view.visibility = View.GONE
+        }
+    }
+
     private fun startInCallChronometer() {
         inCallChronometer?.apply {
             visibility = View.VISIBLE
@@ -121,5 +136,11 @@ abstract class BaseCallFragment(
 
     private fun stopInCallChronometer() {
         inCallChronometer?.stop()
+    }
+
+    private fun initButtons() {
+        button_hangup.setOnClickListener {
+            callViewModel.callUserAction.value = CallViewModel.CallUserAction.HANGUP
+        }
     }
 }
