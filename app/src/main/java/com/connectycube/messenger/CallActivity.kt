@@ -69,8 +69,10 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
                 toggle_mute.visibility = View.VISIBLE
                 if (it.isAudioCall) {
                     toggle_speaker.visibility = View.VISIBLE
+                    toggle_camera.visibility = View.GONE
                 } else {
-                    toggle_speaker.visibility = View.INVISIBLE
+                    toggle_speaker.visibility = View.GONE
+                    toggle_camera.visibility = View.VISIBLE
                 }
             }
         }

@@ -1,7 +1,11 @@
 package com.connectycube.messenger
 
+import android.graphics.drawable.ColorDrawable
+import android.os.Bundle
 import android.os.Handler
 import android.view.ViewTreeObserver
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import com.connectycube.messenger.adapters.VideoCallAdapter
 import com.connectycube.users.model.ConnectycubeUser
@@ -27,6 +31,19 @@ class VideoCallFragment :
     private var users: ArrayList<ConnectycubeUser> = ArrayList()
     private val mainHandler = Handler()
     private var isCameraFront = true
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val actionBar = (activity as AppCompatActivity).supportActionBar
+        actionBar?.setBackgroundDrawable(
+            ColorDrawable(
+                ContextCompat.getColor(
+                    context!!,
+                    R.color.black_60
+                )
+            )
+        )
+    }
 
     override fun onStart() {
         super.onStart()
@@ -188,12 +205,6 @@ class VideoCallFragment :
             { setViewCall(userId, videoTrack, true) },
             VIDEO_TRACK_INITIALIZE_DELAY
         )
-    }
-
-    private fun setUsersToAdapter() {
-        videoCallAdapter.addAll(users)
-
-        recycler_view_opponents.requestLayout()
     }
 
     private fun setUserToAdapter(user: ConnectycubeUser) {
