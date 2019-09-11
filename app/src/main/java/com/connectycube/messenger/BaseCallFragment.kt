@@ -115,6 +115,7 @@ abstract class BaseCallFragment(
                     CallViewModel.CallSessionAction.CALL_STOPPED -> {
                         stopInCallChronometer()
                     }
+                    else -> Timber.d("ignore")
                 }
             }
         })

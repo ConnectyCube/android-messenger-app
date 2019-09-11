@@ -116,6 +116,10 @@
     <string name="title_video_call">Video call</string>
     <string name="title_audio_call">Audio call</string>
 
+    <string name="status_connected">Connected</string>
+    <string name="status_closed">Closed</string>
+    <string name="status_disconnected">Disconnected</string>
+
 
     <!-- Errors -->
     <string name="error_credentials_empty">The App class should contain ConnectyCube credentials. Register new account and application at https://admin.connectycube.com

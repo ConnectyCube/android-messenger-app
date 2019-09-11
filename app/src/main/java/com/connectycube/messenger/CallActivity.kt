@@ -107,6 +107,7 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
     }
 
     private fun switchCamera() {
+        toggle_camera.isEnabled = false
         (currentSession?.mediaStreamManager?.videoCapturer as RTCCameraVideoCapturer)
             .switchCamera(cameraSwitchHandler)
     }

@@ -15,6 +15,7 @@ import com.connectycube.users.model.ConnectycubeUser
 import com.connectycube.videochat.BaseSession
 import com.connectycube.videochat.RTCSession
 import com.connectycube.videochat.callbacks.RTCClientVideoTracksCallback
+import com.connectycube.videochat.callbacks.RTCSessionStateCallback
 import com.connectycube.videochat.view.RTCSurfaceView
 import com.connectycube.videochat.view.RTCVideoTrack
 import kotlinx.android.synthetic.main.fragment_video_call.*
@@ -28,7 +29,7 @@ private const val VIDEO_TRACK_INITIALIZE_DELAY = 500L
 
 class VideoCallFragment :
     BaseCallFragment(R.layout.fragment_video_call, R.string.title_video_call),
-    RTCClientVideoTracksCallback<RTCSession> {
+    RTCClientVideoTracksCallback<RTCSession>, RTCSessionStateCallback<RTCSession> {
     private lateinit var videoCallAdapter: VideoCallAdapter
     private val userViewHolders: HashMap<Int, VideoCallAdapter.ViewHolder> = HashMap()
     private var users: ArrayList<ConnectycubeUser> = ArrayList()
@@ -56,24 +57,26 @@ class VideoCallFragment :
     override fun onStart() {
         super.onStart()
         initVideoTrackListener()
+        initSessionListener()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         releaseUserViewHolders()
         removeVideoTrackListener()
-        releaseOpponentsViews()
+        removeSessionListener()
+        releaseUsersViews()
     }
 
     private fun releaseUserViewHolders() {
         userViewHolders.clear()
     }
 
-    private fun releaseOpponentsViews() {
+    private fun releaseUsersViews() {
         val layoutManager = recycler_view_opponents.layoutManager
         layoutManager?.let { manager ->
             val childCount = manager.childCount
-            Timber.d("releaseOpponentsViews for  $childCount views")
+            Timber.d("releaseUsersViews for  $childCount views")
             for (i in 0 until childCount) {
                 val childView = manager.getChildAt(i)
                 Timber.d(" release View for  $i, $childView")
@@ -156,6 +159,7 @@ class VideoCallFragment :
             val holder = getViewHolderForUser(user.id)
             if (holder != null) videoCallAdapter.initViewHeight(holder, height)
         }
+        videoCallAdapter.itemHeight = height
     }
 
     private fun getViewHolderForUser(userId: Int): VideoCallAdapter.ViewHolder? {
@@ -206,7 +210,19 @@ class VideoCallFragment :
         }
     }
 
-    ////////////////////////////  RTCClientVideoTracksCallback callbacks  ///////////////////
+    private fun initSessionListener() {
+        currentSession?.apply {
+            addSessionCallbacksListener(this@VideoCallFragment)
+        }
+    }
+
+    private fun removeSessionListener() {
+        currentSession?.apply {
+            removeSessionCallbacksListener(this@VideoCallFragment)
+        }
+    }
+
+    //RTCClientVideoTracksCallback callbacks
     override fun onLocalVideoTrackReceive(rtcSession: RTCSession, videoTrack: RTCVideoTrack) {
         Timber.d("onLocalVideoTrackReceive currentUser= $currentUser")
         setUserToAdapter(currentUser)
@@ -230,6 +246,24 @@ class VideoCallFragment :
         )
     }
 
+    //    RTCSessionConnectionCallbacks
+    override fun onStateChanged(rtcSession: RTCSession, state: BaseSession.RTCSessionState) {
+
+    }
+
+    override fun onConnectedToUser(rtcSession: RTCSession, userId: Int) {
+        setStatusUser(userId, getString(R.string.status_connected))
+    }
+
+    override fun onConnectionClosedForUser(rtcSession: RTCSession, userId: Int) {
+        setStatusUser(userId, getString(R.string.status_closed))
+        removeUserFromAdapter(userId)
+    }
+
+    override fun onDisconnectedFromUser(rtcSession: RTCSession, userId: Int) {
+        setStatusUser(userId, getString(R.string.status_disconnected))
+    }
+
     private fun setUserToAdapter(user: ConnectycubeUser) {
         videoCallAdapter.add(user)
         recycler_view_opponents.requestLayout()
@@ -238,6 +272,15 @@ class VideoCallFragment :
     private fun setUserToAdapter(userId: Int) {
         val user = users.first { it.id == userId }
         setUserToAdapter(user)
+    }
+
+    private fun removeUserFromAdapter(userId: Int) {
+        val itemHolder = getViewHolderForUser(userId)
+        if (itemHolder != null) {
+            Timber.d("removeUserFromAdapter opponentsAdapter.removeItem")
+            videoCallAdapter.removeItem(itemHolder.adapterPosition)
+            userViewHolders.remove(userId)
+        }
     }
 
     private fun setViewCall(userId: Int, videoTrack: RTCVideoTrack, remoteRenderer: Boolean) {
@@ -275,6 +318,11 @@ class VideoCallFragment :
         surfaceViewRenderer.setScalingType(scalingType)
         surfaceViewRenderer.setMirror(mirror)
         surfaceViewRenderer.requestLayout()
+    }
+
+    private fun setStatusUser(userId: Int, status: String) {
+        val holder = findHolder(userId) ?: return
+        holder.connectionStatus.text = status
     }
 
     private fun isCurrentSessionClosed(): Boolean {
