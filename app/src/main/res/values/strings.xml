@@ -141,6 +141,7 @@
     <string name="group_description">Group Description</string>
     <string name="put_there_some_information_about_group">Put there some additional information about group</string>
     <string name="title_select_call_members">Select call members</string>
+    <string name="denied_permission">You can\'t go on without an access to %s</string>
 
     <!--fix for Matisse lib-->
     <plurals name="error_over_count">

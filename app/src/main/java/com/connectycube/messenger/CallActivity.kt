@@ -10,6 +10,8 @@ import com.connectycube.chat.ConnectycubeChatService
 import com.connectycube.chat.WebRTCSignaling
 import com.connectycube.messenger.helpers.RTCSessionManager
 import com.connectycube.messenger.utilities.InjectorUtils
+import com.connectycube.messenger.utilities.PermissionsHelper
+import com.connectycube.messenger.utilities.REQUEST_PERMISSION_CALL
 import com.connectycube.messenger.utilities.observeOnce
 import com.connectycube.messenger.viewmodels.CallViewModel
 import com.connectycube.videochat.*
@@ -19,7 +21,6 @@ import com.connectycube.videochat.callbacks.RTCSessionStateCallback
 import kotlinx.android.synthetic.main.activity_call.*
 import org.webrtc.CameraVideoCapturer
 import timber.log.Timber
-import java.util.HashMap
 
 
 const val MAX_OPPONENTS = 4
@@ -31,6 +32,7 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
     private val callViewModel: CallViewModel by viewModels {
         InjectorUtils.provideCallViewModelFactory(this.application)
     }
+    private val permissionsHelper = PermissionsHelper(this)
     private var currentSession: RTCSession? = null
     private var audioManager: AppRTCAudioManager? = null
     private val cameraSwitchHandler = CameraSwitchHandler()
@@ -43,7 +45,7 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
         initToolbar()
         initCall()
         initAudioManager()
-        startFragment()
+        checkPermissionsAndProceed()
     }
 
     private fun initSession() {
@@ -62,6 +64,14 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
         toggle_camera.setOnClickListener { switchCamera() }
         toggle_mute_camera.setOnClickListener { setMuteCamera(toggle_mute_camera.isChecked) }
         updateToolbar()
+    }
+
+    private fun checkPermissionsAndProceed() {
+        if (permissionsHelper.areCallPermissionsGranted()) {
+            startFragment()
+        } else {
+            permissionsHelper.requestCallPermissions()
+        }
     }
 
     private fun updateToolbar(showFull: Boolean = false) {
@@ -227,8 +237,37 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
         subscribeCallScreen()
     }
 
-    fun rejectCurrentSession() {
+    private fun rejectCurrentSession() {
         currentSession?.rejectCall(HashMap<String, String>())
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>, grantResults: IntArray
+    ) {
+        when (requestCode) {
+            REQUEST_PERMISSION_CALL -> {
+                if (permissionsHelper.areCallPermissionsGranted()) {
+                    Timber.d("permission was granted")
+                    startFragment()
+                } else {
+                    Timber.d("permission was denied")
+                    Toast.makeText(
+                        this,
+                        getString(
+                            R.string.denied_permission,
+                            permissions.joinToString()
+                        ),
+                        Toast.LENGTH_LONG
+                    ).show()
+                    finish()
+                }
+                return
+            }
+            else -> {
+                // Ignore all other requests.
+            }
+        }
     }
 
     private fun initIncomingStopCallTask() {
@@ -306,7 +345,7 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
     ) {
     }
 
-    fun hangUpCurrentSession() {
+    private fun hangUpCurrentSession() {
         currentSession?.hangUp(HashMap<String, String>())
     }
 
