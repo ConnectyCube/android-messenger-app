@@ -55,11 +55,7 @@ class AppNotificationManager {
 
         val notificationManager = NotificationManagerCompat.from(context)
 
-        val intent = Intent(context, LoginActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            action = Intent.ACTION_MAIN
-            addCategory(Intent.CATEGORY_LAUNCHER)
-        }
+        val intent = Intent(context, LoginActivity::class.java)
 
         val pendingIntent: PendingIntent = PendingIntent.getActivity(context, 0, intent, 0)
 

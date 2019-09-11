@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.lifecycle.observe
 import androidx.recyclerview.widget.DefaultItemAnimator
@@ -20,6 +21,8 @@ import kotlinx.android.synthetic.main.activity_create_chat.progressbar
 import kotlinx.android.synthetic.main.activity_create_chat.users_recycler_view
 import kotlinx.android.synthetic.main.activity_select_users.*
 import java.util.*
+
+const val MAX_OPPONENTS_LIMIT = 3
 
 class SelectCallMembersActivity : BaseChatActivity(), CheckableUsersAdapter.CheckableUsersAdapterCallback {
 
@@ -109,6 +112,16 @@ class SelectCallMembersActivity : BaseChatActivity(), CheckableUsersAdapter.Chec
     }
 
     override fun onUserSelected(user: ConnectycubeUser, checked: Boolean) {
+        if(checked && selectedUsers.size == MAX_OPPONENTS_LIMIT){
+            Toast.makeText(this,
+                getString(R.string.limit_users_to_selection,
+                    MAX_OPPONENTS_LIMIT.toString()),
+                Toast.LENGTH_LONG)
+                .show()
+            usersAdapter.notifyDataSetChanged()
+            return
+        }
+
         selectCallMembersViewModel.updateUserSelection(user, checked)
     }
 
