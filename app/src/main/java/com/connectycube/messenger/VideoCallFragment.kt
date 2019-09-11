@@ -115,6 +115,7 @@ class VideoCallFragment :
 
     override fun initViews() {
         super.initViews()
+        chronometerInCall = chronometer
         initRecyclerView()
         initAdapter()
     }

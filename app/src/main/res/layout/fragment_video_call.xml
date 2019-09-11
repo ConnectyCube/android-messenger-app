@@ -18,6 +18,19 @@
             tools:listitem="@layout/list_item_call_opponent"
             tools:targetApi="jelly_bean_mr1" />
 
+    <Chronometer
+            android:id="@+id/chronometer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="@dimen/margin_big"
+            android:textColor="@color/dark_grey"
+            android:textSize="16sp"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible"/>
 
     <include
             android:id="@+id/outgoing_view"

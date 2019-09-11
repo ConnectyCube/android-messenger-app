@@ -58,8 +58,9 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
     private fun initToolbar() {
         setSupportActionBar(toolbar)
         toggle_speaker.setOnClickListener { switchAudioDevice() }
-        toggle_mute.setOnClickListener { setAudioMute(toggle_mute.isChecked) }
+        toggle_mute_mic.setOnClickListener { setAudioMute(toggle_mute_mic.isChecked) }
         toggle_camera.setOnClickListener { switchCamera() }
+        toggle_mute_camera.setOnClickListener { setMuteCamera(toggle_mute_camera.isChecked) }
         updateToolbar()
     }
 
@@ -67,16 +68,19 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
         currentSession?.let {
             if (isInComingCall && !showFull) {
                 toggle_speaker.visibility = View.INVISIBLE
-                toggle_mute.visibility = View.INVISIBLE
+                toggle_mute_mic.visibility = View.INVISIBLE
                 toggle_camera.visibility = View.INVISIBLE
+                toggle_mute_camera.visibility = View.INVISIBLE
             } else {
-                toggle_mute.visibility = View.VISIBLE
+                toggle_mute_mic.visibility = View.VISIBLE
                 if (it.isAudioCall) {
                     toggle_speaker.visibility = View.VISIBLE
                     toggle_camera.visibility = View.GONE
+                    toggle_mute_camera.visibility = View.GONE
                 } else {
                     toggle_speaker.visibility = View.GONE
                     toggle_camera.visibility = View.VISIBLE
+                    toggle_mute_camera.visibility = View.VISIBLE
                 }
             }
         }
@@ -110,6 +114,12 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
         toggle_camera.isEnabled = false
         (currentSession?.mediaStreamManager?.videoCapturer as RTCCameraVideoCapturer)
             .switchCamera(cameraSwitchHandler)
+    }
+
+    private fun setMuteCamera(isEnabled: Boolean) {
+        currentSession?.apply {
+            mediaStreamManager?.localVideoTrack?.setEnabled(isEnabled)
+        }
     }
 
     private fun initCall() {

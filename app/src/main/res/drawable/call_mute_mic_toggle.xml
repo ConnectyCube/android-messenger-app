@@ -5,5 +5,5 @@
             android:drawable="@drawable/call_toggle_background" />
     <item
             android:id="@+id/toggle"
-            android:drawable="@drawable/selector_toggle_mute_button" />
+            android:drawable="@drawable/selector_toggle_mute_mic_button" />
 </layer-list>
