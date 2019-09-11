@@ -259,14 +259,11 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
         }
     }
 
-    override fun onReceiveHangUpFromUser(session: RTCSession?,
-                                         userId: Int?,
+    override fun onReceiveHangUpFromUser(session: RTCSession,
+                                         userId: Int,
                                          userInfo: MutableMap<String, String>?
     ) {
-        Toast.makeText(
-            applicationContext, "User $userId " + getString(R.string.call_status_hang_up),
-            Toast.LENGTH_SHORT
-        ).show()
+        Timber.d("onReceiveHangUpFromUser userId= $userId")
     }
 
     override fun onCallAcceptByUser(session: RTCSession?,

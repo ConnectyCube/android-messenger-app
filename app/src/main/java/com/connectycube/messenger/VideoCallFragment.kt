@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.view.View
 import android.view.ViewTreeObserver
+import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -13,8 +14,10 @@ import com.connectycube.messenger.adapters.VideoCallAdapter
 import com.connectycube.messenger.viewmodels.CallViewModel
 import com.connectycube.users.model.ConnectycubeUser
 import com.connectycube.videochat.BaseSession
+import com.connectycube.videochat.RTCClient
 import com.connectycube.videochat.RTCSession
 import com.connectycube.videochat.callbacks.RTCClientVideoTracksCallback
+import com.connectycube.videochat.callbacks.RTCSessionEventsCallback
 import com.connectycube.videochat.callbacks.RTCSessionStateCallback
 import com.connectycube.videochat.view.RTCSurfaceView
 import com.connectycube.videochat.view.RTCVideoTrack
@@ -29,7 +32,8 @@ private const val VIDEO_TRACK_INITIALIZE_DELAY = 500L
 
 class VideoCallFragment :
     BaseCallFragment(R.layout.fragment_video_call, R.string.title_video_call),
-    RTCClientVideoTracksCallback<RTCSession>, RTCSessionStateCallback<RTCSession> {
+    RTCClientVideoTracksCallback<RTCSession>, RTCSessionStateCallback<RTCSession>,
+    RTCSessionEventsCallback {
     private lateinit var videoCallAdapter: VideoCallAdapter
     private val userViewHolders: HashMap<Int, VideoCallAdapter.ViewHolder> = HashMap()
     private var users: ArrayList<ConnectycubeUser> = ArrayList()
@@ -58,6 +62,7 @@ class VideoCallFragment :
         super.onStart()
         initVideoTrackListener()
         initSessionListener()
+        initRTCClientListener()
     }
 
     override fun onDestroyView() {
@@ -65,6 +70,7 @@ class VideoCallFragment :
         releaseUserViewHolders()
         removeVideoTrackListener()
         removeSessionListener()
+        removeRTCClientListener()
         releaseUsersViews()
     }
 
@@ -90,9 +96,9 @@ class VideoCallFragment :
     }
 
     private fun subscribeModel() {
-        callViewModel.callSessionAction.observe(this, Observer {
-            it?.let {
-                when (it) {
+        callViewModel.callSessionAction.observe(this, Observer { action ->
+            action?.let { result ->
+                when (result) {
                     CallViewModel.CallSessionAction.SWITCHED_CAMERA -> {
                         isCameraFront = !isCameraFront
                         val localView = getViewHolderForUser(currentUser.id)?.rtcView
@@ -223,6 +229,14 @@ class VideoCallFragment :
         }
     }
 
+    private fun initRTCClientListener() {
+        RTCClient.getInstance(context).addSessionCallbacksListener(this@VideoCallFragment)
+    }
+
+    private fun removeRTCClientListener() {
+        RTCClient.getInstance(context).removeSessionsCallbacksListener(this@VideoCallFragment)
+    }
+
     //RTCClientVideoTracksCallback callbacks
     override fun onLocalVideoTrackReceive(rtcSession: RTCSession, videoTrack: RTCVideoTrack) {
         Timber.d("onLocalVideoTrackReceive currentUser= $currentUser")
@@ -263,6 +277,41 @@ class VideoCallFragment :
 
     override fun onDisconnectedFromUser(rtcSession: RTCSession, userId: Int) {
         setStatusUser(userId, getString(R.string.status_disconnected))
+    }
+
+    //RTCClientSessionUserCallbacks
+    override fun onUserNotAnswer(session: RTCSession, userId: Int) {
+        Timber.d("onUserNotAnswer= $userId")
+    }
+
+    override fun onCallRejectByUser(session: RTCSession,
+                                    userId: Int,
+                                    userInfo: Map<String, String>?
+    ) {
+        Timber.d("onCallRejectByUser= $userId")
+    }
+
+    override fun onCallAcceptByUser(session: RTCSession,
+                                    userId: Int,
+                                    userInfo: Map<String, String>?
+    ) {
+        Timber.d("onCallAcceptByUser= $userId")
+    }
+
+    override fun onReceiveHangUpFromUser(session: RTCSession,
+                                         userId: Int,
+                                         userInfo: Map<String, String>?
+    ) {
+        Timber.d("onReceiveHangUpFromUser user= $userId")
+        val user = users.first { it.id == userId }
+        Toast.makeText(
+            context, "${user.fullName
+                ?: user.login} " + getString(R.string.call_status_hang_up),
+            Toast.LENGTH_SHORT
+        ).show()
+    }
+
+    override fun onSessionClosed(session: RTCSession) {
     }
 
     private fun setUserToAdapter(user: ConnectycubeUser) {
