@@ -47,7 +47,7 @@ abstract class BaseCallFragment(
         super.onCreate(savedInstanceState)
         val actionBar = (activity as AppCompatActivity).supportActionBar
         actionBar?.setTitle(title)
-        currentSession = RTCSessionManager.getInstance(activity!!.applicationContext).currentCall
+        currentSession = RTCSessionManager.getInstance().currentCall
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

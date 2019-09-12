@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.connectycube.chat.ConnectycubeChatService
 import com.connectycube.chat.IncomingMessagesManager
-import com.connectycube.chat.WebRTCSignaling
 import com.connectycube.chat.exception.ChatException
 import com.connectycube.chat.listeners.ChatDialogMessageListener
 import com.connectycube.chat.model.ConnectycubeChatDialog
@@ -25,9 +24,6 @@ import com.connectycube.messenger.utilities.loadUserAvatar
 import com.connectycube.messenger.viewmodels.ChatDialogListViewModel
 import com.connectycube.messenger.vo.Status
 import com.connectycube.users.model.ConnectycubeUser
-import com.connectycube.videochat.RTCClient
-import com.connectycube.videochat.RTCSession
-import com.connectycube.videochat.callbacks.RTCClientSessionCallbacksImpl
 import kotlinx.android.synthetic.main.activity_chatdialogs.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -112,19 +108,6 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
     fun initManagers() {
         incomingMessagesManager = ConnectycubeChatService.getInstance().incomingMessagesManager
         incomingMessagesManager?.addDialogMessageListener(AllMessageListener())
-
-        initCallListener()
-    }
-
-    private fun initCallListener() {
-        ConnectycubeChatService.getInstance().videoChatWebRTCSignalingManager?.addSignalingManagerListener { signaling, createdLocally ->
-            if (!createdLocally) {
-                RTCClient.getInstance(this).addSignaling(signaling as WebRTCSignaling)
-            }
-        }
-
-        RTCClient.getInstance(this).addSessionCallbacksListener(RTCSessionCallbackListenerSimple(this))
-        RTCClient.getInstance(this).prepareToProcessCalls()
     }
 
     fun unregisterChatManagers() {
@@ -243,13 +226,6 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
                 Timber.d("processMessage chatDialogListViewModel.updateChat chatMessage= " + chatMessage.body)
                 chatDialogListViewModel.updateChat(dialogId)
             }
-        }
-    }
-
-    private inner class RTCSessionCallbackListenerSimple (val context: Context): RTCClientSessionCallbacksImpl() {
-        override fun onReceiveNewSession(session: RTCSession?) {
-            super.onReceiveNewSession(session)
-            session?.let { RTCSessionManager.getInstance(context).receiveCall(session) }
         }
     }
 }

@@ -51,7 +51,7 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
     }
 
     private fun initSession() {
-        currentSession = RTCSessionManager.getInstance(this).currentCall
+        currentSession = RTCSessionManager.getInstance().currentCall
         currentSession?.addSessionCallbacksListener(this@CallActivity)
     }
 
@@ -309,19 +309,11 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
 
     override fun onReceiveNewSession(session: RTCSession) {
         Timber.d("onReceiveNewSession")
-        if (currentSession == null) {
-            initCurrentSession(session)
-        } else {
-            Timber.d("Stop new session. Device now is busy")
+        if (currentSession != null) {
+            Timber.d("reject new session, device is busy")
             session.rejectCall(null)
         }
     }
-
-    private fun initCurrentSession(session: RTCSession) {
-        Timber.d("Init new RTCSession")
-        currentSession = session
-    }
-
 
     override fun onUserNoActions(session: RTCSession?, userId: Int?) {
     }
@@ -349,8 +341,10 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
 
     private fun releaseCurrentCall() {
         audioManager?.stop()
+        RTCClient.getInstance(this).removeSessionsCallbacksListener(this)
+        currentSession?.removeSessionCallbacksListener(this)
         currentSession = null
-        RTCSessionManager.getInstance(applicationContext).endCall()
+        RTCSessionManager.getInstance().endCall()
     }
 
     override fun onDisconnectedFromUser(session: RTCSession?, userID: Int?) {

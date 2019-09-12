@@ -1,9 +1,13 @@
 package com.connectycube.messenger.helpers
 
 import android.content.Context
+import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import com.connectycube.chat.ConnectycubeChatService
 import com.connectycube.chat.WebRTCSignaling
 import com.connectycube.core.helper.StringifyArrayList
+import com.connectycube.messenger.CallActivity
+import com.connectycube.messenger.EXTRA_IS_INCOMING_CALL
 import com.connectycube.messenger.R
 import com.connectycube.messenger.api.ConnectycubePushSender
 import com.connectycube.pushnotifications.model.ConnectycubeEnvironment
@@ -96,13 +100,14 @@ class RTCSessionManager {
         currentCall = null
     }
 
-    private fun startCallActivity(isIncomig: Boolean) {
-        Timber.w("start call incoming - $isIncomig")
+    private fun startCallActivity(isIncoming: Boolean) {
+        Timber.w("start call incoming - $isIncoming")
 
-//        val intent = Intent(context, CallActivity::class.java)
-//        intent.putExtra(EXTRA_CALL_DIRECTION, isIncomig)
+        val intent = Intent(applicationContext, CallActivity::class.java)
+        intent.flags = FLAG_ACTIVITY_NEW_TASK
+        intent.putExtra(EXTRA_IS_INCOMING_CALL, isIncoming)
 
-//        context.startActivity(intent)
+        applicationContext?.startActivity(intent)
     }
 
     fun destroy() {

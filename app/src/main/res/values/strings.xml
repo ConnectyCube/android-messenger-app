@@ -90,15 +90,6 @@
     <string name="chats_channel_description">Notifications about new messages in chats</string>
     <string name="new_message">New message</string>
 
-    <!--Notifications-->
-    <string name="you_have_got_new_incoming_call_open_app_to_manage_it">You have got new Incoming Call. Open app to manage it</string>
-    <string name="calls_channel_name">Calls</string>
-    <string name="calls_channel_description">Notifications about incoming calls</string>
-    <string name="incoming_call">Incoming Call</string>
-    <string name="chats_channel_name">Chats</string>
-    <string name="chats_channel_description">Notifications about new messages in chats</string>
-    <string name="new_message">New message</string>
-
     <!--CallActivity-->
     <string name="call_status_connect">Connect…</string>
     <string name="call_status_connected">Connected</string>
@@ -148,7 +139,5 @@
         <item quantity="one">You can only select one media file</item>
         <item quantity="many">You can only select up to %1$d media files</item>
     </plurals>
-
-    <string name="sender_id"></string>
 
 </resources>

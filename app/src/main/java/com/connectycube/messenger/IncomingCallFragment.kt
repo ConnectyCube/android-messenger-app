@@ -37,20 +37,20 @@ class IncomingCallFragment : Fragment(R.layout.fragment_incoming_call) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         activity?.let {
-            currentSession = RTCSessionManager.getInstance(it.applicationContext).currentCall
+            currentSession = RTCSessionManager.getInstance().currentCall
             callViewModel = ViewModelProviders.of(it).get(CallViewModel::class.java)
         }
         initArguments()
         initFields()
     }
 
-    override fun onStart() {
-        super.onStart()
+    override fun onResume() {
+        super.onResume()
         startRingtone()
     }
 
-    override fun onStop() {
-        super.onStop()
+    override fun onPause() {
+        super.onPause()
         stopRingtone()
     }
 
