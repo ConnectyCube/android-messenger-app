@@ -8,6 +8,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.connectycube.chat.ConnectycubeChatService
 import com.connectycube.messenger.helpers.RTCSessionManager
+import com.connectycube.messenger.helpers.RingtoneManager
 import com.connectycube.messenger.utilities.loadUserAvatar
 import com.connectycube.messenger.viewmodels.CallViewModel
 import com.connectycube.messenger.vo.Status
@@ -20,6 +21,7 @@ import timber.log.Timber
 
 class IncomingCallFragment : Fragment(R.layout.fragment_incoming_call) {
     private var currentSession: RTCSession? = null
+    private lateinit var ringtoneManager: RingtoneManager
     private var opponentsIds: List<Int>? = null
     private var conferenceType: RTCTypes.ConferenceType? = null
 
@@ -30,6 +32,7 @@ class IncomingCallFragment : Fragment(R.layout.fragment_incoming_call) {
         super.onCreate(savedInstanceState)
         val actionBar = (activity as AppCompatActivity).supportActionBar
         actionBar?.setTitle(R.string.title_incoming_call)
+        ringtoneManager = RingtoneManager(context!!)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -39,6 +42,26 @@ class IncomingCallFragment : Fragment(R.layout.fragment_incoming_call) {
         }
         initArguments()
         initFields()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        startRingtone()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        stopRingtone()
+    }
+
+    private fun startRingtone() {
+        Timber.d("startRingtone")
+        ringtoneManager.start(looping = false, vibrate = true)
+    }
+
+    private fun stopRingtone() {
+        Timber.d("stopRingtone()")
+        ringtoneManager.stop()
     }
 
     private fun initArguments() {
@@ -85,10 +108,12 @@ class IncomingCallFragment : Fragment(R.layout.fragment_incoming_call) {
 
     private fun reject() {
         callViewModel.incomingCallAction.value = CallViewModel.CallUserAction.REJECT
+        stopRingtone()
     }
 
     private fun accept() {
         callViewModel.incomingCallAction.value = CallViewModel.CallUserAction.ACCEPT
+        stopRingtone()
     }
 
 }

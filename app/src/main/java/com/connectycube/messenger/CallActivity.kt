@@ -9,6 +9,7 @@ import androidx.lifecycle.Observer
 import com.connectycube.chat.ConnectycubeChatService
 import com.connectycube.chat.WebRTCSignaling
 import com.connectycube.messenger.helpers.RTCSessionManager
+import com.connectycube.messenger.helpers.RingtoneManager
 import com.connectycube.messenger.utilities.InjectorUtils
 import com.connectycube.messenger.utilities.PermissionsHelper
 import com.connectycube.messenger.utilities.REQUEST_PERMISSION_CALL
@@ -22,7 +23,6 @@ import kotlinx.android.synthetic.main.activity_call.*
 import org.webrtc.CameraVideoCapturer
 import timber.log.Timber
 
-
 const val MAX_OPPONENTS = 4
 const val EXTRA_IS_INCOMING_CALL = "conversation_type"
 
@@ -33,6 +33,7 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
         InjectorUtils.provideCallViewModelFactory(this.application)
     }
     private val permissionsHelper = PermissionsHelper(this)
+    private lateinit var ringtoneManager: RingtoneManager
     private var currentSession: RTCSession? = null
     private var audioManager: AppRTCAudioManager? = null
     private val cameraSwitchHandler = CameraSwitchHandler()
@@ -45,6 +46,7 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
         initToolbar()
         initCall()
         initAudioManager()
+        initRingtoneManager()
         checkPermissionsAndProceed()
     }
 
@@ -169,12 +171,16 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
         }
     }
 
+    private fun initRingtoneManager() {
+        ringtoneManager = RingtoneManager(this, R.raw.ringtone_outgoing)
+    }
+
     private fun startFragment() {
         if (isInComingCall) {
-            initIncomingStopCallTask()
             startIncomingCallFragment()
             subscribeIncomingScreen()
         } else {
+            ringtoneManager.start()
             startCall()
         }
     }
@@ -270,25 +276,11 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
         }
     }
 
-    private fun initIncomingStopCallTask() {
-//        showIncomingCallWindowTaskHandler = Handler(Looper.myLooper())
-//        showIncomingCallWindowTask = {
-//            if (currentSession == null) {
-//                return
-//            }
-//
-//            val currentSessionState = currentSession.getState()
-//            if (RTCSession.RTCSessionState.RTC_SESSION_NEW == currentSessionState) {
-//                rejectCurrentSession()
-//            } else {
-//                ringtonePlayer.stop()
-//                hangUpCurrentSession()
-//            }
-//            showToast("Call was stopped by timer")
-//        }
-    }
-
     override fun onUserNotAnswer(session: RTCSession?, userId: Int?) {
+        if (session != currentSession) {
+            return
+        }
+        ringtoneManager.stop()
     }
 
     override fun onSessionStartClose(session: RTCSession) {
@@ -309,6 +301,10 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
                                     userId: Int?,
                                     data: MutableMap<String, String>?
     ) {
+        if (session != currentSession) {
+            return
+        }
+        ringtoneManager.stop()
     }
 
     override fun onReceiveNewSession(session: RTCSession) {
@@ -335,6 +331,7 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
         if (session == currentSession) {
             Timber.d("release currentSession")
             releaseCurrentCall()
+            ringtoneManager.stop()
             finish()
         }
     }
@@ -346,6 +343,7 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
     }
 
     private fun hangUpCurrentSession() {
+        ringtoneManager.stop()
         currentSession?.hangUp(HashMap<String, String>())
     }
 
