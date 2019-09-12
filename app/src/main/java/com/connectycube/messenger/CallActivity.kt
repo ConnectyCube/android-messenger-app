@@ -6,8 +6,6 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import com.connectycube.chat.ConnectycubeChatService
-import com.connectycube.chat.WebRTCSignaling
 import com.connectycube.messenger.helpers.RTCSessionManager
 import com.connectycube.messenger.helpers.RingtoneManager
 import com.connectycube.messenger.utilities.InjectorUtils
@@ -23,7 +21,6 @@ import kotlinx.android.synthetic.main.activity_call.*
 import org.webrtc.CameraVideoCapturer
 import timber.log.Timber
 
-const val MAX_OPPONENTS = 4
 const val EXTRA_IS_INCOMING_CALL = "conversation_type"
 
 class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSessionCallbacks,
@@ -135,18 +132,7 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
     }
 
     private fun initCall() {
-        ConnectycubeChatService.getInstance().videoChatWebRTCSignalingManager?.addSignalingManagerListener { signaling, createdLocally ->
-            if (!createdLocally) {
-                RTCClient.getInstance(this).addSignaling(signaling as WebRTCSignaling)
-            }
-        }
-
-        // Configure
-        //
-        RTCConfig.setMaxOpponentsCount(MAX_OPPONENTS)
-        RTCConfig.setDebugEnabled(true)
         RTCClient.getInstance(this).addSessionCallbacksListener(this)
-        RTCClient.getInstance(this).prepareToProcessCalls()
     }
 
     private fun initAudioManager() {

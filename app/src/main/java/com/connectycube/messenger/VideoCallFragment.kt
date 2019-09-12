@@ -149,7 +149,11 @@ class VideoCallFragment :
     }
 
     private fun updateViewSizeIfNeed() {
-        val height = recycler_view_opponents.height / 2
+        val height = if (videoCallAdapter.itemCount < 2) {
+            recycler_view_opponents.height
+        } else {
+            recycler_view_opponents.height / 2
+        }
         initCurrentUserViewHeight(height)
         videoCallAdapter.itemHeight = height
     }
@@ -253,8 +257,8 @@ class VideoCallFragment :
                                            userId: Int
     ) {
         Timber.d("onRemoteVideoTrackReceive userId= $userId")
-        updateViewSizeIfNeed()
         setUserToAdapter(userId)
+        updateViewSizeIfNeed()
         mainHandler.postDelayed(
             { setViewCall(userId, videoTrack, true) },
             VIDEO_TRACK_INITIALIZE_DELAY
@@ -331,6 +335,7 @@ class VideoCallFragment :
             videoCallAdapter.removeItem(itemHolder.adapterPosition)
             userViewHolders.remove(userId)
         }
+        updateViewSizeIfNeed()
     }
 
     private fun setViewCall(userId: Int, videoTrack: RTCVideoTrack, remoteRenderer: Boolean) {
