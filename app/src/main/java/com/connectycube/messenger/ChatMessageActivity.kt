@@ -27,6 +27,8 @@ import com.connectycube.core.exception.ResponseException
 import com.connectycube.messenger.adapters.ChatMessageAdapter
 import com.connectycube.messenger.adapters.AttachmentClickListener
 import com.connectycube.messenger.api.ConnectycubeMessageSender
+import com.connectycube.messenger.helpers.startAudioCall
+import com.connectycube.messenger.helpers.startVideoCall
 import com.connectycube.messenger.paging.Status
 import com.connectycube.messenger.utilities.*
 import com.connectycube.messenger.viewmodels.AttachmentViewModel
@@ -35,7 +37,6 @@ import com.connectycube.users.model.ConnectycubeUser
 import com.google.android.material.button.MaterialButton.ICON_GRAVITY_START
 import com.google.android.material.button.MaterialButton.ICON_GRAVITY_TEXT_END
 import com.zhihu.matisse.Matisse
-import kotlinx.android.synthetic.main.activity_chat_dialog_details.*
 import kotlinx.android.synthetic.main.activity_chatmessages.*
 import kotlinx.android.synthetic.main.activity_chatmessages.avatar_img
 import kotlinx.android.synthetic.main.activity_chatmessages.back_btn
@@ -343,11 +344,13 @@ class ChatMessageActivity : BaseChatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.menu_action_video -> {
-                Toast.makeText(this, R.string.coming_soon, Toast.LENGTH_SHORT).show()
+                startVideoCall(this, ArrayList(chatDialog.occupants.filter { it != ConnectycubeChatService.getInstance().user.id }))
+//                Toast.makeText(this, R.string.coming_soon, Toast.LENGTH_SHORT).show()
                 true
             }
             R.id.menu_action_audio -> {
-                Toast.makeText(this, R.string.coming_soon, Toast.LENGTH_SHORT).show()
+                startAudioCall(this, ArrayList(chatDialog.occupants.filter { it != ConnectycubeChatService.getInstance().user.id }))
+//                Toast.makeText(this, R.string.coming_soon, Toast.LENGTH_SHORT).show()
                 true
             }
             else -> super.onOptionsItemSelected(item)

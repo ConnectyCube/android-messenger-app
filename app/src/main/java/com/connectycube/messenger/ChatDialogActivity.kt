@@ -16,6 +16,7 @@ import com.connectycube.chat.model.ConnectycubeChatDialog
 import com.connectycube.chat.model.ConnectycubeChatMessage
 import com.connectycube.messenger.adapters.ChatDialogAdapter
 import com.connectycube.messenger.api.UserService
+import com.connectycube.messenger.helpers.RTCSessionManager
 import com.connectycube.messenger.utilities.InjectorUtils
 import com.connectycube.messenger.utilities.SharedPreferencesManager
 import com.connectycube.messenger.utilities.loadUserAvatar
@@ -23,9 +24,6 @@ import com.connectycube.messenger.viewmodels.ChatDialogListViewModel
 import com.connectycube.messenger.vo.Status
 import com.connectycube.users.model.ConnectycubeUser
 import kotlinx.android.synthetic.main.activity_chatdialogs.*
-import kotlinx.android.synthetic.main.activity_chatdialogs.progressbar
-import kotlinx.android.synthetic.main.activity_chatdialogs.avatar_img
-import kotlinx.android.synthetic.main.activity_chatdialogs.toolbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -88,7 +86,7 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
                 Status.SUCCESS -> {
                     hideProgress(progressbar)
                     val listChatDialogs = resource.data
-                    Timber.d("chatDialogListViewModel.getChats() = $listChatDialogs" + ", conUser= " + listChatDialogs!![0])
+                    Timber.d("chatDialogListViewModel.getChats() = $listChatDialogs")
                     updateDialogAdapter(listChatDialogs)
                 }
                 Status.LOADING -> Timber.d("Status.LOADING")
@@ -97,7 +95,7 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
         }
     }
 
-    private fun updateDialogAdapter(listChats: List<ConnectycubeChatDialog>) {
+    private fun updateDialogAdapter(listChats: List<ConnectycubeChatDialog>?) {
         chatDialogAdapter.submitList(listChats)
     }
 
@@ -192,6 +190,7 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
         chatDialogListViewModel.chatLiveDataLazy.removeObservers(this)
         GlobalScope.launch(Dispatchers.Main) {
             UserService.instance.ultimateLogout(applicationContext)
+            RTCSessionManager.getInstance().destroy()
             SharedPreferencesManager.getInstance(applicationContext).deleteCurrentUser()
             startLoginActivity()
             hideProgress(progressbar)
