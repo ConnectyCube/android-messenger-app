@@ -6,20 +6,22 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
+import com.connectycube.chat.ConnectycubeChatService
 import com.connectycube.messenger.helpers.RTCSessionManager
 import com.connectycube.messenger.helpers.RingtoneManager
-import com.connectycube.messenger.utilities.InjectorUtils
-import com.connectycube.messenger.utilities.PermissionsHelper
-import com.connectycube.messenger.utilities.REQUEST_PERMISSION_CALL
-import com.connectycube.messenger.utilities.observeOnce
+import com.connectycube.messenger.helpers.showSnackbar
+import com.connectycube.messenger.utilities.*
 import com.connectycube.messenger.viewmodels.CallViewModel
 import com.connectycube.videochat.*
 import com.connectycube.videochat.callbacks.RTCClientSessionCallbacks
 import com.connectycube.videochat.callbacks.RTCSessionEventsCallback
 import com.connectycube.videochat.callbacks.RTCSessionStateCallback
 import kotlinx.android.synthetic.main.activity_call.*
+import org.jivesoftware.smack.AbstractConnectionListener
 import org.webrtc.CameraVideoCapturer
 import timber.log.Timber
+import com.google.android.material.snackbar.Snackbar
+
 
 const val EXTRA_IS_INCOMING_CALL = "conversation_type"
 
@@ -34,6 +36,7 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
     private var currentSession: RTCSession? = null
     private var audioManager: AppRTCAudioManager? = null
     private val cameraSwitchHandler = CameraSwitchHandler()
+    private val connectionListener = ConnectionListener()
     private var isInComingCall: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,6 +48,16 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
         initAudioManager()
         initRingtoneManager()
         checkPermissionsAndProceed()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        ConnectycubeChatService.getInstance().addConnectionListener(connectionListener)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        ConnectycubeChatService.getInstance().removeConnectionListener(connectionListener)
     }
 
     private fun initSession() {
@@ -346,7 +359,7 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
     override fun onStateChanged(session: RTCSession?, state: BaseSession.RTCSessionState?) {
     }
 
-    inner class CameraSwitchHandler : CameraVideoCapturer.CameraSwitchHandler {
+    private inner class CameraSwitchHandler : CameraVideoCapturer.CameraSwitchHandler {
         override fun onCameraSwitchDone(isFront: Boolean) {
             toggle_camera.isEnabled = true
             callViewModel.callSessionAction.value = CallViewModel.CallSessionAction.SWITCHED_CAMERA
@@ -359,6 +372,27 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
             ).show()
             toggle_camera.isEnabled = true
         }
+    }
 
+    private inner class ConnectionListener : AbstractConnectionListener() {
+        override fun connectionClosedOnError(e: Exception?) {
+            showSnackbar(
+                this@CallActivity,
+                R.string.connection_is_disconnected,
+                Snackbar.LENGTH_INDEFINITE
+            )
+        }
+
+        override fun reconnectionSuccessful() {
+            showSnackbar(
+                this@CallActivity,
+                R.string.connection_is_reconnected,
+                Snackbar.LENGTH_SHORT
+            )
+        }
+
+        override fun reconnectingIn(seconds: Int) {
+
+        }
     }
 }

@@ -110,7 +110,9 @@
     <string name="status_connected">Connected</string>
     <string name="status_closed">Closed</string>
     <string name="status_disconnected">Disconnected</string>
-
+    <string name="connection_is_disconnected">The connection is disconnected</string>
+    <string name="connection_is_reconnected">The connection is reconnected</string>
+    <string name="snackbar_dismiss">Dismiss</string>
 
     <!-- Errors -->
     <string name="error_credentials_empty">The App class should contain ConnectyCube credentials. Register new account and application at https://admin.connectycube.com

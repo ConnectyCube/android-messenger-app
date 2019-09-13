@@ -31,6 +31,7 @@ abstract class BaseCallFragment(
     protected var currentSession: RTCSession? = null
     protected var isIncomingCall: Boolean = false
     protected var chronometerInCall: Chronometer? = null
+    private var chronometerStarted: Boolean = false
     protected var currentUser: ConnectycubeUser = ConnectycubeChatService.getInstance().user
 
     companion object {
@@ -128,14 +129,18 @@ abstract class BaseCallFragment(
     }
 
     private fun startInCallChronometer() {
-        chronometerInCall?.apply {
-            visibility = View.VISIBLE
-            base = SystemClock.elapsedRealtime()
-            start()
+        if (!chronometerStarted) {
+            chronometerInCall?.apply {
+                chronometerStarted = true
+                visibility = View.VISIBLE
+                base = SystemClock.elapsedRealtime()
+                start()
+            }
         }
     }
 
     private fun stopInCallChronometer() {
+        chronometerStarted = false
         chronometerInCall?.stop()
     }
 
