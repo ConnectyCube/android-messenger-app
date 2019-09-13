@@ -22,6 +22,8 @@ class ChatRepository private constructor(private val chatDao: ChatDao, private v
 
     fun getChat(chatId: String) = chatDao.getChat(chatId)
 
+    fun getChatSync(chatId: String) = chatDao.getChatSync(chatId)
+
     fun update(dialogId: String): LiveData<Resource<List<Chat>>> {
         return loadChats()
     }

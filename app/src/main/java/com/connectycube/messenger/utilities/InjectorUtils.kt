@@ -37,12 +37,12 @@ object InjectorUtils {
 
     fun provideChatMessageListViewModelFactory(
         application: Application,
-        chat: ConnectycubeChatDialog
+        dialogId: String
     ): ChatMessageListViewModelFactory {
         val chatMessageRepository = getChatMessageRepository(application.baseContext)
         val userRepository = getUserRepository(application.baseContext)
         val chatRepository = getChatRepository(application.baseContext)
-        return ChatMessageListViewModelFactory(application, chatMessageRepository, userRepository, chatRepository, chat)
+        return ChatMessageListViewModelFactory(application, chatMessageRepository, userRepository, chatRepository, dialogId)
     }
 
     private fun getChatMessageRepository(context: Context): ChatMessageRepository {

@@ -12,7 +12,7 @@ import androidx.annotation.NonNull
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.connectycube.chat.ConnectycubeChatService
+import com.connectycube.auth.session.ConnectycubeSessionManager
 import com.connectycube.chat.model.ConnectycubeAttachment
 import com.connectycube.chat.model.ConnectycubeChatDialog
 import com.connectycube.chat.model.ConnectycubeChatMessage
@@ -39,7 +39,7 @@ class ChatMessageAdapter(
     val ATTACH_IMAGE_OUTCOMING = 3
     val ATTACH_IMAGE_INCOMING = 4
 
-    val localUserId = ConnectycubeChatService.getInstance().user.id
+    val localUserId = ConnectycubeSessionManager.getInstance().sessionParameters.userId
     val occupantIds:List<Int> = ArrayList<Int>(chatDialog.occupants).apply { remove(localUserId) }
     private var networkState: NetworkState? = null
 
@@ -154,8 +154,7 @@ class ChatMessageAdapter(
     }
 
     fun isIncoming(chatMessage: ConnectycubeChatMessage): Boolean {
-        val localUser = ConnectycubeChatService.getInstance().user
-        return chatMessage.senderId != null && chatMessage.senderId != localUser.id
+        return chatMessage.senderId != null && chatMessage.senderId != localUserId
     }
 
     fun withAttachment(chatMessage: ConnectycubeChatMessage): Boolean {
