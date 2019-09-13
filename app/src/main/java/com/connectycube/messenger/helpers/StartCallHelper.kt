@@ -16,7 +16,7 @@ const val CALL_TYPE_AUDIO = 2
 fun startCall(context: Context, occupants: ArrayList<Int>, callType: Int) {
     val rtcCallType =
         if (callType == CALL_TYPE_VIDEO) RTCTypes.ConferenceType.CONFERENCE_TYPE_VIDEO
-        else RTCTypes.ConferenceType.CONFERENCE_TYPE_VIDEO
+        else RTCTypes.ConferenceType.CONFERENCE_TYPE_AUDIO
 
     val rtcClient = RTCClient.getInstance(context.applicationContext)
     val rtcSession = rtcClient.createNewSessionWithOpponents(occupants, rtcCallType)
