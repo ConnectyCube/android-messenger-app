@@ -13,10 +13,10 @@ class ChatMessageListViewModelFactory(
     private val chatMessageRepository: ChatMessageRepository,
     private val userRepository: UserRepository,
     private val chatRepository: ChatRepository,
-    private val chat: ConnectycubeChatDialog
+    private val dialogId: String
 ) : ViewModelProvider.NewInstanceFactory() {
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>) =
-        ChatMessageListViewModel(applicationContext, chatMessageRepository, userRepository, chatRepository, chat) as T
+        ChatMessageListViewModel(applicationContext, chatMessageRepository, userRepository, chatRepository, dialogId) as T
 }
