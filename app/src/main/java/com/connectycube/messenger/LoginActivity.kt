@@ -63,10 +63,12 @@ class LoginActivity : BaseChatActivity() {
             if (resource.status == Status.SUCCESS) {
                 val listUser = resource.data
 
-                val userRaw: User? = listUser!!.find { it.login == user.login }
-                Timber.d("proceed loginTo user= $userRaw" + ", conUser= " + userRaw!!.conUser)
-                val userToLogin = userRaw.conUser.also { it.password = user.password }
-                signInRestIdNeed(userToLogin)
+                val userRaw: User? = listUser?.find { it.login == user.login }
+                userRaw?.let {
+                    Timber.d("proceed loginTo user= $it, conUser= ${it.conUser}")
+                    val userToLogin = it.conUser.also { it.password = user.password }
+                    signInRestIdNeed(userToLogin)
+                }
             }
         }
     }
