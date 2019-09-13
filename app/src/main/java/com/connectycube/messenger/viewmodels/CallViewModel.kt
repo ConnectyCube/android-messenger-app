@@ -39,17 +39,15 @@ class CallViewModel internal constructor(
             if (it.isNullOrEmpty()) {
                 result.value = Resource.error(
                     getApplication<Application>().getString(R.string.error_while_loading_users),
-                    null)
+                    null
+                )
             } else {
                 result.value = Resource.success(it
-                    .map { user -> user.conUser })
+                                                    .map { user -> user.conUser })
                 result.removeSource(source)
             }
         }
 
         return result
     }
-
-
-
 }
