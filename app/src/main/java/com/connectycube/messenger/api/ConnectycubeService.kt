@@ -11,6 +11,7 @@ import com.connectycube.core.helper.StringifyArrayList
 import com.connectycube.chat.model.ConnectycubeChatMessage
 import com.connectycube.chat.request.MessageGetBuilder
 import com.connectycube.core.request.RequestGetBuilder
+import com.connectycube.messenger.api.utils.PerformerTask.uploadDialogPhotoTask
 import com.connectycube.messenger.api.utils.PerformerTask.uploadUserAvatarTask
 import com.connectycube.messenger.data.Chat
 import com.connectycube.messenger.data.Message
@@ -179,6 +180,31 @@ class ConnectycubeService {
         chatDialog.photo = newGroupPhotoUrl
 
         return updateChatDialog(chatDialog)
+    }
+
+    fun updateDialogPhoto(dialogId: String,
+                          newGroupPhotoUrl: String,
+                          callback: ResponsePerformer.Callback<Chat>
+    ) {
+        val file = File(newGroupPhotoUrl)
+        val service =
+            InjectorUtils.provideSyncConnectycubeServiceForType<ConnectycubeChatDialog, Chat>()
+        service.performProgress(
+            uploadDialogPhotoTask(dialogId, file, true)
+            {service.progressCallBack?.onProgressUpdate(it)},
+            object : Converter<Chat, ConnectycubeChatDialog>() {
+                override fun convertTo(response: ConnectycubeChatDialog): Chat {
+                    return Chat(
+                        response.dialogId,
+                        response.lastMessageDateSent,
+                        response.createdAt.time,
+                        response.unreadMessageCount ?: 0,
+                        response.name,
+                        response
+                    )
+                }
+            }, callback
+        )
     }
 
     fun addDialogOccupants(dialogId: String, vararg usersIds: Int): LiveData<ApiResponse<Chat>> {

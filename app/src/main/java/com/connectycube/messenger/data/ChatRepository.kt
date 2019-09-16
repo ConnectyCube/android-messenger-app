@@ -6,6 +6,7 @@ import com.connectycube.core.Consts
 import com.connectycube.messenger.api.ApiResponse
 import com.connectycube.messenger.api.ConnectycubeService
 import com.connectycube.messenger.utilities.UpdateResourceProcessor
+import com.connectycube.messenger.utilities.UpdateResourceProgressProcessor
 import com.connectycube.messenger.vo.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -120,6 +121,10 @@ class ChatRepository private constructor(private val chatDao: ChatDao, private v
         return updateChat(chatId) {service.updateDialogPhoto(chatId, newChatPhoto)}
     }
 
+    fun updateChatPhoto(chatId: String, newChatPhoto: String, errorAction: Function2<String, Chat, Unit>, progressAction: Function1<Int, Unit>) {
+        service.updateDialogPhoto(chatId, newChatPhoto, callback = getRequestProgressProcessor(chatId, errorAction, progressAction))
+    }
+
     fun addChatOccupants(chatId: String, vararg usersIds: Int): LiveData<Resource<Chat>> {
         return updateChat(chatId) {service.addDialogOccupants(chatId, *usersIds)}
     }
@@ -167,14 +172,35 @@ class ChatRepository private constructor(private val chatDao: ChatDao, private v
         }.asLiveData()
     }
 
-    private fun getRequestProcessor(chatId: String, errorAction: Function2<String, Chat, Unit>): UpdateResourceProcessor<Chat> {
-        return object : UpdateResourceProcessor<Chat>(appExecutors){
+    private fun getRequestProcessor(chatId: String,
+                                    errorAction: Function2<String, Chat, Unit>
+    ): UpdateResourceProcessor<Chat> {
+        return object : UpdateResourceProcessor<Chat>(appExecutors) {
             override fun processError(errorMessage: String) {
                 errorAction.invoke(errorMessage, chatDao.getChatValue(chatId))
             }
 
             override fun saveCallResult(item: Chat) {
                 chatDao.update(item)
+            }
+        }
+    }
+
+    private fun getRequestProgressProcessor(chatId: String,
+                                            errorAction: Function2<String, Chat, Unit>,
+                                            progressAction: Function1<Int, Unit>
+    ): UpdateResourceProgressProcessor<Chat> {
+        return object : UpdateResourceProgressProcessor<Chat>(appExecutors) {
+            override fun processError(errorMessage: String) {
+                errorAction.invoke(errorMessage, chatDao.getChatValue(chatId))
+            }
+
+            override fun saveCallResult(item: Chat) {
+                chatDao.update(item)
+            }
+
+            override fun processProgress(progress: Int) {
+                progressAction.invoke(progress)
             }
         }
     }
