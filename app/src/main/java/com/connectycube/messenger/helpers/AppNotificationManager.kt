@@ -13,10 +13,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
-import androidx.core.app.Person
-import androidx.core.app.RemoteInput
+import androidx.core.app.*
 import com.connectycube.chat.ConnectycubeChatService
 import com.connectycube.messenger.*
 import com.connectycube.messenger.data.AppDatabase
@@ -89,13 +86,13 @@ class AppNotificationManager {
             putInt(EXTRA_NOTIFICATION_ID, notificationId)
         }
 
-        val intent =
-            prepareStartIntent(context, ChatMessageActivity::class.java, startBundle).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK /*or Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NO_HISTORY */
-            }
+        val intent = prepareStartIntent(context, ChatMessageActivity::class.java, startBundle)
 
-        val pendingIntent: PendingIntent =
-            PendingIntent.getActivities(context, Random().nextInt(), arrayOf(getDefaultActivityIntent(context), intent), FLAG_UPDATE_CURRENT)
+        val taskStackBuilder = TaskStackBuilder.create(context)
+            .addNextIntent(Intent(context, ChatDialogActivity::class.java))
+            .addNextIntent(intent)
+
+        val pendingIntent = taskStackBuilder.getPendingIntent(Random().nextInt(), FLAG_UPDATE_CURRENT)!!
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createChatNotificationsChannel(context)
@@ -209,6 +206,8 @@ class AppNotificationManager {
         channel.enableVibration(true)
         channel.lightColor = context.resources.getColor(R.color.colorPrimary)
         channel.enableLights(true)
+        channel.importance = NotificationManager.IMPORTANCE_DEFAULT
+        channel.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
         getNotificationManager(context).createNotificationChannel(channel)
     }
 
@@ -221,11 +220,12 @@ class AppNotificationManager {
     ): NotificationCompat.Builder {
         return NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.drawable.ic_notification)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setVibrate(longArrayOf(500))
             .setLights(context.resources.getColor(R.color.colorPrimary), 2000, 2000)
             .setColor(context.resources.getColor(R.color.colorPrimary))
             .setAutoCancel(true)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
     }
 
     private fun displayNotification(context: Context,
@@ -247,7 +247,10 @@ class AppNotificationManager {
     }
 
     private fun getDefaultActivityIntent(context: Context): Intent {
-        return  Intent(context, LoginActivity::class.java)
+        return  Intent(context, LoginActivity::class.java).apply {
+            addCategory(Intent.CATEGORY_LAUNCHER)
+            action = Intent.ACTION_MAIN
+        }
     }
 
     private fun userAlreadyRegistered(context: Context): Boolean {

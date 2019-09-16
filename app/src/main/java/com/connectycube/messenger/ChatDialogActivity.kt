@@ -177,9 +177,9 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
     }
 
     private fun startChatActivity(chat: ConnectycubeChatDialog) {
-        val intent = Intent(this, ChatMessageActivity::class.java)
-        intent.putExtra(EXTRA_CHAT, chat)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        val intent = Intent(this, ChatMessageActivity::class.java).apply {
+            putExtra(EXTRA_CHAT, chat)
+        }
         startActivity(intent)
     }
 
