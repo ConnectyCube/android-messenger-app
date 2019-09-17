@@ -39,6 +39,7 @@ import com.connectycube.users.model.ConnectycubeUser
 import com.google.android.material.button.MaterialButton.ICON_GRAVITY_START
 import com.google.android.material.button.MaterialButton.ICON_GRAVITY_TEXT_END
 import com.zhihu.matisse.Matisse
+import kotlinx.android.synthetic.main.activity_chat_dialog_details.*
 import kotlinx.android.synthetic.main.activity_chatmessages.*
 import kotlinx.android.synthetic.main.activity_chatmessages.avatar_img
 import kotlinx.android.synthetic.main.activity_chatmessages.back_btn

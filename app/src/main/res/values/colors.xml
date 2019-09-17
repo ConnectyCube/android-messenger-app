@@ -8,6 +8,13 @@
     <color name="dark_grey">#6e6e6e</color>
     <color name="blue_light">#acc3e8</color>
     <color name="pink_light">#debbf0</color>
+    <color name="red">#eb4034</color>
+    <color name="red_light">#f7746a</color>
+    <color name="green">#8ae356</color>
+    <color name="green_light">#b7f294</color>
+
+    <color name="green_dark">#58a828</color>
+    <color name="green_dark_light">#6ec43b</color>
 
     <color name="unread_messages_budge">#43A238</color>
     <color name="unread_messages_date">@color/unread_messages_budge</color>
@@ -16,4 +23,9 @@
 
     <color name="dark">#000000</color>
     <color name="dark_transparent">#E6000000</color>
+
+    <color name="black_60">#60000000</color>
+    <color name="grey_90">#90606060</color>
+    <color name="grey_60">#60606060</color>
+    <color name="grey_30">#30606060</color>
 </resources>

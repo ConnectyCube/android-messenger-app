@@ -43,6 +43,8 @@
     <string name="action_create">Create</string>
     <string name="action_done">Done</string>
     <string name="action_close">Close</string>
+    <string name="action_toggle_speaker">Toggle speaker</string>
+    <string name="action_toggle_mute">Toggle mute</string>
 
     <!--Menu-->
     <string name="menu_chat_dialog_logout">Logout</string>
@@ -87,6 +89,33 @@
     <string name="chats_channel_name">Chats</string>
     <string name="chats_channel_description">Notifications about new messages in chats</string>
     <string name="new_message">New message</string>
+    <string name="enter_your_reply_here">Enter your reply here</string>
+    <string name="reply">Reply</string>
+    <string name="you_format">You: %s</string>
+
+    <!--CallActivity-->
+    <string name="call_status_connect">Connect…</string>
+    <string name="call_status_connected">Connected</string>
+    <string name="call_status_disconnected">Disconnected</string>
+    <string name="call_status_closed">Closed</string>
+    <string name="call_status_hang_up">Hung up</string>
+    <string name="camera_switch_error">Failed to switch camera"</string>
+
+    <string name="incoming_audio_call_title">Incoming Audio Call</string>
+    <string name="incoming_video_call_title">Incoming Video Call</string>
+    <string name="incoming_audio_call_opponents">on call:</string>
+    <string name="outgoing_call_ringing">Ringing</string>
+
+    <string name="title_incoming_call">Incoming call</string>
+    <string name="title_video_call">Video call</string>
+    <string name="title_audio_call">Audio call</string>
+
+    <string name="status_connected">Connected</string>
+    <string name="status_closed">Closed</string>
+    <string name="status_disconnected">Disconnected</string>
+    <string name="connection_is_disconnected">The connection is disconnected</string>
+    <string name="connection_is_reconnected">The connection is reconnected</string>
+    <string name="snackbar_dismiss">Dismiss</string>
 
     <!-- Errors -->
     <string name="error_credentials_empty">The App class should contain ConnectyCube credentials. Register new account and application at https://admin.connectycube.com
@@ -100,6 +129,8 @@
     <string name="coming_soon">Coming soon</string>
     <string name="chat_connection_problem">It was detected connection problems. Please check your internet connection and try again</string>
     <string name="limit_users_to_selection">Max %s users possible to selection</string>
+    <string name="error_sending_message">Error sending message</string>
+    <string name="denied_permission">You can\'t go on without an access to %s</string>
 
     <string name="today">Today</string>
     <string name="delete">Delete</string>
@@ -108,10 +139,6 @@
     <string name="group_description">Group Description</string>
     <string name="put_there_some_information_about_group">Put there some additional information about group</string>
     <string name="title_select_call_members">Select call members</string>
-    <string name="enter_your_reply_here">Enter your reply here</string>
-    <string name="reply">Reply</string>
-    <string name="you_format">You: %s</string>
-    <string name="error_sending_message">Error sending message</string>
 
     <!--fix for Matisse lib-->
     <plurals name="error_over_count">

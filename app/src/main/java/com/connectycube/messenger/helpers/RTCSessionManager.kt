@@ -1,20 +1,28 @@
 package com.connectycube.messenger.helpers
 
 import android.content.Context
+import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import com.connectycube.chat.ConnectycubeChatService
 import com.connectycube.chat.WebRTCSignaling
 import com.connectycube.core.helper.StringifyArrayList
+import com.connectycube.messenger.CallActivity
+import com.connectycube.messenger.EXTRA_IS_INCOMING_CALL
 import com.connectycube.messenger.R
 import com.connectycube.messenger.api.ConnectycubePushSender
 import com.connectycube.pushnotifications.model.ConnectycubeEnvironment
 import com.connectycube.pushnotifications.model.ConnectycubeEvent
 import com.connectycube.pushnotifications.model.ConnectycubeNotificationType
 import com.connectycube.videochat.RTCClient
+import com.connectycube.videochat.RTCConfig
+import com.connectycube.videochat.RTCMediaConfig
 import com.connectycube.videochat.RTCSession
 import com.connectycube.videochat.callbacks.RTCClientSessionCallbacks
 import com.connectycube.videochat.callbacks.RTCClientSessionCallbacksImpl
 import org.json.JSONObject
 import timber.log.Timber
+
+const val MAX_OPPONENTS = 4
 
 class RTCSessionManager {
 
@@ -38,6 +46,9 @@ class RTCSessionManager {
         this.applicationContext = applicationContext
         this.sessionCallbackListener = RTCSessionCallbackListenerSimple()
 
+        RTCConfig.setMaxOpponentsCount(MAX_OPPONENTS)
+        RTCConfig.setDebugEnabled(true)
+
         ConnectycubeChatService.getInstance()
             .videoChatWebRTCSignalingManager?.addSignalingManagerListener { signaling, createdLocally ->
             if (!createdLocally) {
@@ -45,7 +56,9 @@ class RTCSessionManager {
             }
         }
 
-        RTCClient.getInstance(applicationContext).addSessionCallbacksListener(sessionCallbackListener)
+        RTCClient.getInstance(applicationContext).addSessionCallbacksListener(
+            sessionCallbackListener
+        )
         RTCClient.getInstance(applicationContext).prepareToProcessCalls()
     }
 
@@ -54,9 +67,22 @@ class RTCSessionManager {
 
         currentCall = rtcSession
 
+        initRTCMediaConfig()
         startCallActivity(false)
 
         sendCallPushNotification(rtcSession.opponents, rtcSession.sessionID)
+    }
+
+    private fun initRTCMediaConfig() {
+        currentCall?.let {
+            if (it.opponents.size < 2) {
+                RTCMediaConfig.setVideoWidth(RTCMediaConfig.VideoQuality.HD_VIDEO.width)
+                RTCMediaConfig.setVideoHeight(RTCMediaConfig.VideoQuality.HD_VIDEO.height)
+            } else {
+                RTCMediaConfig.setVideoWidth(RTCMediaConfig.VideoQuality.QVGA_VIDEO.width)
+                RTCMediaConfig.setVideoHeight(RTCMediaConfig.VideoQuality.QVGA_VIDEO.height)
+            }
+        }
     }
 
     private fun sendCallPushNotification(opponents: List<Int>, sessionId: String) {
@@ -67,7 +93,10 @@ class RTCSessionManager {
 
         val json = JSONObject()
         try {
-            json.put(PARAM_MESSAGE, applicationContext?.getString(R.string.you_have_got_new_incoming_call_open_app_to_manage_it))
+            json.put(
+                PARAM_MESSAGE,
+                applicationContext?.getString(R.string.you_have_got_new_incoming_call_open_app_to_manage_it)
+            )
             // custom parameters
             json.put(PARAM_NOTIFICATION_TYPE, NOTIFICATION_TYPE_CALL)
             json.put(PARAM_CALL_ID, sessionId)
@@ -89,6 +118,8 @@ class RTCSessionManager {
         }
 
         currentCall = rtcSession
+
+        initRTCMediaConfig()
         startCallActivity(true)
     }
 
@@ -96,19 +127,20 @@ class RTCSessionManager {
         currentCall = null
     }
 
-    private fun startCallActivity(isIncomig: Boolean) {
-        Timber.w("start call incoming - $isIncomig")
+    private fun startCallActivity(isIncoming: Boolean) {
+        Timber.w("start call incoming - $isIncoming")
 
-//        val intent = Intent(context, CallActivity::class.java)
-//        intent.putExtra(EXTRA_CALL_DIRECTION, isIncomig)
+        val intent = Intent(applicationContext, CallActivity::class.java)
+        intent.flags = FLAG_ACTIVITY_NEW_TASK
+        intent.putExtra(EXTRA_IS_INCOMING_CALL, isIncoming)
 
-//        context.startActivity(intent)
+        applicationContext?.startActivity(intent)
     }
 
     fun destroy() {
         RTCClient.getInstance(applicationContext)
             .removeSessionsCallbacksListener(sessionCallbackListener)
-        RTCClient.getInstance(applicationContext).stopProcessCalls()
+        RTCClient.getInstance(applicationContext).destroy()
 
         applicationContext = null
         sessionCallbackListener = null
