@@ -87,17 +87,6 @@
             </intent-filter>
         </service>
 
-        <activity
-            android:name=".SelectCallMembersActivity"
-            android:label="@string/title_select_call_members" />
-
-        <service
-            android:name=".fcm.PushListenerService">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
-
         <service android:name=".SendFastReplyMessageService" />
 
         <provider

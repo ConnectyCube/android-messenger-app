@@ -40,7 +40,7 @@ class LoginActivity : BaseActivity() {
             showProgress(progressbar)
             val user = SharedPreferencesManager.getInstance(applicationContext).getCurrentUser()
             text_view.text = getString(R.string.user_logged_in, user.fullName ?: user.login)
-            startNextScreen()
+            startDialogsScreen()
         } else {
             initUsers()
             initUserAdapter()
@@ -77,7 +77,7 @@ class LoginActivity : BaseActivity() {
         if (!isSignedInREST(user)) {
             signInRest(user)
         } else {
-            startNextScreen()
+            startDialogsScreen()
         }
     }
 
@@ -85,7 +85,7 @@ class LoginActivity : BaseActivity() {
         ConnectycubeUsers.signIn(user).performAsync(object : EntityCallback<ConnectycubeUser> {
             override fun onSuccess(conUser: ConnectycubeUser, args: Bundle) {
                 SharedPreferencesManager.getInstance(applicationContext).saveCurrentUser(user)
-                startNextScreen()
+                startDialogsScreen()
             }
 
             override fun onError(ex: ResponseException) {
@@ -99,7 +99,7 @@ class LoginActivity : BaseActivity() {
         })
     }
 
-    fun startNextScreen() {
+    fun startDialogsScreen() {
         hideProgress(progressbar)
         startDialogs()
     }
