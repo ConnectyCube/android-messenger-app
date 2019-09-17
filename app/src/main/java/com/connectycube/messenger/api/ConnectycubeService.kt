@@ -65,6 +65,18 @@ class ConnectycubeService {
             })
     }
 
+    fun updateChatSync(dialogId: String, callback: ResponsePerformer.Callback<Chat>) {
+        InjectorUtils.provideSyncConnectycubeServiceForType<ConnectycubeChatDialog, Chat>()
+            .perform(
+                ConnectycubeRestChatService.getChatDialogById(dialogId),
+                object : Converter<Chat, ConnectycubeChatDialog>() {
+                    override fun convertTo(response: ConnectycubeChatDialog): Chat {
+                        return convertToChat(response)
+                    }
+                }, callback
+            )
+    }
+
     fun loadChatsSlice(): LiveData<ApiResponse<List<Chat>>> {
         val requestGetBuilder = RequestGetBuilder().apply { limit = 10 }
         return InjectorUtils.provideConnectycubeServiceForType<ArrayList<ConnectycubeChatDialog>, List<Chat>>()

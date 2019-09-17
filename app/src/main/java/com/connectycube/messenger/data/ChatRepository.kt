@@ -23,8 +23,24 @@ class ChatRepository private constructor(private val chatDao: ChatDao, private v
 
     fun getChat(chatId: String) = chatDao.getChat(chatId)
 
-    fun update(dialogId: String): LiveData<Resource<List<Chat>>> {
-        return loadChats()
+    fun updateChat(dialogId: String) {
+        fun requestProcessor(chatId: String): UpdateResourceProcessor<Chat> {
+            return object : UpdateResourceProcessor<Chat>(appExecutors) {
+                override fun processError(errorMessage: String) {
+//                  Not implemented
+                }
+
+                override fun saveCallResult(item: Chat) {
+                    val chat = chatDao.getChatValue(chatId)
+                    val shouldUpdate = chat != item
+                    Timber.d("shouldUpdate= $shouldUpdate")
+                    if (shouldUpdate) {
+                        chatDao.update(item)
+                    }
+                }
+            }
+        }
+        service.updateChatSync(dialogId, requestProcessor(dialogId))
     }
 
     fun loadChats(): LiveData<Resource<List<Chat>>> {
