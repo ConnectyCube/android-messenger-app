@@ -104,6 +104,7 @@ class ConnectycubeService {
                             response.dialogId,
                             response.lastMessageDateSent,
                             response.createdAt.time,
+                            response.updatedAt.time,
                             response.unreadMessageCount ?: 0,
                             response.name,
                             response
@@ -198,6 +199,7 @@ class ConnectycubeService {
                         response.dialogId,
                         response.lastMessageDateSent,
                         response.createdAt.time,
+                        response.updatedAt.time,
                         response.unreadMessageCount ?: 0,
                         response.name,
                         response
@@ -292,6 +294,7 @@ class ConnectycubeService {
                             response.dialogId,
                             response.lastMessageDateSent,
                             response.createdAt.time,
+                            response.updatedAt.time,
                             response.unreadMessageCount ?: 0,
                             response.name,
                             response
@@ -313,6 +316,7 @@ class ConnectycubeService {
                             response.dialogId,
                             response.lastMessageDateSent,
                             response.createdAt.time,
+                            response.updatedAt.time,
                             response.unreadMessageCount ?: 0,
                             response.name,
                             response

@@ -15,7 +15,7 @@ import timber.log.Timber
 /**
  * The Room database for this app
  */
-@Database(entities = [User::class, Chat::class, Message::class], version = 1, exportSchema = false)
+@Database(entities = [User::class, Chat::class, Message::class], version = 2, exportSchema = false)
 @TypeConverters(UserConverters::class, ChatConverters::class, MessageConverters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
