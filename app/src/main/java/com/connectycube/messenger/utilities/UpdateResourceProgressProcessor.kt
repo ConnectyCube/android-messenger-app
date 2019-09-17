@@ -11,7 +11,9 @@ abstract class UpdateResourceProgressProcessor<RequestType>(appExecutors: AppExe
     override fun onResult(response: ApiResponse<RequestType>) {
         when (response) {
             is ApiProgressResponse -> {
-                processProgress(response.progress)
+                appExecutors.diskIO().execute {
+                    processProgress(response.progress)
+                }
             }
             else -> super.onResult(response)
         }
