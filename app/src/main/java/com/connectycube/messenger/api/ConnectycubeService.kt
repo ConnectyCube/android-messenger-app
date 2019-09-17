@@ -100,15 +100,7 @@ class ConnectycubeService {
                 ConnectycubeRestChatService.createChatDialog(chatDialog),
                 object : Converter<Chat, ConnectycubeChatDialog>() {
                     override fun convertTo(response: ConnectycubeChatDialog): Chat {
-                        return Chat(
-                            response.dialogId,
-                            response.lastMessageDateSent,
-                            response.createdAt.time,
-                            response.updatedAt.time,
-                            response.unreadMessageCount ?: 0,
-                            response.name,
-                            response
-                        )
+                        return convertToChat(response)
                     }
                 })
     }
@@ -195,15 +187,7 @@ class ConnectycubeService {
             {service.progressCallBack?.onProgressUpdate(it)},
             object : Converter<Chat, ConnectycubeChatDialog>() {
                 override fun convertTo(response: ConnectycubeChatDialog): Chat {
-                    return Chat(
-                        response.dialogId,
-                        response.lastMessageDateSent,
-                        response.createdAt.time,
-                        response.updatedAt.time,
-                        response.unreadMessageCount ?: 0,
-                        response.name,
-                        response
-                    )
+                    return convertToChat(response)
                 }
             }, callback
         )
@@ -290,15 +274,7 @@ class ConnectycubeService {
                 ConnectycubeRestChatService.updateChatDialog(chatDialog, requestBuilder),
                 object : Converter<Chat, ConnectycubeChatDialog>() {
                     override fun convertTo(response: ConnectycubeChatDialog): Chat {
-                        return Chat(
-                            response.dialogId,
-                            response.lastMessageDateSent,
-                            response.createdAt.time,
-                            response.updatedAt.time,
-                            response.unreadMessageCount ?: 0,
-                            response.name,
-                            response
-                        )
+                        return convertToChat(response)
                     }
                 })
     }
@@ -312,15 +288,7 @@ class ConnectycubeService {
             .perform(ConnectycubeRestChatService.updateChatDialog(chatDialog, requestBuilder),
                 object : Converter<Chat, ConnectycubeChatDialog>() {
                     override fun convertTo(response: ConnectycubeChatDialog): Chat {
-                        return Chat(
-                            response.dialogId,
-                            response.lastMessageDateSent,
-                            response.createdAt.time,
-                            response.updatedAt.time,
-                            response.unreadMessageCount ?: 0,
-                            response.name,
-                            response
-                        )
+                        return convertToChat(response)
                     }
                 }, callback
             )

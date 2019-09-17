@@ -33,7 +33,7 @@ fun convertToChat(dialog: ConnectycubeChatDialog): Chat {
         dialog.lastMessageDateSent,
         dialog.createdAt.time,
         dialog.updatedAt.time,
-        dialog.unreadMessageCount,
+        dialog.unreadMessageCount ?: 0,
         dialog.name,
         dialog
     )

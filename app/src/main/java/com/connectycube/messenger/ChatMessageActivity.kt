@@ -122,7 +122,6 @@ class ChatMessageActivity : BaseChatActivity() {
         setSupportActionBar(toolbar)
         back_btn.setOnClickListener { onBackPressed() }
         toolbar_layout.setOnClickListener { startChatDetailsActivity() }
-        loadChatDialogPhoto(this, chatDialog.isPrivate, chatDialog.photo, avatar_img)
 
         modelChatMessageList.getChatDialog(chatDialog.dialogId).observe(this, Observer { resource ->
             when (resource.status) {
@@ -130,6 +129,7 @@ class ChatMessageActivity : BaseChatActivity() {
                     resource.data?.let { chatDialog ->
                         initChatDialog(chatDialog)
                         updateOccupants()
+                        loadChatDialogPhoto(this, chatDialog.isPrivate, chatDialog.photo, avatar_img)
                         chat_message_name.text = chatDialog.name
                     }
                 }

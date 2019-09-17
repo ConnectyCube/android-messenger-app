@@ -73,10 +73,10 @@ class ChatDialogDetailsViewModel internal constructor(
     }
 
     fun updateGroupPhoto(dialogId: String, newPhoto: String) {
-        liveDialog().value = Resource.loading(null)
+        liveDialog().postValue(Resource.loading(null))
         chatRepository.updateChatPhoto(dialogId, newPhoto, { error, chat ->
-            liveDialog().value = Resource.error(error, chat.cubeChat)
-        }, { progress -> liveDialog().value = Resource.loadingProgress(null, progress) })
+            liveDialog().postValue(Resource.error(error, chat.cubeChat))
+        }, { progress -> liveDialog().postValue(Resource.loadingProgress(null, progress)) })
     }
 
     fun updateGroupDescription(dialogId: String, newDescription: String) {
