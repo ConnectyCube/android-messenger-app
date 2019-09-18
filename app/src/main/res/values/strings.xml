@@ -89,6 +89,9 @@
     <string name="chats_channel_name">Chats</string>
     <string name="chats_channel_description">Notifications about new messages in chats</string>
     <string name="new_message">New message</string>
+    <string name="enter_your_reply_here">Enter your reply here</string>
+    <string name="reply">Reply</string>
+    <string name="you_format">You: %s</string>
 
     <!--CallActivity-->
     <string name="call_status_connect">Connect…</string>
@@ -126,6 +129,9 @@
     <string name="coming_soon">Coming soon</string>
     <string name="chat_connection_problem">It was detected connection problems. Please check your internet connection and try again</string>
     <string name="limit_users_to_selection">Max %s users possible to selection</string>
+    <string name="error_sending_message">Error sending message</string>
+    <string name="denied_permission">You can\'t go on without an access to %s</string>
+    <string name="login_chat_error_format">Login chat error. Error  %s</string>
 
     <string name="today">Today</string>
     <string name="delete">Delete</string>
@@ -134,7 +140,6 @@
     <string name="group_description">Group Description</string>
     <string name="put_there_some_information_about_group">Put there some additional information about group</string>
     <string name="title_select_call_members">Select call members</string>
-    <string name="denied_permission">You can\'t go on without an access to %s</string>
 
     <!--fix for Matisse lib-->
     <plurals name="error_over_count">

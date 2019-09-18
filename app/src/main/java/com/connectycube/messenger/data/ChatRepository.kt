@@ -22,6 +22,8 @@ class ChatRepository private constructor(private val chatDao: ChatDao, private v
 
     fun getChat(chatId: String) = chatDao.getChat(chatId)
 
+    fun getChatSync(chatId: String) = chatDao.getChatSync(chatId)
+
     fun update(dialogId: String): LiveData<Resource<List<Chat>>> {
         return loadChats()
     }
@@ -170,7 +172,7 @@ class ChatRepository private constructor(private val chatDao: ChatDao, private v
     private fun getRequestProcessor(chatId: String, errorAction: Function2<String, Chat, Unit>): UpdateResourceProcessor<Chat> {
         return object : UpdateResourceProcessor<Chat>(appExecutors){
             override fun processError(errorMessage: String) {
-                errorAction.invoke(errorMessage, chatDao.getChatValue(chatId))
+                errorAction.invoke(errorMessage, chatDao.getChatSync(chatId))
             }
 
             override fun saveCallResult(item: Chat) {

@@ -15,20 +15,26 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.observe
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.connectycube.auth.session.ConnectycubeSessionManager
 import com.connectycube.chat.ConnectycubeChatService
 import com.connectycube.chat.exception.ChatException
-import com.connectycube.chat.listeners.*
+import com.connectycube.chat.listeners.ChatDialogMessageListener
+import com.connectycube.chat.listeners.ChatDialogMessageSentListener
+import com.connectycube.chat.listeners.ChatDialogTypingListener
+import com.connectycube.chat.listeners.MessageStatusListener
 import com.connectycube.chat.model.ConnectycubeAttachment
 import com.connectycube.chat.model.ConnectycubeChatDialog
 import com.connectycube.chat.model.ConnectycubeChatMessage
 import com.connectycube.chat.model.ConnectycubeDialogType
 import com.connectycube.core.EntityCallback
 import com.connectycube.core.exception.ResponseException
-import com.connectycube.messenger.adapters.ChatMessageAdapter
 import com.connectycube.messenger.adapters.AttachmentClickListener
+import com.connectycube.messenger.adapters.ChatMessageAdapter
 import com.connectycube.messenger.api.ConnectycubeMessageSender
-import com.connectycube.messenger.helpers.startAudioCall
-import com.connectycube.messenger.helpers.startVideoCall
+import com.connectycube.messenger.events.EVENT_CHAT_LOGIN
+import com.connectycube.messenger.events.EventChatConnection
+import com.connectycube.messenger.events.LiveDataBus
+import com.connectycube.messenger.helpers.*
 import com.connectycube.messenger.paging.Status
 import com.connectycube.messenger.utilities.*
 import com.connectycube.messenger.viewmodels.AttachmentViewModel
@@ -38,16 +44,14 @@ import com.google.android.material.button.MaterialButton.ICON_GRAVITY_START
 import com.google.android.material.button.MaterialButton.ICON_GRAVITY_TEXT_END
 import com.zhihu.matisse.Matisse
 import kotlinx.android.synthetic.main.activity_chatmessages.*
-import kotlinx.android.synthetic.main.activity_chatmessages.avatar_img
-import kotlinx.android.synthetic.main.activity_chatmessages.back_btn
-import kotlinx.android.synthetic.main.activity_chatmessages.progressbar
-import kotlinx.android.synthetic.main.activity_chatmessages.toolbar
 import timber.log.Timber
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
 const val TYPING_INTERVAL_MS: Long = 900
+const val EXTRA_CHAT = "chat_dialog"
+const val EXTRA_CHAT_ID = "chat_id"
 
 class ChatMessageActivity : BaseChatActivity() {
 
@@ -63,7 +67,7 @@ class ChatMessageActivity : BaseChatActivity() {
     private val occupants: HashMap<Int, ConnectycubeUser> = HashMap()
     private val membersNames: ArrayList<String> = ArrayList()
 
-    val modelAttachment: AttachmentViewModel by viewModels {
+    private val modelAttachment: AttachmentViewModel by viewModels {
         InjectorUtils.provideAttachmentViewModelFactory(this.application)
     }
 
@@ -102,35 +106,30 @@ class ChatMessageActivity : BaseChatActivity() {
         super.onCreate(savedInstanceState)
         Timber.d("onCreate")
         setContentView(R.layout.activity_chatmessages)
-        initChatDialog(intent.getSerializableExtra(EXTRA_CHAT) as ConnectycubeChatDialog)
-        chatDialog.addMessageListener(messageListener)
-        initChat()
-        messageSender = ConnectycubeMessageSender(this, chatDialog)
-        modelChatMessageList = getChatMessageListViewModel()
-        modelChatMessageList.unreadCounter = chatDialog.unreadMessageCount ?: 0
-        initToolbar()
-        initManagers()
-        initChatAdapter()
+        initWithData(intent)
     }
 
-    private fun initChatDialog(chat: ConnectycubeChatDialog) {
-        this.chatDialog = chat
-        chatDialog.initForChat(ConnectycubeChatService.getInstance())
+    private fun initWithData(intent: Intent) {
+        if (intent.hasExtra(EXTRA_CHAT)){
+            val chatDialog = intent.getSerializableExtra(EXTRA_CHAT) as ConnectycubeChatDialog
+            modelChatMessageList = getChatMessageListViewModel(chatDialog.dialogId)
+            bindChatDialog(chatDialog)
+            AppNotificationManager.getInstance().clearNotificationData(this, chatDialog.dialogId)
+        } else if (intent.hasExtra(EXTRA_CHAT_ID)){
+            val dialogId = intent.getStringExtra(EXTRA_CHAT_ID)
+            modelChatMessageList = getChatMessageListViewModel(dialogId)
+            AppNotificationManager.getInstance().clearNotificationData(this, dialogId)
+        }
+
+        subscribeToDialog()
     }
 
-    private fun initToolbar() {
-        setSupportActionBar(toolbar)
-        back_btn.setOnClickListener { onBackPressed() }
-        toolbar_layout.setOnClickListener { startChatDetailsActivity() }
-        loadChatDialogPhoto(this, chatDialog.isPrivate, chatDialog.photo, avatar_img)
-
-        modelChatMessageList.getChatDialog(chatDialog.dialogId).observe(this, Observer { resource ->
+    private fun subscribeToDialog() {
+        modelChatMessageList.liveDialog.observe(this, Observer { resource ->
             when (resource.status) {
                 com.connectycube.messenger.vo.Status.SUCCESS -> {
                     resource.data?.let { chatDialog ->
-                        initChatDialog(chatDialog)
-                        updateOccupants()
-                        chat_message_name.text = chatDialog.name
+                        bindChatDialog(chatDialog)
                     }
                 }
                 com.connectycube.messenger.vo.Status.LOADING -> {
@@ -138,16 +137,65 @@ class ChatMessageActivity : BaseChatActivity() {
                 com.connectycube.messenger.vo.Status.ERROR -> {
 
                     resource.data?.let { chatDialog ->
-                        chat_message_name.text = chatDialog.name
+                        bindChatDialog(chatDialog)
                     }
                     Toast.makeText(this, resource.message, Toast.LENGTH_LONG).show()
                 }
             }
         })
+    }
+
+    private fun subscribeToChatConnectionChanges() {
+        LiveDataBus.subscribe(EVENT_CHAT_LOGIN, this, Observer {
+            val event = it as EventChatConnection
+
+            if (event.connected) {
+                bindToChatConnection()
+            } else {
+                Toast.makeText(this, R.string.chat_connection_problem, Toast.LENGTH_LONG).show()
+            }
+        })
+    }
+
+    private fun bindChatDialog(chatDialog: ConnectycubeChatDialog) {
+        this.chatDialog = chatDialog
+
+        modelChatMessageList.unreadCounter = chatDialog.unreadMessageCount ?: 0
+
+        initChatAdapter()
+        initToolbar()
+
+        subscribeToOccupants()
+
+        if (ConnectycubeChatService.getInstance().isLoggedIn) {
+            bindToChatConnection()
+        } else {
+            subscribeToChatConnectionChanges()
+        }
+    }
+
+    private fun bindToChatConnection() {
+        chatDialog.initForChat(ConnectycubeChatService.getInstance())
+        initChat(chatDialog)
+
+        messageSender = ConnectycubeMessageSender(this, chatDialog)
+
+        chatDialog.addMessageListener(messageListener)
+
+        initManagers()
+
         input_chat_message.addTextChangedListener(textTypingWatcher)
     }
 
-    private fun updateOccupants() {
+    private fun initToolbar() {
+        setSupportActionBar(toolbar)
+        back_btn.setOnClickListener { onBackPressed() }
+        toolbar_layout.setOnClickListener { startChatDetailsActivity() }
+        loadChatDialogPhoto(this, chatDialog.isPrivate, chatDialog.photo, avatar_img)
+        chat_message_name.text = chatDialog.name
+    }
+
+    private fun subscribeToOccupants() {
         modelChatMessageList.getOccupants(chatDialog).observe(this, Observer { resource ->
             when (resource.status) {
                 com.connectycube.messenger.vo.Status.LOADING -> {
@@ -157,24 +205,24 @@ class ChatMessageActivity : BaseChatActivity() {
                 }
                 com.connectycube.messenger.vo.Status.SUCCESS -> {
                     resource.data?.let {
-                        val occupantsWithoutCurrent =
-                            ArrayList(resource.data).apply { remove(ConnectycubeChatService.getInstance().user) }
+                        val occupantsWithoutCurrent = resource.data.filter { it.id != ConnectycubeSessionManager.getInstance().activeSession.userId }
                         occupants.putAll(occupantsWithoutCurrent.associateBy({ it.id }, { it }))
                     }
+
                     membersNames.run {
                         clear()
                         addAll(occupants.map { it.value.fullName ?: it.value.login })
                     }
-                    if (!chatDialog.isPrivate) chat_message_members_typing.text =
-                        membersNames.joinToString()
+
+                    if (!chatDialog.isPrivate) chat_message_members_typing.text = membersNames.joinToString()
                 }
             }
         })
     }
 
-    private fun getChatMessageListViewModel(): ChatMessageListViewModel {
+    private fun getChatMessageListViewModel(dialogId: String): ChatMessageListViewModel {
         val chatMessageListViewModel: ChatMessageListViewModel by viewModels {
-            InjectorUtils.provideChatMessageListViewModelFactory(this.application, chatDialog)
+            InjectorUtils.provideChatMessageListViewModelFactory(this.application, dialogId)
         }
         return chatMessageListViewModel
     }
@@ -254,7 +302,7 @@ class ChatMessageActivity : BaseChatActivity() {
         })
     }
 
-    private fun initChat() {
+    private fun initChat(chatDialog: ConnectycubeChatDialog) {
         when (chatDialog.type) {
             ConnectycubeDialogType.GROUP, ConnectycubeDialogType.BROADCAST -> {
                 chatDialog.join(null)
@@ -269,13 +317,13 @@ class ChatMessageActivity : BaseChatActivity() {
         }
     }
 
-    fun initManagers() {
+    private fun initManagers() {
         ConnectycubeChatService.getInstance().messageStatusesManager.addMessageStatusListener(messageStatusListener)
         chatDialog.addIsTypingListener(messageTypingListener)
         chatDialog.addMessageSentListener(messageSentListener)
     }
 
-    fun unregisterChatManagers() {
+    private fun unregisterChatManagers() {
         ConnectycubeChatService.getInstance().messageStatusesManager.removeMessageStatusListener(messageStatusListener)
         chatDialog.removeMessageListrener(messageListener)
         chatDialog.removeIsTypingListener(messageTypingListener)
@@ -284,8 +332,10 @@ class ChatMessageActivity : BaseChatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        unregisterChatManagers()
-        input_chat_message.removeTextChangedListener(textTypingWatcher)
+        if (ConnectycubeChatService.getInstance().isLoggedIn) {
+            unregisterChatManagers()
+            input_chat_message.removeTextChangedListener(textTypingWatcher)
+        }
     }
 
     fun onAttachClick(view: View) {
@@ -301,7 +351,7 @@ class ChatMessageActivity : BaseChatActivity() {
     }
 
     private fun onMessageAttachmentClicked(attach: ConnectycubeAttachment) {
-        Timber.d("message attachment= " + attach)
+        Timber.d("message attachment= $attach")
         startAttachmentPreview(attach)
     }
 
@@ -312,7 +362,12 @@ class ChatMessageActivity : BaseChatActivity() {
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
     }
 
-    fun sendChatMessage(text: String = "", attachment: ConnectycubeAttachment? = null) {
+    private fun sendChatMessage(text: String = "", attachment: ConnectycubeAttachment? = null) {
+        if (!ConnectycubeChatService.getInstance().isLoggedIn){
+            Toast.makeText(this, R.string.chat_connection_problem, Toast.LENGTH_LONG).show()
+            return
+        }
+
         messageSender.sendChatMessage(text, attachment).let {
             if (it.first) {
                 if (ConnectycubeDialogType.PRIVATE == chatDialog.type) {
@@ -324,7 +379,6 @@ class ChatMessageActivity : BaseChatActivity() {
                 Timber.d("sendChatMessage failed")
             }
         }
-
     }
 
     fun submitMessage(message: ConnectycubeChatMessage) {
@@ -344,16 +398,31 @@ class ChatMessageActivity : BaseChatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.menu_action_video -> {
-                startVideoCall(this, ArrayList(chatDialog.occupants.filter { it != ConnectycubeChatService.getInstance().user.id }))
-//                Toast.makeText(this, R.string.coming_soon, Toast.LENGTH_SHORT).show()
+                startCall(CALL_TYPE_VIDEO)
                 true
             }
             R.id.menu_action_audio -> {
-                startAudioCall(this, ArrayList(chatDialog.occupants.filter { it != ConnectycubeChatService.getInstance().user.id }))
-//                Toast.makeText(this, R.string.coming_soon, Toast.LENGTH_SHORT).show()
+                startCall(CALL_TYPE_AUDIO)
                 true
             }
             else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun startCall(callType: Int) {
+        if (!ConnectycubeChatService.getInstance().isLoggedIn){
+            Toast.makeText(this, R.string.chat_connection_problem, Toast.LENGTH_LONG).show()
+        } else {
+            when (callType) {
+                CALL_TYPE_VIDEO -> startVideoCall(
+                    this,
+                    ArrayList(chatDialog.occupants.filter { it != ConnectycubeChatService.getInstance().user.id })
+                )
+                CALL_TYPE_AUDIO -> startAudioCall(
+                    this,
+                    ArrayList(chatDialog.occupants.filter { it != ConnectycubeChatService.getInstance().user.id })
+                )
+            }
         }
     }
 
@@ -392,7 +461,7 @@ class ChatMessageActivity : BaseChatActivity() {
         }
     }
 
-    fun startChatDetailsActivity() {
+    private fun startChatDetailsActivity() {
         val intent = Intent(this, ChatDialogDetailsActivity::class.java)
         intent.putExtra(EXTRA_CHAT_DIALOG_ID, chatDialog.dialogId)
         startActivity(intent)

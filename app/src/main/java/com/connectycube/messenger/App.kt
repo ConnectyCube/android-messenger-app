@@ -12,5 +12,6 @@ class App : Application() {
             Timber.plant(Timber.DebugTree())
         }
         SettingsProvider.initConnectycubeCredentials(this)
+        SettingsProvider.initChatConfiguration()
     }
 }

@@ -21,7 +21,7 @@ class ChatMessageListViewModel internal constructor(
     private val repository: ChatMessageRepository,
     private val usersRepository: UserRepository,
     private val chatRepository: ChatRepository,
-    private val chat: ConnectycubeChatDialog
+    private val dialogId: String
 ) :
     AndroidViewModel(applicationContext) {
     private val scrollAtomic = AtomicBoolean()
@@ -36,14 +36,16 @@ class ChatMessageListViewModel internal constructor(
         repository.postsOfDialogId(it.dialogId, PAGE_SIZE)
     }
 
+    val liveDialog by lazy {
+        return@lazy getChatDialog(dialogId)
+    }
+
     val networkState = Transformations.switchMap(repoResult, { it.networkState })
     val messages = Transformations.switchMap(repoResult, { it.pagedList })
     val refreshState = Transformations.switchMap(repoResult, { it.refreshState })
 
-    private fun createShowDialog(): MutableLiveData<ConnectycubeChatDialog> {
-        val dialogName = MutableLiveData<ConnectycubeChatDialog>()
-        dialogName.value = chat
-        return dialogName
+    private fun createShowDialog(): LiveData<ConnectycubeChatDialog> {
+        return map(chatRepository.getChat(dialogId)) { it.cubeChat }
     }
 
     fun getOccupants(chatDialog: ConnectycubeChatDialog): LiveData<Resource<List<ConnectycubeUser>>> {
@@ -67,7 +69,7 @@ class ChatMessageListViewModel internal constructor(
         return result
     }
 
-    fun getChatDialog(dialogId: String): LiveData<Resource<ConnectycubeChatDialog>> {
+    private fun getChatDialog(dialogId: String): LiveData<Resource<ConnectycubeChatDialog>> {
         val result = MediatorLiveData<Resource<ConnectycubeChatDialog>>()
         result.value = Resource.loading(null)
 
