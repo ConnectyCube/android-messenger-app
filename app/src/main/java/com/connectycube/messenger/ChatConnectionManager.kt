@@ -8,11 +8,11 @@ import com.connectycube.core.exception.ResponseException
 import com.connectycube.messenger.events.EVENT_CHAT_LOGIN
 import com.connectycube.messenger.events.EventChatConnection
 import com.connectycube.messenger.events.LiveDataBus
-import com.connectycube.messenger.helpers.ProgressMarker
 import com.connectycube.messenger.helpers.RTCSessionManager
 import com.connectycube.messenger.utilities.SharedPreferencesManager
 import com.connectycube.users.model.ConnectycubeUser
 import timber.log.Timber
+import java.util.concurrent.atomic.AtomicBoolean
 
 class ChatConnectionManager {
 
@@ -26,30 +26,29 @@ class ChatConnectionManager {
             }
     }
 
-    private val  progressMarker = ProgressMarker()
+    private val isPending = AtomicBoolean(false)
 
     fun initWith(context: Context) {
-        Timber.d("initWith, isPending ${progressMarker.isPending()}")
-        if (progressMarker.isPending()) return
+        Timber.d("initWith, isPending ${isPending.get()}")
+        if (isPending.get()) return
 
         if (SharedPreferencesManager.getInstance(context).currentUserExists()
-            && !ConnectycubeChatService.getInstance().isLoggedIn
-            && !progressMarker.isPending())
+            && !ConnectycubeChatService.getInstance().isLoggedIn)
         {
-            progressMarker.setPending(true)
+            isPending.set(true)
             Timber.d("Start chat login")
             ConnectycubeChatService.getInstance().login(
                 SharedPreferencesManager.getInstance(context).getCurrentUser(),
                 object : EntityCallback<Void> {
                     override fun onSuccess(void: Void?, bundle: Bundle?) {
-                        progressMarker.setPending(false)
+                        isPending.set(false)
                         Timber.d("Success login to chat, login = ${ConnectycubeChatService.getInstance().user.login}")
                         notifySuccessLoginToChat(ConnectycubeChatService.getInstance().user)
                         initCallManager(context)
                     }
 
                     override fun onError(ex: ResponseException) {
-                        progressMarker.setPending(false)
+                        isPending.set(false)
                         Timber.d("Error while login to chat, error = ${ex.message}")
                         notifyErrorLoginToChat(ex)
                     }

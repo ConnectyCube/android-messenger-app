@@ -20,9 +20,6 @@ interface ChatDao {
     @Query("SELECT * FROM chats WHERE id = :chatId")
     fun getChatSync(chatId: String): Chat
 
-    @Query("SELECT * FROM chats WHERE id = :chatId")
-    fun getChatValue(chatId: String?): Chat
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(chat: Chat)
 

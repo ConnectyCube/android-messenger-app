@@ -108,7 +108,6 @@ class AppNotificationManager {
                     context,
                     Random().nextInt(),
                     Intent(context, SendFastReplyMessageService::class.java).apply {
-                        putExtra(EXTRA_NOTIFICATION_ID, notificationId)
                         putExtra(EXTRA_CHAT_ID, dialogId)
                     },
                     FLAG_ONE_SHOT
@@ -144,7 +143,9 @@ class AppNotificationManager {
             notificationsMessages[dialogId] = messagingStyle
         }
 
-        messagingStyle.addMessage(newMessage, Date().time, Person.Builder().setName(dialogName).build())
+        if (newMessage.isNotEmpty()) {
+            messagingStyle.addMessage(newMessage, Date().time, Person.Builder().setName(dialogName).build())
+        }
 
         return messagingStyle
     }
@@ -257,17 +258,17 @@ class AppNotificationManager {
         return SharedPreferencesManager.getInstance(context).currentUserExists()
     }
 
-    fun notifyReplyResult(context: Context, notificationId: Int, dialogId: String, text: String, success: Boolean) {
+    fun notifyReplyResult(context: Context, dialogId: String, text: String, success: Boolean) {
+        val params = mutableMapOf<String, String>()
+        params[PARAM_DIALOG_ID] = dialogId
+
         if (success){
-            val params = mutableMapOf<String, String>()
-            params[PARAM_DIALOG_ID] = dialogId
             params[PARAM_MESSAGE] = context.getString(R.string.you_format, text)
-            showChatNotification(context, params)
         } else {
-            //TODO VT back there
-            Toast.makeText(context, R.string.error_sending_message, Toast.LENGTH_SHORT).show()
-            getNotificationManager(context).cancel(notificationId)
+            params[PARAM_MESSAGE] = ""
         }
+
+        showChatNotification(context, params)
     }
 
     fun clearNotificationData(context: Context, dialogId: String){

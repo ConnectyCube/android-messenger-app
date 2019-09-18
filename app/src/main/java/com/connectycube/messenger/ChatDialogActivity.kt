@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.observe
@@ -18,6 +19,7 @@ import com.connectycube.chat.model.ConnectycubeChatMessage
 import com.connectycube.messenger.adapters.ChatDialogAdapter
 import com.connectycube.messenger.api.UserService
 import com.connectycube.messenger.events.EVENT_CHAT_LOGIN
+import com.connectycube.messenger.events.EventChatConnection
 import com.connectycube.messenger.events.LiveDataBus
 import com.connectycube.messenger.helpers.RTCSessionManager
 import com.connectycube.messenger.utilities.InjectorUtils
@@ -83,7 +85,13 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
         Timber.d("subscribeUi")
         showProgress(progressbar)
         LiveDataBus.subscribe(EVENT_CHAT_LOGIN, this, Observer {
-            initManagers()
+            val event = it as EventChatConnection
+
+            if (event.error != null){
+                Toast.makeText(this, getString(R.string.login_chat_error_format, event.error.message), Toast.LENGTH_LONG).show()
+            } else if (event.connected) {
+                initManagers()
+            }
         })
 
         chatDialogListViewModel.chatLiveDataLazy.observe(this) { resource ->

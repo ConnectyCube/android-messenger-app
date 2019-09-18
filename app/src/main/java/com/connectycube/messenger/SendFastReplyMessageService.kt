@@ -5,13 +5,13 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.IBinder
+import android.widget.Toast
 import androidx.core.app.RemoteInput
 import com.connectycube.chat.ConnectycubeRestChatService
 import com.connectycube.chat.model.ConnectycubeChatMessage
 import com.connectycube.core.EntityCallback
 import com.connectycube.core.exception.ResponseException
 import com.connectycube.messenger.helpers.AppNotificationManager
-import com.connectycube.messenger.helpers.EXTRA_NOTIFICATION_ID
 import com.connectycube.messenger.helpers.EXTRA_REPLY_TEXT
 import java.util.concurrent.Executors
 
@@ -31,22 +31,22 @@ class SendFastReplyMessageService: Service() {
         val remoteInput = RemoteInput.getResultsFromIntent(intent)
 
         if (remoteInput != null) {
-            val notificationId = intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
-            val dialogId = intent.getStringExtra(EXTRA_CHAT_ID)
+            val chatId = intent.getStringExtra(EXTRA_CHAT_ID)
             val replyText = remoteInput.getCharSequence(EXTRA_REPLY_TEXT)?.toString()
 
             val chatMessage = ConnectycubeChatMessage().apply {
                 body = replyText
-                setDialogId(dialogId)
+                dialogId = chatId
             }
 
             ConnectycubeRestChatService.createMessage(chatMessage, true).performAsync(object : EntityCallback<ConnectycubeChatMessage> {
                 override fun onSuccess(connectycubeChatMessage: ConnectycubeChatMessage?, bundle: Bundle?) {
-                    finishReplyProcess(applicationContext, notificationId, dialogId, replyText.toString(), true)
+                    finishReplyProcess(applicationContext, chatId, replyText.toString(), true)
                 }
 
                 override fun onError(responseException: ResponseException?) {
-                    finishReplyProcess(applicationContext, notificationId, dialogId, replyText.toString(), false)
+                    Toast.makeText(this@SendFastReplyMessageService, R.string.error_sending_message, Toast.LENGTH_SHORT).show()
+                    finishReplyProcess(applicationContext, chatId, replyText.toString(), false)
                 }
             })
         }
@@ -54,9 +54,9 @@ class SendFastReplyMessageService: Service() {
         return START_NOT_STICKY
     }
 
-    private fun finishReplyProcess(context: Context, notificationId: Int, dialogId: String, text: String, isSuccess: Boolean){
+    private fun finishReplyProcess(context: Context, dialogId: String, text: String, isSuccess: Boolean){
         Executors.newSingleThreadExecutor().submit {
-            AppNotificationManager.getInstance().notifyReplyResult(context, notificationId, dialogId, text, isSuccess)
+            AppNotificationManager.getInstance().notifyReplyResult(context, dialogId, text, isSuccess)
         }
 
         stopSelf()
