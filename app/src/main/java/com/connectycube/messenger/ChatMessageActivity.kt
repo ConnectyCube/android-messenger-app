@@ -113,7 +113,6 @@ class ChatMessageActivity : BaseChatActivity() {
         if (intent.hasExtra(EXTRA_CHAT)){
             val chatDialog = intent.getSerializableExtra(EXTRA_CHAT) as ConnectycubeChatDialog
             modelChatMessageList = getChatMessageListViewModel(chatDialog.dialogId)
-            bindChatDialog(chatDialog)
             AppNotificationManager.getInstance().clearNotificationData(this, chatDialog.dialogId)
         } else if (intent.hasExtra(EXTRA_CHAT_ID)){
             val dialogId = intent.getStringExtra(EXTRA_CHAT_ID)

@@ -84,6 +84,7 @@ class ChatMessageListViewModel internal constructor(
             } else {
                 result.value = Resource.success(chatDialog.cubeChat)
             }
+            result.removeSource(source)
         }
         return result
     }
