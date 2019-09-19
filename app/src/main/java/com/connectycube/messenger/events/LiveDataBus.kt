@@ -10,7 +10,7 @@ const val EVENT_INCOMING_MESSAGE = 1
 
 object LiveDataBus {
 
-    private val events = SparseArray<EventLiveData>()
+    private val events = SparseArray<Any>()
 
 
 
@@ -24,8 +24,8 @@ object LiveDataBus {
     /**
      * Get the live data or create it if it's not already in memory.
      */
-    private fun getLiveData(@EventIdentifier eventId: Int): EventLiveData {
-        var liveData: EventLiveData? = events.get(eventId)
+    private fun <T>getLiveData(@EventIdentifier eventId: Int): EventLiveData<T> {
+        var liveData: EventLiveData<T>? = events.get(eventId) as EventLiveData<T>?
         if (liveData == null) {
             liveData = EventLiveData(eventId)
             events.put(eventId, liveData)
@@ -37,8 +37,8 @@ object LiveDataBus {
     /**
      * Subscribe to the specified eventId and listen for updates on that eventId.
      */
-    fun subscribe(@EventIdentifier eventId: Int, lifecycle: LifecycleOwner, action: Observer<Any>) {
-        getLiveData(eventId).observe(lifecycle, action)
+    fun <T>subscribe(@EventIdentifier eventId: Int, lifecycle: LifecycleOwner, action: Observer<T>) {
+        getLiveData<T>(eventId).observe(lifecycle, action)
     }
 
     /**
@@ -51,7 +51,7 @@ object LiveDataBus {
     /**
      * Publish an object to the specified eventId for all subscribers of that eventId.
      */
-    fun publish(@EventIdentifier eventId: Int, event: Any) {
-        getLiveData(eventId).update(event)
+    fun <T>publish(@EventIdentifier eventId: Int, event: T) {
+        getLiveData<T>(eventId).update(event)
     }
 }

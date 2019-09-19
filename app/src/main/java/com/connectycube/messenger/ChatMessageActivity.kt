@@ -145,10 +145,8 @@ class ChatMessageActivity : BaseChatActivity() {
     }
 
     private fun subscribeToChatConnectionChanges() {
-        LiveDataBus.subscribe(EVENT_CHAT_LOGIN, this, Observer {
-            val event = it as EventChatConnection
-
-            if (event.connected) {
+        LiveDataBus.subscribe(EVENT_CHAT_LOGIN, this, Observer<EventChatConnection> {
+            if (it.connected) {
                 bindToChatConnection()
             } else {
                 Toast.makeText(this, R.string.chat_connection_problem, Toast.LENGTH_LONG).show()
