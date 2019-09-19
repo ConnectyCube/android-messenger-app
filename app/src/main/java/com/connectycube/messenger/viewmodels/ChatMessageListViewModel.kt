@@ -69,7 +69,7 @@ class ChatMessageListViewModel internal constructor(
         return result
     }
 
-    private fun getChatDialog(dialogId: String): LiveData<Resource<ConnectycubeChatDialog>> {
+    fun getChatDialog(dialogId: String = this.dialogId): LiveData<Resource<ConnectycubeChatDialog>> {
         val result = MediatorLiveData<Resource<ConnectycubeChatDialog>>()
         result.value = Resource.loading(null)
 
