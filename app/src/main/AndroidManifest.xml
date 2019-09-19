@@ -87,6 +87,8 @@
             </intent-filter>
         </service>
 
+        <service android:name=".SendFastReplyMessageService" />
+
         <provider
                 android:name="androidx.core.content.FileProvider"
                 android:authorities="${applicationId}.fileprovider"

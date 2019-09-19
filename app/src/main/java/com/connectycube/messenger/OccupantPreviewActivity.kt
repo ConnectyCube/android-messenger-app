@@ -3,7 +3,7 @@ package com.connectycube.messenger
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
-import com.connectycube.chat.ConnectycubeChatService
+import com.connectycube.messenger.utilities.SharedPreferencesManager
 import com.connectycube.messenger.utilities.getPrettyLastActivityDate
 import com.connectycube.messenger.utilities.loadUserAvatar
 import com.connectycube.users.model.ConnectycubeUser
@@ -30,7 +30,8 @@ class OccupantPreviewActivity : BaseChatActivity() {
         user_name_txt.text = user.fullName ?: user.login
         loadUserAvatar(this, user, avatar_img)
 
-        val isCurrentUser = user.id == ConnectycubeChatService.getInstance().user.id
+        val currentUser = SharedPreferencesManager.getInstance(this).getCurrentUser()
+        val isCurrentUser = currentUser.id != null && user.id == currentUser.id
         if (!isCurrentUser) {
             last_activity_title_txt.visibility = View.VISIBLE
             last_activity_text_view.text =

@@ -52,7 +52,7 @@ object SettingsProvider {
         return false
     }
 
-    fun initChat() {
+    fun initChatConfiguration() {
         ConnectycubeSettings.getInstance().logLevel = LogLevel.DEBUG
         ConnectycubeChatService.setDebugEnabled(true)
         ConnectycubeChatService.setDefaultConnectionTimeout(30000)

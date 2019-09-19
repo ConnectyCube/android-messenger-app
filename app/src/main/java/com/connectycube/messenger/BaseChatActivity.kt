@@ -1,22 +1,13 @@
 package com.connectycube.messenger
 
-import android.view.View
-import android.view.WindowManager
-import android.widget.ProgressBar
-import androidx.appcompat.app.AppCompatActivity
+import android.os.Bundle
+import timber.log.Timber
 
-abstract class BaseChatActivity : AppCompatActivity() {
+abstract class BaseChatActivity : BaseActivity() {
 
-    fun hideProgress(progressbar: ProgressBar) {
-        window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
-        progressbar.visibility = View.GONE
-    }
-
-    fun showProgress(progressbar: ProgressBar) {
-        window.setFlags(
-            WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
-            WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
-        )
-        progressbar.visibility = View.VISIBLE
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        Timber.d("onCreate")
+        ChatConnectionManager.getInstance().initWith(this)
     }
 }

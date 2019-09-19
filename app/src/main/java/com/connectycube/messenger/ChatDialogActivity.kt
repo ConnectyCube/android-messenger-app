@@ -4,7 +4,9 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.lifecycle.Observer
 import androidx.lifecycle.observe
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -16,6 +18,9 @@ import com.connectycube.chat.model.ConnectycubeChatDialog
 import com.connectycube.chat.model.ConnectycubeChatMessage
 import com.connectycube.messenger.adapters.ChatDialogAdapter
 import com.connectycube.messenger.api.UserService
+import com.connectycube.messenger.events.EVENT_CHAT_LOGIN
+import com.connectycube.messenger.events.EventChatConnection
+import com.connectycube.messenger.events.LiveDataBus
 import com.connectycube.messenger.helpers.RTCSessionManager
 import com.connectycube.messenger.utilities.InjectorUtils
 import com.connectycube.messenger.utilities.SharedPreferencesManager
@@ -29,7 +34,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
-const val EXTRA_CHAT = "chat_dialog"
 const val REQUEST_SETTING_SCREEN = 50
 
 class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapterCallback {
@@ -47,7 +51,6 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
         super.onCreate(savedInstanceState)
         Timber.d("onCreate")
         setContentView(R.layout.activity_chatdialogs)
-        initManagers()
         initToolbar()
         initDialogsAdapter()
         initDialogsRecyclerView()
@@ -81,6 +84,16 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
     private fun subscribeUi() {
         Timber.d("subscribeUi")
         showProgress(progressbar)
+        LiveDataBus.subscribe(EVENT_CHAT_LOGIN, this, Observer {
+            val event = it as EventChatConnection
+
+            if (event.error != null){
+                Toast.makeText(this, getString(R.string.login_chat_error_format, event.error.message), Toast.LENGTH_LONG).show()
+            } else if (event.connected) {
+                initManagers()
+            }
+        })
+
         chatDialogListViewModel.chatLiveDataLazy.observe(this) { resource ->
             when (resource.status) {
                 Status.SUCCESS -> {
@@ -172,8 +185,9 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
     }
 
     private fun startChatActivity(chat: ConnectycubeChatDialog) {
-        val intent = Intent(this, ChatMessageActivity::class.java)
-        intent.putExtra(EXTRA_CHAT, chat)
+        val intent = Intent(this, ChatMessageActivity::class.java).apply {
+            putExtra(EXTRA_CHAT, chat)
+        }
         startActivity(intent)
     }
 

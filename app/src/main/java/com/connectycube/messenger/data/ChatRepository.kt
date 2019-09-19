@@ -23,6 +23,8 @@ class ChatRepository private constructor(private val chatDao: ChatDao, private v
 
     fun getChat(chatId: String) = chatDao.getChat(chatId)
 
+    fun getChatSync(chatId: String) = chatDao.getChatSync(chatId)
+
     fun updateChat(dialogId: String) {
         fun requestProcessor(chatId: String): UpdateResourceProcessor<Chat> {
             return object : UpdateResourceProcessor<Chat>(appExecutors) {
@@ -31,7 +33,7 @@ class ChatRepository private constructor(private val chatDao: ChatDao, private v
                 }
 
                 override fun saveCallResult(item: Chat) {
-                    val chat = chatDao.getChatValue(chatId)
+                    val chat = chatDao.getChatSync(chatId)
                     val shouldUpdate = chat != item
                     Timber.d("shouldUpdate= $shouldUpdate")
                     if (shouldUpdate) {
@@ -188,12 +190,10 @@ class ChatRepository private constructor(private val chatDao: ChatDao, private v
         }.asLiveData()
     }
 
-    private fun getRequestProcessor(chatId: String,
-                                    errorAction: Function2<String, Chat, Unit>
-    ): UpdateResourceProcessor<Chat> {
-        return object : UpdateResourceProcessor<Chat>(appExecutors) {
+    private fun getRequestProcessor(chatId: String, errorAction: Function2<String, Chat, Unit>): UpdateResourceProcessor<Chat> {
+        return object : UpdateResourceProcessor<Chat>(appExecutors){
             override fun processError(errorMessage: String) {
-                errorAction.invoke(errorMessage, chatDao.getChatValue(chatId))
+                errorAction.invoke(errorMessage, chatDao.getChatSync(chatId))
             }
 
             override fun saveCallResult(item: Chat) {
@@ -208,7 +208,7 @@ class ChatRepository private constructor(private val chatDao: ChatDao, private v
     ): UpdateResourceProgressProcessor<Chat> {
         return object : UpdateResourceProgressProcessor<Chat>(appExecutors) {
             override fun processError(errorMessage: String) {
-                errorAction.invoke(errorMessage, chatDao.getChatValue(chatId))
+                errorAction.invoke(errorMessage, chatDao.getChatSync(chatId))
             }
 
             override fun saveCallResult(item: Chat) {
