@@ -75,6 +75,13 @@ class ChatDialogDetailsViewModel internal constructor(
         return SharedPreferencesManager.getInstance(getApplication()).getCurrentUser()
     }
 
+    fun updateGroupPhoto(dialogId: String, newPhoto: String) {
+        liveDialog().postValue(Resource.loading(null))
+        chatRepository.updateChatPhoto(dialogId, newPhoto, { error, chat ->
+            liveDialog().postValue(Resource.error(error, chat.cubeChat))
+        }, { progress -> liveDialog().postValue(Resource.loadingProgress(null, progress)) })
+    }
+
     fun updateGroupDescription(dialogId: String, newDescription: String) {
         chatRepository.updateChatDescription(dialogId, newDescription) { error, chat ->
             liveDialog().postValue(Resource.error(error, chat.cubeChat))

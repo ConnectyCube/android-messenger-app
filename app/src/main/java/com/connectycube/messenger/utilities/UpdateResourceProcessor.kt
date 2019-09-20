@@ -9,8 +9,9 @@ import com.connectycube.messenger.vo.AppExecutors
 
 
 abstract class UpdateResourceProcessor<RequestType>
-@MainThread constructor(private val appExecutors: AppExecutors) : ResponsePerformer.Callback<RequestType> {
+@MainThread constructor(protected val appExecutors: AppExecutors) : ResponsePerformer.Callback<RequestType> {
 
+    @MainThread
     override fun onResult(response: ApiResponse<RequestType>) {
         when (response) {
             is ApiSuccessResponse -> {

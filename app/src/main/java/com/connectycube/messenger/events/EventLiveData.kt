@@ -3,15 +3,15 @@ package com.connectycube.messenger.events
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 
-class EventLiveData (
+class EventLiveData<T> (
     @LiveDataBus.EventIdentifier val id: Int
-) : LiveData<Any>() {
+) : LiveData<T>() {
 
-    fun update(toUpdateObject: Any) {
+    fun update(toUpdateObject: T) {
         postValue(toUpdateObject)
     }
 
-    override fun removeObserver(observer: Observer<in Any>) {
+    override fun removeObserver(observer: Observer<in T>) {
         super.removeObserver(observer)
         if (!hasObservers()) {
             LiveDataBus.unregister(id)

@@ -84,12 +84,10 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
     private fun subscribeUi() {
         Timber.d("subscribeUi")
         showProgress(progressbar)
-        LiveDataBus.subscribe(EVENT_CHAT_LOGIN, this, Observer {
-            val event = it as EventChatConnection
-
-            if (event.error != null){
-                Toast.makeText(this, getString(R.string.login_chat_error_format, event.error.message), Toast.LENGTH_LONG).show()
-            } else if (event.connected) {
+        LiveDataBus.subscribe(EVENT_CHAT_LOGIN, this, Observer<EventChatConnection> {
+            if (it.error != null){
+                Toast.makeText(this, getString(R.string.login_chat_error_format, it.error.message), Toast.LENGTH_LONG).show()
+            } else if (it.connected) {
                 initManagers()
             }
         })

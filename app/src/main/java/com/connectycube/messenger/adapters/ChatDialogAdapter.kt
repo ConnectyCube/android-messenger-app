@@ -160,6 +160,7 @@ internal class ChatDialogAdapter(private val context: Context) :
                     && oldItem.lastMessage == newItem.lastMessage
                     && oldItem.unreadMessageCount == newItem.unreadMessageCount
                     && oldItem.name == newItem.name
+                    && oldItem.updatedAt == newItem.updatedAt
         }
     }
 

@@ -12,12 +12,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.connectycube.chat.model.ConnectycubeChatDialog
 import com.connectycube.chat.model.ConnectycubeDialogType
 import com.connectycube.messenger.adapters.DialogOccupantsAdapter
-import com.connectycube.messenger.utilities.InjectorUtils
-import com.connectycube.messenger.utilities.loadChatDialogPhoto
+import com.connectycube.messenger.utilities.*
 import com.connectycube.messenger.viewmodels.ChatDialogDetailsViewModel
 import com.connectycube.messenger.vo.Status
 import com.connectycube.users.model.ConnectycubeUser
+import com.yalantis.ucrop.UCrop
+import com.zhihu.matisse.Matisse
 import kotlinx.android.synthetic.main.activity_chat_dialog_details.*
+import timber.log.Timber
 
 const val EXTRA_CHAT_DIALOG_ID = "chat_dialog_id"
 const val MAX_DIALOG_DESCRIPTION_LENGTH = 200
@@ -29,6 +31,7 @@ const val REQUEST_ADD_OCCUPANTS = 10
 class ChatDialogDetailsActivity : BaseChatActivity(),
     DialogOccupantsAdapter.DialogOccupantsAdapterCallback {
 
+    private val permissionsHelper = PermissionsHelper(this)
     private lateinit var chatDialogDetailsViewModel: ChatDialogDetailsViewModel
     private lateinit var currentChatDialog: ConnectycubeChatDialog
     private lateinit var occupantsAdapter: DialogOccupantsAdapter
@@ -53,7 +56,9 @@ class ChatDialogDetailsActivity : BaseChatActivity(),
     }
 
     private fun editGroupPhoto() {
-        Toast.makeText(this, R.string.coming_soon, Toast.LENGTH_LONG).show()
+        if (permissionsHelper.areAllImageGranted()) {
+            requestImage(this)
+        } else permissionsHelper.requestImagePermissions()
     }
 
     private fun editGroupName() {
@@ -104,7 +109,7 @@ class ChatDialogDetailsActivity : BaseChatActivity(),
                     }
                 }
                 Status.LOADING -> {
-                    showProgress(progressbar)
+                    showProgressValueIfNotNull(progressbar, resource.progress)
                 }
                 Status.ERROR -> {
                     hideProgress(progressbar)
@@ -198,6 +203,47 @@ class ChatDialogDetailsActivity : BaseChatActivity(),
             REQUEST_ADD_OCCUPANTS -> {
                 startAddOccupants(data.getIntegerArrayListExtra(EXTRA_SELECTED_USERS))
             }
+//            update photo
+            REQUEST_CODE_CHOOSE -> {
+                if (Matisse.obtainPathResult(data) != null) {
+                    cropImage(this, Matisse.obtainPathResult(data).iterator().next())
+                }
+            }
+            UCrop.REQUEST_CROP -> {
+                val resultUri = UCrop.getOutput(data)
+                resultUri?.let {
+                    startPhotoUpdate(resultUri.path)
+                }
+            }
+            UCrop.RESULT_ERROR -> {
+                handleCropError(this, data)
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>, grantResults: IntArray
+    ) {
+        when (requestCode) {
+            REQUEST_PERMISSION_IMAGE -> {
+                // If request is cancelled, the result arrays are empty.
+                if (permissionsHelper.areAllImageGranted()) {
+                    Timber.d("permission was granted")
+                } else {
+                    Timber.d("permission is denied")
+                }
+                return
+            }
+            else -> {
+                // Ignore all other requests.
+            }
+        }
+    }
+
+    private fun startPhotoUpdate(path: String?) {
+        path?.let {
+            chatDialogDetailsViewModel.updateGroupPhoto(currentChatDialog.dialogId, path)
         }
     }
 
@@ -250,6 +296,11 @@ class ChatDialogDetailsActivity : BaseChatActivity(),
 
     override fun getCurrentUser(): ConnectycubeUser {
         return chatDialogDetailsViewModel.getCurrentUser()
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        setResult(REQUEST_CODE_DETAILS)
     }
 
     override fun finish() {

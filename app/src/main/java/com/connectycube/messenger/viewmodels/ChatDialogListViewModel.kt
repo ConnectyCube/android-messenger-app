@@ -47,9 +47,7 @@ class ChatDialogListViewModel internal constructor(val chatRepository: ChatRepos
     }
 
     fun updateChat(dialogId: String) {
-        chatMediatorLiveData.addSource(chatRepository.update(dialogId)) { data ->
-            chatMediatorLiveData.value = data
-        }
+        chatRepository.updateChat(dialogId)
     }
 
     fun deleteChat(chatDialog: ConnectycubeChatDialog): LiveData<Resource<List<ConnectycubeChatDialog>>>{

@@ -13,10 +13,11 @@ data class Chat(
     @ColumnInfo(name = "id") val chatId: String,
     val lastMessageDateSent: Long,
     val createdAt: Long,
+    val updatedAt: Long,
     val unreadMessageCount: Int,
     val name: String,
     val cubeChat: ConnectycubeChatDialog
 ) {
     override fun toString() = "chatId $chatId, lastMessageDateSent= $lastMessageDateSent, createdAt= $createdAt, " +
-            "unreadMessageCount= $unreadMessageCount, name= $name"
+            "updatedAt= $updatedAt, unreadMessageCount= $unreadMessageCount, name= $name"
 }
