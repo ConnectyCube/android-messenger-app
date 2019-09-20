@@ -2,8 +2,8 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item
             android:id="@+id/background"
-            android:drawable="@drawable/call_toggle_background" />
+            android:drawable="@drawable/call_toolbar_toggle_background" />
     <item
             android:id="@+id/toggle"
-            android:drawable="@drawable/selector_toggle_mute_mic_button" />
+            android:drawable="@drawable/selector_toggle_speaker_button" />
 </layer-list>

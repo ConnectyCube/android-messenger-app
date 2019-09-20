@@ -2,12 +2,10 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item
             android:state_checked="true"
-            android:drawable="@drawable/shape_call_circle_semi_transparent"
-
+            android:drawable="@drawable/ic_screen_share_white_24dp"
             />
     <item
             android:state_checked="false"
-            android:drawable="@drawable/shape_call_circle_semi_transparent"
-
+            android:drawable="@drawable/ic_stop_screen_share_white_24dp"
             />
 </selector>
