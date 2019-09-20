@@ -9,7 +9,7 @@ const val EVENT_INCOMING_MESSAGE = 1
 
 object LiveDataBus {
 
-    private val events = mutableMapOf<Int, Any>()
+    private val events = mutableMapOf<Int, EventLiveData<*>>()
 
 
     @Retention(AnnotationRetention.SOURCE)
