@@ -108,6 +108,7 @@ class ChatMessageActivity : BaseChatActivity() {
         super.onCreate(savedInstanceState)
         Timber.d("onCreate")
         setContentView(R.layout.activity_chatmessages)
+        setSupportActionBar(toolbar)
         initWithData(intent)
     }
 
@@ -209,7 +210,6 @@ class ChatMessageActivity : BaseChatActivity() {
     }
 
     private fun initToolbar() {
-        setSupportActionBar(toolbar)
         back_btn.setOnClickListener { onBackPressed() }
         toolbar_layout.setOnClickListener { startChatDetailsActivity() }
         loadChatDialogPhoto(this, chatDialog.isPrivate, chatDialog.photo, avatar_img)

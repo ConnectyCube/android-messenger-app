@@ -26,7 +26,7 @@ class CallViewModel internal constructor(
     }
 
     enum class CallSessionAction {
-        CALL_STARTED, CALL_STOPPED, SWITCHED_CAMERA
+        CALL_STARTED, CALL_STOPPED
     }
 
 

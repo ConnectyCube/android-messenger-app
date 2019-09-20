@@ -6,14 +6,13 @@ import android.os.Handler
 import android.view.View
 import android.view.ViewTreeObserver
 import android.widget.Toast
-import androidx.lifecycle.Observer
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import com.connectycube.messenger.adapters.VideoCallAdapter
-import com.connectycube.messenger.viewmodels.CallViewModel
 import com.connectycube.users.model.ConnectycubeUser
 import com.connectycube.videochat.BaseSession
+import com.connectycube.videochat.RTCCameraVideoCapturer
 import com.connectycube.videochat.RTCClient
 import com.connectycube.videochat.RTCSession
 import com.connectycube.videochat.callbacks.RTCClientVideoTracksCallback
@@ -22,6 +21,7 @@ import com.connectycube.videochat.callbacks.RTCSessionStateCallback
 import com.connectycube.videochat.view.RTCSurfaceView
 import com.connectycube.videochat.view.RTCVideoTrack
 import kotlinx.android.synthetic.main.fragment_video_call.*
+import org.webrtc.CameraVideoCapturer
 import org.webrtc.RendererCommon
 import org.webrtc.SurfaceViewRenderer
 import timber.log.Timber
@@ -37,6 +37,7 @@ class VideoCallFragment :
     private lateinit var videoCallAdapter: VideoCallAdapter
     private val userViewHolders: HashMap<Int, VideoCallAdapter.ViewHolder> = HashMap()
     private var users: ArrayList<ConnectycubeUser> = ArrayList()
+    private val cameraSwitchHandler = CameraSwitchHandler()
     private val mainHandler = Handler()
     private var isCameraFront = true
 
@@ -55,7 +56,7 @@ class VideoCallFragment :
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        subscribeModel()
+        initButtons()
     }
 
     override fun onStart() {
@@ -95,21 +96,28 @@ class VideoCallFragment :
         }
     }
 
-    private fun subscribeModel() {
-        callViewModel.callSessionAction.observe(this, Observer { action ->
-            action?.let { result ->
-                when (result) {
-                    CallViewModel.CallSessionAction.SWITCHED_CAMERA -> {
-                        isCameraFront = !isCameraFront
-                        val localView = getViewHolderForUser(currentUser.id)?.rtcView
-                        localView?.let {
-                            updateVideoView(it, isCameraFront)
-                        }
-                    }
-                    else -> Timber.d("ignore")
-                }
-            }
-        })
+    private fun initButtons() {
+        toggle_camera.setOnClickListener { switchCamera() }
+        toggle_mute_camera.setOnClickListener { setMuteCamera(toggle_mute_camera.isChecked) }
+        toggle_mute_mic.setOnClickListener { setAudioMute(toggle_mute_mic.isChecked) }
+    }
+
+    private fun switchCamera() {
+        toggle_camera.isEnabled = false
+        (currentSession?.mediaStreamManager?.videoCapturer as RTCCameraVideoCapturer)
+            .switchCamera(cameraSwitchHandler)
+    }
+
+    private fun setMuteCamera(isEnabled: Boolean) {
+        currentSession?.apply {
+            mediaStreamManager?.localVideoTrack?.setEnabled(isEnabled)
+        }
+    }
+
+    private fun setAudioMute(isEnabled: Boolean) {
+        currentSession?.apply {
+            mediaStreamManager?.localAudioTrack?.setEnabled(isEnabled)
+        }
     }
 
     override fun initWithOpponents(opponents: List<ConnectycubeUser>?) {
@@ -400,6 +408,26 @@ class VideoCallFragment :
                 }
             }
             return 2
+        }
+    }
+
+    private inner class CameraSwitchHandler : CameraVideoCapturer.CameraSwitchHandler {
+        override fun onCameraSwitchDone(isFront: Boolean) {
+            toggle_camera.isEnabled = true
+            isCameraFront = !isCameraFront
+
+            val localView = getViewHolderForUser(currentUser.id)?.rtcView
+            localView?.let {
+                updateVideoView(it, isCameraFront)
+            }
+        }
+
+        override fun onCameraSwitchError(err: String?) {
+            Toast.makeText(
+                context, getString(R.string.camera_switch_error),
+                Toast.LENGTH_SHORT
+            ).show()
+            toggle_camera.isEnabled = true
         }
     }
 }

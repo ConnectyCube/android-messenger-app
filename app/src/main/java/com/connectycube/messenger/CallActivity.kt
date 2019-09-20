@@ -18,7 +18,6 @@ import com.connectycube.videochat.callbacks.RTCSessionEventsCallback
 import com.connectycube.videochat.callbacks.RTCSessionStateCallback
 import kotlinx.android.synthetic.main.activity_call.*
 import org.jivesoftware.smack.AbstractConnectionListener
-import org.webrtc.CameraVideoCapturer
 import timber.log.Timber
 import com.google.android.material.snackbar.Snackbar
 
@@ -35,7 +34,6 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
     private lateinit var ringtoneManager: RingtoneManager
     private var currentSession: RTCSession? = null
     private var audioManager: AppRTCAudioManager? = null
-    private val cameraSwitchHandler = CameraSwitchHandler()
     private val connectionListener = ConnectionListener()
     private var isInComingCall: Boolean = false
 
@@ -73,8 +71,7 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
         setSupportActionBar(toolbar)
         toggle_speaker.setOnClickListener { switchAudioDevice() }
         toggle_mute_mic.setOnClickListener { setAudioMute(toggle_mute_mic.isChecked) }
-        toggle_camera.setOnClickListener { switchCamera() }
-        toggle_mute_camera.setOnClickListener { setMuteCamera(toggle_mute_camera.isChecked) }
+        toggle_screen_sharing.setOnClickListener { screenSharing() }
         updateToolbar()
     }
 
@@ -91,18 +88,16 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
             if (isInComingCall && !showFull) {
                 toggle_speaker.visibility = View.INVISIBLE
                 toggle_mute_mic.visibility = View.INVISIBLE
-                toggle_camera.visibility = View.INVISIBLE
-                toggle_mute_camera.visibility = View.INVISIBLE
+                toggle_screen_sharing.visibility = View.INVISIBLE
             } else {
-                toggle_mute_mic.visibility = View.VISIBLE
                 if (it.isAudioCall) {
+                    toggle_mute_mic.visibility = View.VISIBLE
                     toggle_speaker.visibility = View.VISIBLE
-                    toggle_camera.visibility = View.GONE
-                    toggle_mute_camera.visibility = View.GONE
+                    toggle_screen_sharing.visibility = View.GONE
                 } else {
+                    toggle_screen_sharing.visibility = View.VISIBLE
+                    toggle_mute_mic.visibility = View.GONE
                     toggle_speaker.visibility = View.GONE
-                    toggle_camera.visibility = View.VISIBLE
-                    toggle_mute_camera.visibility = View.VISIBLE
                 }
             }
         }
@@ -132,16 +127,8 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
         }
     }
 
-    private fun switchCamera() {
-        toggle_camera.isEnabled = false
-        (currentSession?.mediaStreamManager?.videoCapturer as RTCCameraVideoCapturer)
-            .switchCamera(cameraSwitchHandler)
-    }
-
-    private fun setMuteCamera(isEnabled: Boolean) {
-        currentSession?.apply {
-            mediaStreamManager?.localVideoTrack?.setEnabled(isEnabled)
-        }
+    private fun screenSharing() {
+        Toast.makeText(this, getString(R.string.coming_soon), Toast.LENGTH_LONG).show()
     }
 
     private fun initCall() {
@@ -357,21 +344,6 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
     }
 
     override fun onStateChanged(session: RTCSession?, state: BaseSession.RTCSessionState?) {
-    }
-
-    private inner class CameraSwitchHandler : CameraVideoCapturer.CameraSwitchHandler {
-        override fun onCameraSwitchDone(isFront: Boolean) {
-            toggle_camera.isEnabled = true
-            callViewModel.callSessionAction.value = CallViewModel.CallSessionAction.SWITCHED_CAMERA
-        }
-
-        override fun onCameraSwitchError(err: String?) {
-            Toast.makeText(
-                applicationContext, getString(R.string.camera_switch_error),
-                Toast.LENGTH_SHORT
-            ).show()
-            toggle_camera.isEnabled = true
-        }
     }
 
     private inner class ConnectionListener : AbstractConnectionListener() {
