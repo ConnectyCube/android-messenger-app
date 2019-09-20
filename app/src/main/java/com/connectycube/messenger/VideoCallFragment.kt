@@ -99,7 +99,7 @@ class VideoCallFragment :
     private fun initButtons() {
         toggle_camera.setOnClickListener { switchCamera() }
         toggle_mute_camera.setOnClickListener { setMuteCamera(toggle_mute_camera.isChecked) }
-        toggle_mute_mic.setOnClickListener { setAudioMute(toggle_mute_mic.isChecked) }
+        toggle_mute_mic.setOnClickListener { setMuteAudio(toggle_mute_mic.isChecked) }
     }
 
     private fun switchCamera() {
@@ -114,7 +114,7 @@ class VideoCallFragment :
         }
     }
 
-    private fun setAudioMute(isEnabled: Boolean) {
+    private fun setMuteAudio(isEnabled: Boolean) {
         currentSession?.apply {
             mediaStreamManager?.localAudioTrack?.setEnabled(isEnabled)
         }

@@ -70,7 +70,7 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
     private fun initToolbar() {
         setSupportActionBar(toolbar)
         toggle_speaker.setOnClickListener { switchAudioDevice() }
-        toggle_mute_mic.setOnClickListener { setAudioMute(toggle_mute_mic.isChecked) }
+        toggle_mute_mic.setOnClickListener { setMuteAudio(toggle_mute_mic.isChecked) }
         toggle_screen_sharing.setOnClickListener { screenSharing() }
         updateToolbar()
     }
@@ -121,7 +121,7 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
         }
     }
 
-    private fun setAudioMute(isEnabled: Boolean) {
+    private fun setMuteAudio(isEnabled: Boolean) {
         currentSession?.apply {
             mediaStreamManager?.localAudioTrack?.setEnabled(isEnabled)
         }
