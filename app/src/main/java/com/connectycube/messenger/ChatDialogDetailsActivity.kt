@@ -109,11 +109,7 @@ class ChatDialogDetailsActivity : BaseChatActivity(),
                     }
                 }
                 Status.LOADING -> {
-                    showProgress(progressbar)
-                    if (resource.progress != null) {
-                        if (progressbar.isIndeterminate) progressbar.isIndeterminate = false
-                        progressbar.progress = resource.progress
-                    } else if (!progressbar.isIndeterminate) progressbar.isIndeterminate = true
+                    showProgressValueIfNotNull(progressbar, resource.progress)
                 }
                 Status.ERROR -> {
                     hideProgress(progressbar)

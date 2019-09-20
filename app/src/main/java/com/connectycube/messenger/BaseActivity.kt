@@ -19,4 +19,12 @@ abstract class BaseActivity : AppCompatActivity() {
         )
         progressbar.visibility = View.VISIBLE
     }
+
+    fun showProgressValueIfNotNull(progressbar: ProgressBar, progress: Int?) {
+        showProgress(progressbar)
+        if (progress != null) {
+            if (progressbar.isIndeterminate) progressbar.isIndeterminate = false
+            progressbar.progress = progress
+        } else if (!progressbar.isIndeterminate) progressbar.isIndeterminate = true
+    }
 }
