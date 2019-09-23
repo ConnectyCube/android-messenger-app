@@ -42,6 +42,7 @@ import com.connectycube.messenger.viewmodels.ChatMessageListViewModel
 import com.connectycube.users.model.ConnectycubeUser
 import com.google.android.material.button.MaterialButton.ICON_GRAVITY_START
 import com.google.android.material.button.MaterialButton.ICON_GRAVITY_TEXT_END
+import com.timehop.stickyheadersrecyclerview.StickyRecyclerHeadersDecoration
 import com.zhihu.matisse.Matisse
 import kotlinx.android.synthetic.main.activity_chatmessages.*
 import timber.log.Timber
@@ -257,10 +258,8 @@ class ChatMessageActivity : BaseChatActivity() {
         messages_recycleview.layoutManager = layoutManager
         messages_recycleview.adapter = chatAdapter
         messages_recycleview.addItemDecoration(
-            MarginItemDecoration(
-                resources.getDimension(R.dimen.margin_normal).toInt()
+            StickyRecyclerHeadersDecoration(chatAdapter)
             )
-        )
 
         messages_recycleview.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {

@@ -3,6 +3,7 @@ package com.connectycube.messenger.utilities
 import android.content.Context
 import com.connectycube.messenger.R
 import java.text.DateFormat
+import java.text.SimpleDateFormat
 import java.util.*
 
 fun getPrettyDate(context: Context, date: Long): String {
@@ -27,8 +28,23 @@ fun getPrettyLastActivityDate(context: Context, date: Date): String {
     val currentDay = currentDate.get(Calendar.DAY_OF_YEAR)
 
     return when (currentDay - lastRequestAtDay) {
-        0 -> context.getString(R.string.today) + " at " + DateFormat.getTimeInstance(DateFormat.SHORT).format(date)
-        1 -> context.getString(R.string.yesterday) + " at " + DateFormat.getTimeInstance(DateFormat.SHORT).format(date)
+        0 -> context.getString(R.string.today) + " at " + DateFormat.getTimeInstance(DateFormat.SHORT).format(
+            date
+        )
+        1 -> context.getString(R.string.yesterday) + " at " + DateFormat.getTimeInstance(DateFormat.SHORT).format(
+            date
+        )
         else -> DateFormat.getDateInstance(DateFormat.MEDIUM).format(date)
     }
 }
+
+fun getDateAsHeaderId(milliseconds: Long): Long {
+    val dateFormat = SimpleDateFormat("ddMMyyyy", Locale.getDefault())
+    return java.lang.Long.parseLong(dateFormat.format(Date(milliseconds)))
+}
+
+fun getDate(milliseconds: Long): String {
+    val dateFormat = SimpleDateFormat("MMMM dd", Locale.getDefault())
+    return dateFormat.format(Date(milliseconds))
+}
+

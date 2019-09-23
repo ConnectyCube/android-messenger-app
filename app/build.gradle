@@ -65,6 +65,7 @@ dependencies { configuration ->
     implementation "com.google.android.gms:play-services-gcm:17.0.0"
     implementation "com.google.firebase:firebase-messaging:20.0.0"
     implementation "com.google.firebase:firebase-core:17.2.0"
+    implementation "com.timehop.stickyheadersrecyclerview:library:0.4.2"
 }
 
 private static void connectycubeComponents(configuration, version) {

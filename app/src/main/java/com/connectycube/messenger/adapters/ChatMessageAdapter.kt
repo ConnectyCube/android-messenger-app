@@ -20,8 +20,11 @@ import com.connectycube.chat.model.ConnectycubeDialogType
 import com.connectycube.core.helper.CollectionsUtil
 import com.connectycube.messenger.R
 import com.connectycube.messenger.paging.NetworkState
+import com.connectycube.messenger.utilities.getDate
+import com.connectycube.messenger.utilities.getDateAsHeaderId
 import com.connectycube.messenger.utilities.loadAttachImage
 import com.connectycube.messenger.utilities.loadChatMessagePhoto
+import com.timehop.stickyheadersrecyclerview.StickyRecyclerHeadersAdapter
 import timber.log.Timber
 
 
@@ -32,7 +35,38 @@ class ChatMessageAdapter(
     val context: Context,
     var chatDialog: ConnectycubeChatDialog,
     private val attachmentClickListener: AttachmentClickListener
-) : PagedListAdapter<ConnectycubeChatMessage, RecyclerView.ViewHolder>(diffCallback) {
+) : PagedListAdapter<ConnectycubeChatMessage, RecyclerView.ViewHolder>(diffCallback),
+    StickyRecyclerHeadersAdapter<RecyclerView.ViewHolder> {
+    
+    override fun getHeaderId(position: Int): Long {
+        val chatMessage = getItem(position)
+        var date = 0L
+        chatMessage?.let {
+            date = getDateAsHeaderId(chatMessage.dateSent * 1000)
+        }
+        return date
+    }
+
+    override fun onCreateHeaderViewHolder(parent: ViewGroup?): RecyclerView.ViewHolder {
+        val view = LayoutInflater.from(parent?.context).inflate(
+            R.layout.chat_message_header,
+            parent,
+            false
+        )
+        return object : RecyclerView.ViewHolder(view) {
+        }
+    }
+
+    override fun onBindHeaderViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        val view = holder.itemView
+        val dateView = view.findViewById<TextView>(R.id.header_text_view)
+
+        val chatMessage = getItem(position)
+        chatMessage?.let{
+            dateView.text = getDate(chatMessage.dateSent * 1000)
+        }
+    }
+
     val IN_PROGRESS = -1
     val TEXT_OUTCOMING = 1
     val TEXT_INCOMING = 2
