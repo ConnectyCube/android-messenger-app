@@ -6,9 +6,11 @@ import com.connectycube.core.EntityCallback
 import com.connectycube.core.exception.ResponseException
 import com.connectycube.core.server.Performer
 import com.connectycube.messenger.api.ApiResponse
+import com.connectycube.messenger.vo.AppExecutors
 import java.util.concurrent.atomic.AtomicBoolean
 
 open class LiveDataResponsePerformer<T, R> {
+    val appExecutors = AppExecutors()
 
     open fun perform(performer: Performer<T>, converter: Converter<R, T>): MutableLiveData<ApiResponse<R>> {
         return object : MutableLiveData<ApiResponse<R>>() {
@@ -26,6 +28,28 @@ open class LiveDataResponsePerformer<T, R> {
                             postValue(ApiResponse.create(ex))
                         }
                     })
+                }
+            }
+        }
+    }
+
+    open fun performSync(performer: Performer<T>,
+                         converter: Converter<R, T>
+    ): MutableLiveData<ApiResponse<R>> {
+        return object : MutableLiveData<ApiResponse<R>>() {
+            private var started = AtomicBoolean(false)
+            override fun onActive() {
+                super.onActive()
+                if (started.compareAndSet(false, true)) {
+                    appExecutors.networkIO().execute {
+                        try {
+                            val result = performer.perform()
+                            val wrapped = converter.convertTo(result)
+                            postValue(ApiResponse.create(wrapped, Bundle.EMPTY))
+                        } catch (ex: ResponseException) {
+                            postValue(ApiResponse.create(ex))
+                        }
+                    }
                 }
             }
         }
