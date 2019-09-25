@@ -97,7 +97,7 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
                 Status.SUCCESS -> {
                     hideProgress(progressbar)
                     val listChatDialogs = resource.data
-                    Timber.d("chatDialogListViewModel.getChats() = $listChatDialogs")
+                    Timber.d("chatDialogListViewModel.getChats() = ${listChatDialogs?.size}")
                     updateDialogAdapter(listChatDialogs)
                 }
                 Status.LOADING -> Timber.d("Status.LOADING")

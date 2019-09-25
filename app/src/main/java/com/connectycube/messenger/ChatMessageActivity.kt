@@ -42,6 +42,8 @@ import com.connectycube.messenger.viewmodels.ChatMessageListViewModel
 import com.connectycube.users.model.ConnectycubeUser
 import com.google.android.material.button.MaterialButton.ICON_GRAVITY_START
 import com.google.android.material.button.MaterialButton.ICON_GRAVITY_TEXT_END
+import com.timehop.stickyheadersrecyclerview.StickyRecyclerHeadersAdapter
+import com.timehop.stickyheadersrecyclerview.StickyRecyclerHeadersDecoration
 import com.zhihu.matisse.Matisse
 import kotlinx.android.synthetic.main.activity_chatmessages.*
 import timber.log.Timber
@@ -261,7 +263,6 @@ class ChatMessageActivity : BaseChatActivity() {
                 resources.getDimension(R.dimen.margin_normal).toInt()
             )
         )
-
         messages_recycleview.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
@@ -563,18 +564,19 @@ class ChatMessageActivity : BaseChatActivity() {
         }
     }
 
-    class MarginItemDecoration(private val spaceHeight: Int) : RecyclerView.ItemDecoration() {
+    inner class MarginItemDecoration(private val spaceHeight: Int): StickyRecyclerHeadersDecoration(chatAdapter) {
+
         override fun getItemOffsets(
             outRect: Rect, view: View,
             parent: RecyclerView, state: RecyclerView.State
         ) {
+            super.getItemOffsets(outRect, view, parent, state)
             with(outRect) {
-                if (parent.getChildAdapterPosition(view) == 0) {
+                if (parent.getChildAdapterPosition(view) == 0 && chatAdapter.isHeaderView(1)) {
+                    top = spaceHeight * 4
+                } else if (parent.getChildAdapterPosition(view) == 0) {
                     top = spaceHeight
                 }
-                left = spaceHeight
-                right = spaceHeight
-                bottom = spaceHeight
             }
         }
     }

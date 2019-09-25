@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:gravity="start">
+        xmlns:tools="http://schemas.android.com/tools"
+        style="@style/ChatMessageItemStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="start">
 
     <ImageView
             android:id="@+id/avatar_image_view"
@@ -15,13 +16,13 @@
     <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin_tiny"
             android:layout_marginLeft="@dimen/margin_tiny"
-            android:padding="@dimen/margin_tiny"
-            android:orientation="vertical"
             android:background="@drawable/text_message_bubble"
             android:backgroundTint="@color/pink_light"
             android:gravity="start"
-            android:layout_marginStart="@dimen/margin_tiny">
+            android:orientation="vertical"
+            android:padding="@dimen/margin_tiny">
 
         <LinearLayout
                 android:layout_width="wrap_content"
@@ -33,21 +34,21 @@
                     android:id="@+id/text_message_date"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingRight="@dimen/margin_small"
                     android:paddingLeft="@dimen/margin_small"
-                    tools:text="Yesterday"
                     android:paddingEnd="@dimen/margin_small"
-                    tools:ignore="RtlSymmetry"/>
+                    android:paddingRight="@dimen/margin_small"
+                    tools:ignore="RtlSymmetry"
+                    tools:text="Yesterday" />
 
             <TextView
                     android:id="@+id/text_message_body"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingRight="@dimen/margin_small"
                     android:paddingLeft="@dimen/margin_small"
-                    tools:text="text message example"
                     android:paddingEnd="@dimen/margin_small"
-                    tools:ignore="RtlSymmetry"/>
+                    android:paddingRight="@dimen/margin_small"
+                    tools:ignore="RtlSymmetry"
+                    tools:text="text message example" />
         </LinearLayout>
 
     </LinearLayout>

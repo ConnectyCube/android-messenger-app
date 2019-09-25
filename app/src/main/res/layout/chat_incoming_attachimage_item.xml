@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
+        style="@style/ChatMessageItemStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
 
@@ -10,43 +10,43 @@
             android:id="@+id/avatar_image_view"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            tools:ignore="ContentDescription"
-            tools:src="@drawable/ic_avatar_placeholder"
-            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="16dp"
             app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginTop="16dp"/>
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="ContentDescription"
+            tools:src="@drawable/ic_avatar_placeholder" />
 
     <LinearLayout
             android:id="@+id/bubble_frame"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="@dimen/margin_tiny"
-            android:orientation="vertical"
-            android:background="@drawable/text_message_bubble"
-            android:backgroundTint="@color/pink_light"
-            android:gravity="start"
-            app:layout_constraintStart_toEndOf="@+id/avatar_image_view"
             android:layout_marginStart="16dp"
             android:layout_marginLeft="16dp"
             android:layout_marginTop="16dp"
+            android:background="@drawable/text_message_bubble"
+            android:backgroundTint="@color/pink_light"
+            android:gravity="start"
+            android:orientation="vertical"
+            android:padding="@dimen/margin_tiny"
+            app:layout_constraintStart_toEndOf="@+id/avatar_image_view"
             app:layout_constraintTop_toTopOf="parent">
 
         <TextView
                 android:id="@+id/text_message_date"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingRight="@dimen/margin_small"
                 android:paddingLeft="@dimen/margin_small"
-                tools:text="Yesterday"
                 android:paddingEnd="@dimen/margin_small"
-                tools:ignore="RtlSymmetry"/>
+                android:paddingRight="@dimen/margin_small"
+                tools:ignore="RtlSymmetry"
+                tools:text="Yesterday" />
 
         <ImageView
                 android:id="@+id/attachment_image_view"
-                android:adjustViewBounds="true"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/margin_tiny"
+                android:adjustViewBounds="true"
                 tools:ignore="ContentDescription"
                 tools:src="@drawable/ic_avatar_placeholder" />
 
