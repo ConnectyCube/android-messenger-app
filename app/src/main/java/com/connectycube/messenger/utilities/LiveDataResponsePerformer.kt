@@ -33,8 +33,8 @@ open class LiveDataResponsePerformer<T, R> {
         }
     }
 
-    open fun performSync(performer: Performer<T>,
-                         converter: Converter<R, T>
+    open fun performAsyncIO(performer: Performer<T>,
+                            converter: Converter<R, T>
     ): MutableLiveData<ApiResponse<R>> {
         return object : MutableLiveData<ApiResponse<R>>() {
             private var started = AtomicBoolean(false)
