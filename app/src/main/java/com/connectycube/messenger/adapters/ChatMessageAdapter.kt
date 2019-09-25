@@ -129,11 +129,14 @@ class ChatMessageAdapter(
     }
 
     fun isHeaderView(position: Int): Boolean {
+        if (position >= itemCount) {
+            return false
+        }
         val msgCurrent = getItem(position)
         val msgNext = getItem(position - 1)
-        if(msgCurrent != null && msgNext != null) {
-            val dateMsgCurrent:Long? = getDateAsHeaderId(msgCurrent.dateSent * 1000)
-            val dateMsgNext:Long? = getDateAsHeaderId(msgNext.dateSent * 1000)
+        if (msgCurrent != null && msgNext != null) {
+            val dateMsgCurrent: Long? = getDateAsHeaderId(msgCurrent.dateSent * 1000)
+            val dateMsgNext: Long? = getDateAsHeaderId(msgNext.dateSent * 1000)
             return dateMsgCurrent != dateMsgNext
         }
         return false
