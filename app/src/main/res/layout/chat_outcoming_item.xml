@@ -29,6 +29,8 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="end"
                     android:paddingLeft="@dimen/margin_small"
+                    android:textSize="@dimen/message_date_size"
+                    android:textStyle="italic"
                     tools:ignore="RtlSymmetry"
                     tools:text="Yesterday" />
 

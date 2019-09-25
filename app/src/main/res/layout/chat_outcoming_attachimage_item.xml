@@ -24,6 +24,8 @@
                 android:paddingLeft="@dimen/margin_small"
                 android:paddingEnd="@dimen/margin_small"
                 android:paddingRight="@dimen/margin_small"
+                android:textSize="@dimen/message_date_size"
+                android:textStyle="italic"
                 tools:ignore="RtlSymmetry"
                 tools:text="Yesterday" />
 

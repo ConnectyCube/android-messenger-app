@@ -199,6 +199,7 @@ class ChatMessageActivity : BaseChatActivity() {
     }
 
     private fun bindToChatConnection() {
+//        ToDo IllegalArgumentException Recipient ID can't be null or empty
         chatDialog.initForChat(ConnectycubeChatService.getInstance())
         initChat(chatDialog)
 
@@ -230,6 +231,7 @@ class ChatMessageActivity : BaseChatActivity() {
                     resource.data?.let {
                         val occupantsWithoutCurrent = resource.data.filter { it.id != ConnectycubeSessionManager.getInstance().activeSession.userId }
                         occupants.putAll(occupantsWithoutCurrent.associateBy({ it.id }, { it }))
+                        updateChatAdapter()
                     }
 
                     membersNames.run {
@@ -322,6 +324,10 @@ class ChatMessageActivity : BaseChatActivity() {
 
             chatAdapter.submitList(it)
         })
+    }
+
+    private fun updateChatAdapter() {
+        chatAdapter.setOccupants(occupants)
     }
 
     private fun initChat(chatDialog: ConnectycubeChatDialog) {
@@ -549,7 +555,7 @@ class ChatMessageActivity : BaseChatActivity() {
 
     inner class ChatMessageListener : ChatDialogMessageListener {
         override fun processMessage(dialogId: String, chatMessage: ConnectycubeChatMessage, senderId: Int) {
-            Timber.d("ChatMessageListener processMessage " + chatMessage.body)
+            Timber.d("ChatMessageListener processMessage ${chatMessage.body}")
             val isIncoming = senderId != ConnectycubeChatService.getInstance().user.id
             if (isIncoming) {
                 modelChatMessageList.unreadCounter++

@@ -21,6 +21,7 @@ import com.connectycube.core.helper.CollectionsUtil
 import com.connectycube.messenger.R
 import com.connectycube.messenger.paging.NetworkState
 import com.connectycube.messenger.utilities.*
+import com.connectycube.users.model.ConnectycubeUser
 import com.timehop.stickyheadersrecyclerview.StickyRecyclerHeadersAdapter
 import timber.log.Timber
 
@@ -42,11 +43,13 @@ class ChatMessageAdapter(
     val ATTACH_IMAGE_INCOMING = 4
 
     val localUserId = ConnectycubeSessionManager.getInstance().sessionParameters.userId
-    val occupantIds: List<Int> = ArrayList<Int>(chatDialog.occupants).apply { remove(localUserId) }
+    val occupantsIds: ArrayList<Int> =
+        ArrayList<Int>(chatDialog.occupants).apply { remove(localUserId) }
+    val occupants: MutableMap<Int, ConnectycubeUser> = mutableMapOf()
     private var networkState: NetworkState? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        Timber.d("onCreateViewHolder viewType= " + viewType)
+        Timber.d("onCreateViewHolder viewType= $viewType")
         return when (viewType) {
             TEXT_OUTCOMING -> ChatMessageOutcomingViewHolder(parent, R.layout.chat_outcoming_item)
             TEXT_INCOMING -> ChatMessageIncomingViewHolder(parent, R.layout.chat_incoming_item)
@@ -125,7 +128,7 @@ class ChatMessageAdapter(
         val message = getItem(position)
         message?.let {
             with(holder) {
-                bindTo(it, isNeedToShowAvatar(position, it))
+                bindTo(it, isNeedExtraData(position, it))
             }
         }
     }
@@ -150,7 +153,7 @@ class ChatMessageAdapter(
         val message = getItem(position)
         message?.let {
             with(holder) {
-                bindTo(it, isNeedToShowAvatar(position, it))
+                bindTo(it, isNeedExtraData(position, it))
                 itemView.setOnClickListener {
                     attachmentClickListener(message.attachments.first())
                 }
@@ -158,7 +161,7 @@ class ChatMessageAdapter(
         }
     }
 
-    private fun isNeedToShowAvatar(position: Int, currentMsg: ConnectycubeChatMessage): Boolean {
+    private fun isNeedExtraData(position: Int, currentMsg: ConnectycubeChatMessage): Boolean {
         if (chatDialog.isPrivate) return true
         fun isPreviousTheSameSender(position: Int,
                                     currentMsg: ConnectycubeChatMessage
@@ -270,6 +273,13 @@ class ChatMessageAdapter(
         }
     }
 
+    fun setOccupants(newOccupants: Map<Int, ConnectycubeUser>) {
+        occupants.clear()
+        occupants.putAll(newOccupants)
+        occupantsIds.clear()
+        occupantsIds.addAll(newOccupants.keys.toList())
+    }
+
     fun isIncoming(chatMessage: ConnectycubeChatMessage): Boolean {
         return chatMessage.senderId != null && chatMessage.senderId != localUserId
     }
@@ -338,13 +348,13 @@ class ChatMessageAdapter(
     private fun messageIsRead(message: ConnectycubeChatMessage): Boolean {
         if (chatDialog.isPrivate) return message.readIds != null &&
                 (message.recipientId == null || message.readIds.contains(message.recipientId))
-        return message.readIds != null && message.readIds.any { it in occupantIds }
+        return message.readIds != null && message.readIds.any { it in occupantsIds }
     }
 
     private fun messageIsDelivered(message: ConnectycubeChatMessage): Boolean {
         if (chatDialog.isPrivate) return message.deliveredIds?.contains(message.recipientId)
             ?: false
-        return message.deliveredIds != null && message.deliveredIds.any { it in occupantIds }
+        return message.deliveredIds != null && message.deliveredIds.any { it in occupantsIds }
     }
 
     fun getAttachImageUrl(attachment: ConnectycubeAttachment): String {
@@ -381,19 +391,26 @@ class ChatMessageAdapter(
     inner class ChatMessageIncomingViewHolder(parent: ViewGroup, @LayoutRes chatItem: Int) :
         BaseChatMessageTextViewHolder(parent, chatItem) {
         private val imgAvatar: ImageView = itemView.findViewById(R.id.avatar_image_view)
+        private val senderName: TextView = itemView.findViewById(R.id.text_message_sender)
 
-        fun bindTo(message: ConnectycubeChatMessage, showAvatar: Boolean) {
+        fun bindTo(message: ConnectycubeChatMessage, showData: Boolean) {
             super.bindTo(message)
-            if (showAvatar) {
+            if (showData) {
                 imgAvatar.visibility = View.VISIBLE
+                senderName.visibility = View.VISIBLE
                 loadChatMessagePhoto(
                     chatDialog.type == ConnectycubeDialogType.PRIVATE,
                     "",
                     imgAvatar,
                     context
                 )
+                val sender = occupants[message.senderId]
+                sender?.let {
+                    senderName.text = sender.fullName ?: sender.login
+                }
             } else {
                 imgAvatar.visibility = View.INVISIBLE
+                senderName.visibility = View.GONE
             }
         }
     }
@@ -427,18 +444,26 @@ class ChatMessageAdapter(
     inner class ChatImageAttachIncomingViewHolder(parent: ViewGroup, @LayoutRes chatItem: Int) :
         BaseChatImageAttachViewHolder(parent, chatItem) {
         private val imgAvatar: ImageView = itemView.findViewById(R.id.avatar_image_view)
-        fun bindTo(message: ConnectycubeChatMessage, showAvatar: Boolean) {
+        private val senderName: TextView = itemView.findViewById(R.id.text_message_sender)
+
+        fun bindTo(message: ConnectycubeChatMessage, showData: Boolean) {
             super.bindTo(message)
-            if (showAvatar) {
+            if (showData) {
                 imgAvatar.visibility = View.VISIBLE
+                senderName.visibility = View.VISIBLE
                 loadChatMessagePhoto(
                     chatDialog.isPrivate,
                     "",
                     imgAvatar,
                     context
                 )
+                val sender = occupants[message.senderId]
+                sender?.let {
+                    senderName.text = sender.fullName ?: sender.login
+                }
             } else {
                 imgAvatar.visibility = View.INVISIBLE
+                senderName.visibility = View.GONE
             }
         }
     }
