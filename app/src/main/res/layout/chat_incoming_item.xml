@@ -43,18 +43,6 @@
                     tools:visibility="visible" />
 
             <TextView
-                    android:id="@+id/text_message_date"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingLeft="@dimen/margin_small"
-                    android:paddingEnd="@dimen/margin_small"
-                    android:paddingRight="@dimen/margin_small"
-                    android:textSize="@dimen/message_date_size"
-                    android:textStyle="italic"
-                    tools:ignore="RtlSymmetry"
-                    tools:text="Yesterday" />
-
-            <TextView
                     android:id="@+id/text_message_body"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -63,9 +51,22 @@
                     android:paddingRight="@dimen/margin_small"
                     tools:ignore="RtlSymmetry"
                     tools:text="text message example" />
+
+
+            <TextView
+                    android:id="@+id/text_message_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:paddingLeft="@dimen/margin_small"
+                    android:paddingEnd="@dimen/margin_small"
+                    android:paddingRight="@dimen/margin_small"
+                    android:textSize="@dimen/message_date_size"
+                    android:textStyle="italic"
+                    tools:ignore="RtlSymmetry"
+                    tools:text="20:05" />
         </LinearLayout>
 
     </LinearLayout>
-
 
 </LinearLayout>

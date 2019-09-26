@@ -42,7 +42,6 @@ import com.connectycube.messenger.viewmodels.ChatMessageListViewModel
 import com.connectycube.users.model.ConnectycubeUser
 import com.google.android.material.button.MaterialButton.ICON_GRAVITY_START
 import com.google.android.material.button.MaterialButton.ICON_GRAVITY_TEXT_END
-import com.timehop.stickyheadersrecyclerview.StickyRecyclerHeadersAdapter
 import com.timehop.stickyheadersrecyclerview.StickyRecyclerHeadersDecoration
 import com.zhihu.matisse.Matisse
 import kotlinx.android.synthetic.main.activity_chatmessages.*

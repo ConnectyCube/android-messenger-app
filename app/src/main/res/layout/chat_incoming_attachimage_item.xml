@@ -42,17 +42,6 @@
                 tools:text="Ron Weasley"
                 tools:visibility="visible" />
 
-        <TextView
-                android:id="@+id/text_message_date"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingLeft="@dimen/margin_small"
-                android:paddingEnd="@dimen/margin_small"
-                android:paddingRight="@dimen/margin_small"
-                android:textSize="@dimen/message_date_size"
-                android:textStyle="italic"
-                tools:ignore="RtlSymmetry"
-                tools:text="Yesterday" />
 
         <ImageView
                 android:id="@+id/attachment_image_view"
@@ -62,6 +51,19 @@
                 android:adjustViewBounds="true"
                 tools:ignore="ContentDescription"
                 tools:src="@drawable/ic_avatar_placeholder" />
+
+        <TextView
+                android:id="@+id/text_message_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:paddingLeft="@dimen/margin_small"
+                android:paddingEnd="@dimen/margin_small"
+                android:paddingRight="@dimen/margin_small"
+                android:textSize="@dimen/message_date_size"
+                android:textStyle="italic"
+                tools:ignore="RtlSymmetry"
+                tools:text="20:05" />
 
     </LinearLayout>
 
