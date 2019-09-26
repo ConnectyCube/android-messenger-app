@@ -124,13 +124,13 @@ class ChatDialogDetailsActivity : BaseChatActivity(),
 
     private fun attachData(chatDialog: ConnectycubeChatDialog) {
         currentChatDialog = chatDialog
-        
+
         if (currentChatDialog.isPrivate) {
             group_description_layout.visibility = View.GONE
             add_occupants_img.visibility = View.GONE
-            edit_avatar_btn.visibility = View.GONE
             edit_group_name_btn.visibility = View.GONE
-        } else if(!isUserCreator(getCurrentUser())) {
+            if (!isUserCreator(getCurrentUser())) edit_avatar_btn.visibility = View.GONE
+        } else if (!isUserCreator(getCurrentUser())) {
             edit_grop_description_btn.visibility = View.GONE
             edit_avatar_btn.visibility = View.GONE
             edit_group_name_btn.visibility = View.GONE

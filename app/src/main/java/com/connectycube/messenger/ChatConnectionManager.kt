@@ -33,8 +33,8 @@ class ChatConnectionManager {
         if (isPending.get()) return
 
         if (SharedPreferencesManager.getInstance(context).currentUserExists()
-            && !ConnectycubeChatService.getInstance().isLoggedIn)
-        {
+            && !ConnectycubeChatService.getInstance().isLoggedIn
+        ) {
             isPending.set(true)
             Timber.d("Start chat login")
             ConnectycubeChatService.getInstance().login(
@@ -69,5 +69,11 @@ class ChatConnectionManager {
 
     private fun initCallManager(context: Context) {
         RTCSessionManager.getInstance().init(context.applicationContext)
+    }
+
+    fun terminate() {
+        ConnectycubeChatService.getInstance().destroy()
+        isPending.set(false)
+        instance = null
     }
 }
