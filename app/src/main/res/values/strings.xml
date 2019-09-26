@@ -24,7 +24,9 @@
     <string name="creator">Creator</string>
     <string name="admin">Administrator</string>
     <string name="view_details">View Details</string>
-    <string name="description">Description</string>
+    <string name="edit_group_description">Edit Group Description</string>
+    <string name="group_description">Group Description</string>
+    <string name="put_there_some_information_about_group">Put there some additional information about group</string>
     <string name="add_to_admins">Add to admins</string>
     <string name="remove_from_admins">Remove from admins</string>
     <string name="remove_from_occupants">Remove from occupants</string>
@@ -136,9 +138,6 @@
     <string name="today">Today</string>
     <string name="delete">Delete</string>
     <string name="id_format">id: %s</string>
-    <string name="edit_group_description">Edit Group Description</string>
-    <string name="group_description">Group Description</string>
-    <string name="put_there_some_information_about_group">Put there some additional information about group</string>
     <string name="title_select_call_members">Select call members</string>
 
     <!--fix for Matisse lib-->

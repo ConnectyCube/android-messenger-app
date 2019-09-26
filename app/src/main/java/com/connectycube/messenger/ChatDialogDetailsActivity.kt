@@ -124,10 +124,18 @@ class ChatDialogDetailsActivity : BaseChatActivity(),
 
     private fun attachData(chatDialog: ConnectycubeChatDialog) {
         currentChatDialog = chatDialog
+        
         if (currentChatDialog.isPrivate) {
-            edit_group_name_btn.isClickable = false
-            edit_group_name_btn.alpha = 0.3f
+            group_description_layout.visibility = View.GONE
+            add_occupants_img.visibility = View.GONE
+            edit_avatar_btn.visibility = View.GONE
+            edit_group_name_btn.visibility = View.GONE
+        } else if(!isUserCreator(getCurrentUser())) {
+            edit_grop_description_btn.visibility = View.GONE
+            edit_avatar_btn.visibility = View.GONE
+            edit_group_name_btn.visibility = View.GONE
         }
+
         chatDialogDetailsViewModel.getUsers(chatDialog).observe(this, Observer { resource ->
             when (resource.status) {
                 Status.LOADING -> {
@@ -148,17 +156,7 @@ class ChatDialogDetailsActivity : BaseChatActivity(),
             }
         })
 
-        group_description_layout.visibility =
-            if (chatDialog.type == ConnectycubeDialogType.PRIVATE) View.GONE else View.VISIBLE
         description_txt.text = chatDialog.description
-        add_occupants_img.visibility =
-            if (chatDialog.type == ConnectycubeDialogType.PRIVATE) View.GONE else View.VISIBLE
-//        remove_occupants_img.visibility =
-//            if (chatDialog.type == ConnectycubeDialogType.GROUP && isCurrentUserCreator()) View.VISIBLE else View.GONE
-
-
-        edit_avatar_btn.visibility = if (chatDialog.type == ConnectycubeDialogType.PRIVATE) View.GONE else View.VISIBLE
-
         chat_dialog_name_txt.text = chatDialog.name
         loadChatDialogPhoto(this, chatDialog.isPrivate, chatDialog.photo, avatar_img)
     }
