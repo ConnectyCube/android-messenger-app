@@ -128,7 +128,7 @@ class ChatMessageAdapter(
         val message = getItem(position)
         message?.let {
             with(holder) {
-                bindTo(it, isNeedExtraData(position, it))
+                bindTo(it, showAvatar(position, message), showName(position, message))
             }
         }
     }
@@ -153,7 +153,7 @@ class ChatMessageAdapter(
         val message = getItem(position)
         message?.let {
             with(holder) {
-                bindTo(it, isNeedExtraData(position, it))
+                bindTo(it, showAvatar(position, message), showName(position, message))
                 itemView.setOnClickListener {
                     attachmentClickListener(message.attachments.first())
                 }
@@ -161,8 +161,15 @@ class ChatMessageAdapter(
         }
     }
 
-    private fun isNeedExtraData(position: Int, currentMsg: ConnectycubeChatMessage): Boolean {
-        if (chatDialog.isPrivate) return true
+    private fun showAvatar(position: Int, currentMsg: ConnectycubeChatMessage): Boolean {
+        return chatDialog.isPrivate || isNeedShowExtraData(position, currentMsg)
+    }
+
+    private fun showName(position: Int, currentMsg: ConnectycubeChatMessage): Boolean {
+        return !chatDialog.isPrivate && isNeedShowExtraData(position, currentMsg)
+    }
+
+    private fun isNeedShowExtraData(position: Int, currentMsg: ConnectycubeChatMessage): Boolean {
         fun isPreviousTheSameSender(position: Int,
                                     currentMsg: ConnectycubeChatMessage
         ): Boolean {
@@ -393,23 +400,26 @@ class ChatMessageAdapter(
         private val imgAvatar: ImageView = itemView.findViewById(R.id.avatar_image_view)
         private val senderName: TextView = itemView.findViewById(R.id.text_message_sender)
 
-        fun bindTo(message: ConnectycubeChatMessage, showData: Boolean) {
+        fun bindTo(message: ConnectycubeChatMessage, showAvatar: Boolean, showName: Boolean) {
             super.bindTo(message)
-            if (showData) {
+            if (showAvatar) {
                 imgAvatar.visibility = View.VISIBLE
-                senderName.visibility = View.VISIBLE
                 loadChatMessagePhoto(
                     chatDialog.type == ConnectycubeDialogType.PRIVATE,
                     "",
                     imgAvatar,
                     context
                 )
+            } else {
+                imgAvatar.visibility = View.INVISIBLE
+            }
+            if (showName) {
+                senderName.visibility = View.VISIBLE
                 val sender = occupants[message.senderId]
                 sender?.let {
                     senderName.text = sender.fullName ?: sender.login
                 }
             } else {
-                imgAvatar.visibility = View.INVISIBLE
                 senderName.visibility = View.GONE
             }
         }
@@ -446,23 +456,26 @@ class ChatMessageAdapter(
         private val imgAvatar: ImageView = itemView.findViewById(R.id.avatar_image_view)
         private val senderName: TextView = itemView.findViewById(R.id.text_message_sender)
 
-        fun bindTo(message: ConnectycubeChatMessage, showData: Boolean) {
+        fun bindTo(message: ConnectycubeChatMessage, showAvatar: Boolean, showName: Boolean) {
             super.bindTo(message)
-            if (showData) {
+            if (showAvatar) {
                 imgAvatar.visibility = View.VISIBLE
-                senderName.visibility = View.VISIBLE
                 loadChatMessagePhoto(
-                    chatDialog.isPrivate,
+                    chatDialog.type == ConnectycubeDialogType.PRIVATE,
                     "",
                     imgAvatar,
                     context
                 )
+            } else {
+                imgAvatar.visibility = View.INVISIBLE
+            }
+            if (showName) {
+                senderName.visibility = View.VISIBLE
                 val sender = occupants[message.senderId]
                 sender?.let {
                     senderName.text = sender.fullName ?: sender.login
                 }
             } else {
-                imgAvatar.visibility = View.INVISIBLE
                 senderName.visibility = View.GONE
             }
         }
