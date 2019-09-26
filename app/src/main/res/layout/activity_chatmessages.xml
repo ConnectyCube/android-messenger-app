@@ -56,7 +56,7 @@
                     android:background="?actionBarItemBackground"
                     android:scaleType="centerCrop"
                     tools:ignore="ContentDescription"
-                    tools:src="@drawable/ic_launcher_background"
+                    tools:src="@drawable/ic_avatar_placeholder"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"/>

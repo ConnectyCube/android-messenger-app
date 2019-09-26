@@ -1,19 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         style="@style/ChatMessageItemStyle"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="start">
+        android:layout_height="wrap_content">
 
     <ImageView
             android:id="@+id/avatar_image_view"
             android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             tools:ignore="ContentDescription"
             tools:src="@drawable/ic_avatar_placeholder" />
 
     <LinearLayout
+            android:id="@+id/linearLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/margin_tiny"
@@ -22,7 +26,9 @@
             android:backgroundTint="@color/pink_light"
             android:gravity="start"
             android:orientation="vertical"
-            android:padding="@dimen/margin_tiny">
+            android:padding="@dimen/margin_tiny"
+            app:layout_constraintStart_toEndOf="@+id/avatar_image_view"
+            app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
                 android:layout_width="wrap_content"
@@ -69,4 +75,4 @@
 
     </LinearLayout>
 
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
