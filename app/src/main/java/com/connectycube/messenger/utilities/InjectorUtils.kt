@@ -108,4 +108,15 @@ object InjectorUtils {
         val userRepository = getUserRepository(application)
         return CallViewModelFactory(application, userRepository)
     }
+
+    private fun getMessageSenderViewRepository(context: Context): MessageSenderRepository {
+        return MessageSenderRepository.getInstance(AppDatabase.getInstance(context.applicationContext).messageDao())
+    }
+
+    fun provideMessageSenderViewModelFactory(application: Application,
+                                             dialog: ConnectycubeChatDialog
+    ):  MessageSenderViewModelFactory {
+        val repository = getMessageSenderViewRepository(application)
+        return MessageSenderViewModelFactory(application, dialog, repository)
+    }
 }

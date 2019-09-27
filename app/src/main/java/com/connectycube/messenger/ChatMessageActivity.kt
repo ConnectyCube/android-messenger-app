@@ -12,7 +12,6 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.lifecycle.Observer
-import androidx.lifecycle.observe
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.connectycube.auth.session.ConnectycubeSessionManager
@@ -30,7 +29,6 @@ import com.connectycube.core.EntityCallback
 import com.connectycube.core.exception.ResponseException
 import com.connectycube.messenger.adapters.AttachmentClickListener
 import com.connectycube.messenger.adapters.ChatMessageAdapter
-import com.connectycube.messenger.api.ConnectycubeMessageSender
 import com.connectycube.messenger.events.EVENT_CHAT_LOGIN
 import com.connectycube.messenger.events.EventChatConnection
 import com.connectycube.messenger.events.LiveDataBus
@@ -39,6 +37,7 @@ import com.connectycube.messenger.paging.Status
 import com.connectycube.messenger.utilities.*
 import com.connectycube.messenger.viewmodels.AttachmentViewModel
 import com.connectycube.messenger.viewmodels.ChatMessageListViewModel
+import com.connectycube.messenger.viewmodels.MessageSenderViewModel
 import com.connectycube.users.model.ConnectycubeUser
 import com.google.android.material.button.MaterialButton.ICON_GRAVITY_START
 import com.google.android.material.button.MaterialButton.ICON_GRAVITY_TEXT_END
@@ -67,14 +66,13 @@ class ChatMessageActivity : BaseChatActivity() {
     private lateinit var chatAdapter: ChatMessageAdapter
     private lateinit var chatDialog: ConnectycubeChatDialog
     private lateinit var modelChatMessageList: ChatMessageListViewModel
+    private lateinit var modelMessageSender: MessageSenderViewModel
     private val occupants: HashMap<Int, ConnectycubeUser> = HashMap()
     private val membersNames: ArrayList<String> = ArrayList()
 
     private val modelAttachment: AttachmentViewModel by viewModels {
         InjectorUtils.provideAttachmentViewModelFactory(this.application)
     }
-
-    private lateinit var messageSender: ConnectycubeMessageSender
 
     private var clearTypingTimer: Timer? = null
 
@@ -114,11 +112,11 @@ class ChatMessageActivity : BaseChatActivity() {
     }
 
     private fun initWithData(intent: Intent) {
-        if (intent.hasExtra(EXTRA_CHAT)){
+        if (intent.hasExtra(EXTRA_CHAT)) {
             val chatDialog = intent.getSerializableExtra(EXTRA_CHAT) as ConnectycubeChatDialog
             modelChatMessageList = getChatMessageListViewModel(chatDialog.dialogId)
             AppNotificationManager.getInstance().clearNotificationData(this, chatDialog.dialogId)
-        } else if (intent.hasExtra(EXTRA_CHAT_ID)){
+        } else if (intent.hasExtra(EXTRA_CHAT_ID)) {
             val dialogId = intent.getStringExtra(EXTRA_CHAT_ID)
             modelChatMessageList = getChatMessageListViewModel(dialogId)
             AppNotificationManager.getInstance().clearNotificationData(this, dialogId)
@@ -165,6 +163,7 @@ class ChatMessageActivity : BaseChatActivity() {
 
         initChatAdapter()
         initToolbar()
+        initModelSender()
 
         subscribeToOccupants()
 
@@ -173,6 +172,55 @@ class ChatMessageActivity : BaseChatActivity() {
         } else {
             subscribeToChatConnectionChanges()
         }
+    }
+
+    private fun initModelSender() {
+        modelMessageSender = getMessageSenderViewModel()
+    }
+
+    private fun subscribeMessageSenderAttachment() {
+        modelMessageSender.liveMessageAttachmentSender.observe(this, Observer { resource ->
+            when {
+                resource.status == com.connectycube.messenger.vo.Status.LOADING -> {
+                    if(resource.progress != 0) {
+//ToDo add progress implementation on view
+                    }
+                }
+                resource.status == com.connectycube.messenger.vo.Status.SUCCESS -> {
+                    resource.data?.let {
+                        submitMessage(it)
+                    }
+                }
+                resource.status == com.connectycube.messenger.vo.Status.ERROR -> {
+                    Toast.makeText(
+                        applicationContext,
+                        getString(R.string.sending_message_error, resource.message),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        })
+    }
+
+    private fun subscribeMessageSenderText() {
+        modelMessageSender.liveMessageSender.observe(this, Observer { resource ->
+            when {
+                resource.status == com.connectycube.messenger.vo.Status.LOADING -> {
+                }
+                resource.status == com.connectycube.messenger.vo.Status.SUCCESS -> {
+                    resource.data?.let {
+                        submitMessage(it)
+                    }
+                }
+                resource.status == com.connectycube.messenger.vo.Status.ERROR -> {
+                    Toast.makeText(
+                        applicationContext,
+                        getString(R.string.sending_message_error, resource.message),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        })
     }
 
     private fun updateChatDialogData() {
@@ -202,8 +250,8 @@ class ChatMessageActivity : BaseChatActivity() {
         chatDialog.initForChat(ConnectycubeChatService.getInstance())
         initChat(chatDialog)
 
-        messageSender = ConnectycubeMessageSender(this, chatDialog)
-
+        subscribeMessageSenderAttachment()
+        subscribeMessageSenderText()
         chatDialog.addMessageListener(messageListener)
 
         initManagers()
@@ -249,6 +297,13 @@ class ChatMessageActivity : BaseChatActivity() {
             InjectorUtils.provideChatMessageListViewModelFactory(this.application, dialogId)
         }
         return chatMessageListViewModel
+    }
+
+    private fun getMessageSenderViewModel(): MessageSenderViewModel {
+        val messageSender: MessageSenderViewModel by viewModels {
+            InjectorUtils.provideMessageSenderViewModelFactory(this.application, chatDialog)
+        }
+        return messageSender
     }
 
     private fun initChatAdapter() {
@@ -389,23 +444,14 @@ class ChatMessageActivity : BaseChatActivity() {
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
     }
 
-    private fun sendChatMessage(text: String = "", attachment: ConnectycubeAttachment? = null) {
-        if (!ConnectycubeChatService.getInstance().isLoggedIn){
+    private fun sendChatMessage(text: String) {
+        if (!ConnectycubeChatService.getInstance().isLoggedIn) {
             Toast.makeText(this, R.string.chat_connection_problem, Toast.LENGTH_LONG).show()
             return
         }
-
-        messageSender.sendChatMessage(text, attachment).let {
-            if (it.first) {
-                if (ConnectycubeDialogType.PRIVATE == chatDialog.type) {
-                    submitMessage(it.second)
-                    modelChatMessageList.scroll = true
-                }
-                input_chat_message.setText("")
-            } else {
-                Timber.d("sendChatMessage failed")
-            }
-        }
+        modelChatMessageList.scroll = true
+        modelMessageSender.sendMessage(text)
+        input_chat_message.setText("")
     }
 
     fun submitMessage(message: ConnectycubeChatMessage) {
@@ -437,7 +483,7 @@ class ChatMessageActivity : BaseChatActivity() {
     }
 
     private fun startCall(callType: Int) {
-        if (!ConnectycubeChatService.getInstance().isLoggedIn){
+        if (!ConnectycubeChatService.getInstance().isLoggedIn) {
             Toast.makeText(this, R.string.chat_connection_problem, Toast.LENGTH_LONG).show()
         } else {
             when (callType) {
@@ -458,36 +504,16 @@ class ChatMessageActivity : BaseChatActivity() {
         if (requestCode == REQUEST_CODE_CHOOSE && resultCode == Activity.RESULT_OK) {
             if (data != null && Matisse.obtainPathResult(data) != null) {
                 val path = Matisse.obtainPathResult(data).iterator().next()
-                uploadAttachment(path, ConnectycubeAttachment.IMAGE_TYPE)
+                uploadAttachment(path, ConnectycubeAttachment.IMAGE_TYPE, getString(R.string.message_attachment))
             }
         } else if(requestCode == REQUEST_CODE_DETAILS) {
             updateChatDialogData()
         }
     }
 
-    private fun uploadAttachment(path: String, type: String) {
-        modelAttachment.uploadAttachment(path, type).observe(this) { resource ->
-            when {
-                resource.status == com.connectycube.messenger.vo.Status.LOADING -> {
-                    showProgress(progressbar)
-                    progressbar.progress = resource.progress ?: 0
-                }
-
-                resource.status == com.connectycube.messenger.vo.Status.SUCCESS -> {
-                    hideProgress(progressbar)
-                    Timber.d("resource.data=" + resource.data)
-                    sendChatMessage(attachment = resource.data)
-                }
-                resource.status == com.connectycube.messenger.vo.Status.ERROR -> {
-                    hideProgress(progressbar)
-                    Toast.makeText(
-                        applicationContext,
-                        getString(R.string.loading_attachment_error, resource.message),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
-        }
+    private fun uploadAttachment(path: String, type: String, text: String) {
+        modelChatMessageList.scroll = true
+        modelMessageSender.sendAttachment(path, type, text)
     }
 
     private fun startChatDetailsActivity() {
