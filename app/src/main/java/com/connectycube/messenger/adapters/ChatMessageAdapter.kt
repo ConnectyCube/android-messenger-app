@@ -402,25 +402,28 @@ class ChatMessageAdapter(
 
         fun bindTo(message: ConnectycubeChatMessage, showAvatar: Boolean, showName: Boolean) {
             super.bindTo(message)
-            if (showAvatar) {
-                imgAvatar.visibility = View.VISIBLE
-                loadChatMessagePhoto(
-                    chatDialog.type == ConnectycubeDialogType.PRIVATE,
-                    "",
-                    imgAvatar,
-                    context
-                )
-            } else {
-                imgAvatar.visibility = View.INVISIBLE
-            }
-            if (showName) {
-                senderName.visibility = View.VISIBLE
+            if (showAvatar || showName) {
                 val sender = occupants[message.senderId]
-                sender?.let {
-                    senderName.text = sender.fullName ?: sender.login
+                if (showAvatar) {
+                    imgAvatar.visibility = View.VISIBLE
+
+                    loadChatMessagePhoto(
+                        chatDialog.type == ConnectycubeDialogType.PRIVATE,
+                        sender?.avatar,
+                        imgAvatar,
+                        context
+                    )
+                } else {
+                    imgAvatar.visibility = View.INVISIBLE
                 }
-            } else {
-                senderName.visibility = View.GONE
+                if (showName) {
+                    senderName.visibility = View.VISIBLE
+                    sender?.let {
+                        senderName.text = sender.fullName ?: sender.login
+                    }
+                } else {
+                    senderName.visibility = View.GONE
+                }
             }
         }
     }
@@ -458,25 +461,27 @@ class ChatMessageAdapter(
 
         fun bindTo(message: ConnectycubeChatMessage, showAvatar: Boolean, showName: Boolean) {
             super.bindTo(message)
-            if (showAvatar) {
-                imgAvatar.visibility = View.VISIBLE
-                loadChatMessagePhoto(
-                    chatDialog.type == ConnectycubeDialogType.PRIVATE,
-                    "",
-                    imgAvatar,
-                    context
-                )
-            } else {
-                imgAvatar.visibility = View.INVISIBLE
-            }
-            if (showName) {
-                senderName.visibility = View.VISIBLE
+            if (showAvatar || showName) {
                 val sender = occupants[message.senderId]
-                sender?.let {
-                    senderName.text = sender.fullName ?: sender.login
+                if (showAvatar) {
+                    imgAvatar.visibility = View.VISIBLE
+                    loadChatMessagePhoto(
+                        chatDialog.type == ConnectycubeDialogType.PRIVATE,
+                        sender?.avatar,
+                        imgAvatar,
+                        context
+                    )
+                } else {
+                    imgAvatar.visibility = View.INVISIBLE
                 }
-            } else {
-                senderName.visibility = View.GONE
+                if (showName) {
+                    senderName.visibility = View.VISIBLE
+                    sender?.let {
+                        senderName.text = sender.fullName ?: sender.login
+                    }
+                } else {
+                    senderName.visibility = View.GONE
+                }
             }
         }
     }
