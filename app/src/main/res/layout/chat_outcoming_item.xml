@@ -19,41 +19,33 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-        <LinearLayout
-                android:layout_width="match_parent"
+        <TextView
+                android:id="@+id/text_message_date"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingRight="@dimen/margin_small">
+                android:layout_gravity="end"
+                android:paddingLeft="@dimen/margin_small"
+                android:textSize="@dimen/message_date_size"
+                android:textStyle="italic"
+                tools:ignore="RtlSymmetry"
+                tools:text="Yesterday" />
 
-            <TextView
-                    android:id="@+id/text_message_date"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:paddingLeft="@dimen/margin_small"
-                    android:textSize="@dimen/message_date_size"
-                    android:textStyle="italic"
-                    tools:ignore="RtlSymmetry"
-                    tools:text="Yesterday" />
+        <TextView
+                android:id="@+id/text_message_body"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:paddingLeft="@dimen/margin_small"
+                tools:ignore="RtlSymmetry"
+                tools:text="text message example" />
 
-            <TextView
-                    android:id="@+id/text_message_body"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="end"
-                    android:paddingLeft="@dimen/margin_small"
-                    tools:ignore="RtlSymmetry"
-                    tools:text="text message example" />
-
-            <ImageView
-                    android:id="@+id/message_status_image_view"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:scaleType="fitCenter"
-                    tools:src="@drawable/ic_check_black_16dp" />
-
-        </LinearLayout>
+        <ImageView
+                android:id="@+id/message_status_image_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:scaleType="fitCenter"
+                tools:src="@drawable/ic_check_black_16dp" />
 
     </LinearLayout>
 
