@@ -6,6 +6,7 @@ import androidx.lifecycle.MediatorLiveData
 import com.connectycube.chat.model.ConnectycubeChatDialog
 import com.connectycube.chat.model.ConnectycubeChatMessage
 import com.connectycube.messenger.data.MessageSenderRepository
+import com.connectycube.messenger.utilities.SingleLiveEvent
 import com.connectycube.messenger.vo.Resource
 import com.connectycube.messenger.vo.Status
 
@@ -16,7 +17,7 @@ class MessageSenderViewModel internal constructor(
 ) :
     AndroidViewModel(applicationContext) {
 
-    val liveMessageSender = MediatorLiveData<Resource<ConnectycubeChatMessage>>()
+    val liveMessageSender = SingleLiveEvent<Resource<ConnectycubeChatMessage>>()
     val liveMessageAttachmentSender = MediatorLiveData<Resource<ConnectycubeChatMessage>>()
 
     fun sendAttachment(path: String, type: String, text: String) {
