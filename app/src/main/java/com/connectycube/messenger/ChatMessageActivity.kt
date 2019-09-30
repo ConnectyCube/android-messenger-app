@@ -167,7 +167,7 @@ class ChatMessageActivity : BaseChatActivity() {
 
         subscribeToOccupants()
 
-        if (ConnectycubeChatService.getInstance().isLoggedIn) {
+        if (ChatConnectionManager.getInstance().isLoggedIn) {
             bindToChatConnection()
         } else {
             subscribeToChatConnectionChanges()
@@ -246,7 +246,6 @@ class ChatMessageActivity : BaseChatActivity() {
     }
 
     private fun bindToChatConnection() {
-//        ToDo IllegalArgumentException Recipient ID can't be null or empty
         chatDialog.initForChat(ConnectycubeChatService.getInstance())
         initChat(chatDialog)
 
