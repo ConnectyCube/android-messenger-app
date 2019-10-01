@@ -35,7 +35,6 @@ import com.connectycube.messenger.events.LiveDataBus
 import com.connectycube.messenger.helpers.*
 import com.connectycube.messenger.paging.Status
 import com.connectycube.messenger.utilities.*
-import com.connectycube.messenger.viewmodels.AttachmentViewModel
 import com.connectycube.messenger.viewmodels.ChatMessageListViewModel
 import com.connectycube.messenger.viewmodels.MessageSenderViewModel
 import com.connectycube.users.model.ConnectycubeUser
@@ -69,10 +68,6 @@ class ChatMessageActivity : BaseChatActivity() {
     private lateinit var modelMessageSender: MessageSenderViewModel
     private val occupants: HashMap<Int, ConnectycubeUser> = HashMap()
     private val membersNames: ArrayList<String> = ArrayList()
-
-    private val modelAttachment: AttachmentViewModel by viewModels {
-        InjectorUtils.provideAttachmentViewModelFactory(this.application)
-    }
 
     private var clearTypingTimer: Timer? = null
 
@@ -328,7 +323,6 @@ class ChatMessageActivity : BaseChatActivity() {
             override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
                 if (modelChatMessageList.scroll) {
                     scrollDown()
-                    return
                 }
             }
         })
