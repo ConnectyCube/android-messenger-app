@@ -10,7 +10,6 @@
             android:id="@+id/avatar_image_view"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:layout_marginTop="16dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:ignore="ContentDescription"
@@ -20,26 +19,30 @@
             android:id="@+id/bubble_frame"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginLeft="16dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginStart="@dimen/margin_tiny"
+            android:layout_marginLeft="@dimen/margin_tiny"
             android:background="@drawable/text_message_bubble"
             android:backgroundTint="@color/pink_light"
             android:gravity="start"
             android:orientation="vertical"
             android:padding="@dimen/margin_tiny"
+            app:layout_constrainedWidth="true"
             app:layout_constraintStart_toEndOf="@+id/avatar_image_view"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
         <TextView
-                android:id="@+id/text_message_date"
+                android:id="@+id/text_message_sender"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingLeft="@dimen/margin_small"
                 android:paddingEnd="@dimen/margin_small"
                 android:paddingRight="@dimen/margin_small"
-                tools:ignore="RtlSymmetry"
-                tools:text="Yesterday" />
+                android:textStyle="bold"
+                android:visibility="gone"
+                tools:text="Ron Weasley"
+                tools:visibility="visible" />
+
 
         <ImageView
                 android:id="@+id/attachment_image_view"
@@ -49,6 +52,19 @@
                 android:adjustViewBounds="true"
                 tools:ignore="ContentDescription"
                 tools:src="@drawable/ic_avatar_placeholder" />
+
+        <TextView
+                android:id="@+id/text_message_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:paddingLeft="@dimen/margin_small"
+                android:paddingEnd="@dimen/margin_small"
+                android:paddingRight="@dimen/margin_small"
+                android:textSize="@dimen/message_date_size"
+                android:textStyle="italic"
+                tools:ignore="RtlSymmetry"
+                tools:text="20:05" />
 
     </LinearLayout>
 

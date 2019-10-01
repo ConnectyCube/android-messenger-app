@@ -15,4 +15,6 @@
     <dimen name="attach_image_height">150dp</dimen>
 
     <dimen name="grid_expected_size">120dp</dimen>
+
+    <dimen name="message_date_size">13sp</dimen>
 </resources>

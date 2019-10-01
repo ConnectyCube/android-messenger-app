@@ -5,6 +5,24 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+    <ProgressBar
+            android:id="@+id/progressbar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin_small"
+            android:layout_marginTop="@dimen/margin_normal"
+            android:layout_marginEnd="@dimen/margin_small"
+            android:indeterminate="false"
+            android:max="100"
+            android:translationZ="2dp"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toEndOf="@+id/bubble_frame"
+            app:layout_constraintStart_toStartOf="@+id/bubble_frame"
+            app:layout_constraintTop_toTopOf="@+id/bubble_frame"
+            tools:progress="100"
+            tools:visibility="visible" />
+
     <LinearLayout
             android:id="@+id/bubble_frame"
             android:layout_width="wrap_content"
@@ -24,6 +42,8 @@
                 android:paddingLeft="@dimen/margin_small"
                 android:paddingEnd="@dimen/margin_small"
                 android:paddingRight="@dimen/margin_small"
+                android:textSize="@dimen/message_date_size"
+                android:textStyle="italic"
                 tools:ignore="RtlSymmetry"
                 tools:text="Yesterday" />
 

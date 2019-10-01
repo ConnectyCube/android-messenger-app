@@ -200,6 +200,7 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
     private fun logout() {
         showProgress(progressbar)
         chatDialogListViewModel.chatLiveDataLazy.removeObservers(this)
+        LiveDataBus.unregister(EVENT_CHAT_LOGIN)
         GlobalScope.launch(Dispatchers.Main) {
             UserService.instance.ultimateLogout(applicationContext)
             RTCSessionManager.getInstance().destroy()

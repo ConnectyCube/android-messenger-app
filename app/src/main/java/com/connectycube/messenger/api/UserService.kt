@@ -3,6 +3,7 @@ package com.connectycube.messenger.api
 import android.content.Context
 import com.connectycube.chat.ConnectycubeChatService
 import com.connectycube.core.exception.ResponseException
+import com.connectycube.messenger.ChatConnectionManager
 import com.connectycube.messenger.data.AppDatabase
 import com.connectycube.messenger.helpers.RTCSessionManager
 import com.connectycube.users.ConnectycubeUsers
@@ -21,7 +22,7 @@ class UserService private constructor() {
     }
 
     suspend fun ultimateLogout(applicationContext: Context) {
-        ConnectycubeChatService.getInstance().destroy()
+        ChatConnectionManager.getInstance().terminate()
         clearDatabaseAsync(applicationContext).await()
         signOut()
     }

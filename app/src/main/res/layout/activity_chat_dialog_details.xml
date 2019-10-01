@@ -125,7 +125,7 @@
                         android:layout_height="wrap_content"
                         android:layout_alignParentStart="true"
                         android:layout_alignParentLeft="true"
-                        android:text="@string/description"
+                        android:text="@string/group_description"
                         android:textColor="@color/colorPrimary"
                         android:textSize="16sp"
                         tools:ignore="RelativeOverlap" />
@@ -135,9 +135,9 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_below="@id/description_title_txt"
-                        android:text="@string/description"
+                        android:text="@string/group_description"
                         android:textSize="16sp"
-                        tools:text="@string/description" />
+                        tools:text="@string/group_description" />
 
                     <androidx.appcompat.widget.AppCompatImageButton
                         android:id="@+id/edit_grop_description_btn"

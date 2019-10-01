@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.annotation.LayoutRes
 import androidx.annotation.NonNull
@@ -21,12 +22,13 @@ import com.connectycube.core.helper.CollectionsUtil
 import com.connectycube.messenger.R
 import com.connectycube.messenger.paging.NetworkState
 import com.connectycube.messenger.utilities.*
+import com.connectycube.users.model.ConnectycubeUser
 import com.timehop.stickyheadersrecyclerview.StickyRecyclerHeadersAdapter
 import timber.log.Timber
 
 
 typealias AttachmentClickListener = (ConnectycubeAttachment) -> Unit
-
+private typealias PAYLOAD_PROGRESS = ChatMessageAdapter.ProgressMessage
 
 class ChatMessageAdapter(
     val context: Context,
@@ -42,11 +44,13 @@ class ChatMessageAdapter(
     val ATTACH_IMAGE_INCOMING = 4
 
     val localUserId = ConnectycubeSessionManager.getInstance().sessionParameters.userId
-    val occupantIds:List<Int> = ArrayList<Int>(chatDialog.occupants).apply { remove(localUserId) }
+    val occupantsIds: ArrayList<Int> =
+        ArrayList<Int>(chatDialog.occupants).apply { remove(localUserId) }
+    val occupants: MutableMap<Int, ConnectycubeUser> = mutableMapOf()
     private var networkState: NetworkState? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        Timber.d("onCreateViewHolder viewType= " + viewType)
+        Timber.d("onCreateViewHolder viewType= $viewType")
         return when (viewType) {
             TEXT_OUTCOMING -> ChatMessageOutcomingViewHolder(parent, R.layout.chat_outcoming_item)
             TEXT_INCOMING -> ChatMessageIncomingViewHolder(parent, R.layout.chat_incoming_item)
@@ -54,23 +58,46 @@ class ChatMessageAdapter(
                 parent,
                 R.layout.chat_outcoming_attachimage_item
             )
-            ATTACH_IMAGE_INCOMING -> ChatImageAttachIncomingViewHolder(parent, R.layout.chat_incoming_attachimage_item)
+            ATTACH_IMAGE_INCOMING -> ChatImageAttachIncomingViewHolder(
+                parent,
+                R.layout.chat_incoming_attachimage_item
+            )
             IN_PROGRESS -> NetworkStateItemViewHolder.create(parent)
             else -> throw IllegalArgumentException("Wrong type of viewType= $viewType")
         }
     }
 
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int, payloads: MutableList<Any>) {
-        Timber.d("Binding view holder at position $position, payloads= ${payloads.isNotEmpty()}")
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder,
+                                  position: Int,
+                                  payloads: MutableList<Any>
+    ) {
+        Timber.d("Binding view holder at position $position, payloads= ${payloads.isNotEmpty()},  payloads= $payloads")
         if (payloads.isNotEmpty()) {
-            val message = getItem(position)
-            message?.let {
-                val imgStatus = holder.itemView.findViewById<ImageView>(R.id.message_status_image_view)
-                setStatus(imgStatus, message)
+            when (val payload = payloads[0]) {
+                PAYLOAD_STATUS -> {
+                    Timber.d("PAYLOAD_STATUS")
+                    val message = getItem(position)
+                    message?.let {
+                        val imgStatus =
+                            holder.itemView.findViewById<ImageView>(R.id.message_status_image_view)
+                        setStatus(imgStatus, message)
+                    }
+                }
+                is PAYLOAD_PROGRESS -> {
+                    Timber.d("PROGRESS payloads= ${payload.progress}")
+                    val progressBar =
+                        holder.itemView.findViewById<ProgressBar>(R.id.progressbar)
+                    setProgress(progressBar, payload.progress)
+                }
             }
         } else {
             super.onBindViewHolder(holder, position, payloads)
         }
+    }
+
+
+    fun getItemByPosition(position: Int): ConnectycubeChatMessage? {
+        return getItem(position)
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
@@ -83,9 +110,20 @@ class ChatMessageAdapter(
         }
 
         when (this.getItemViewType(position)) {
-            TEXT_OUTCOMING, TEXT_INCOMING -> onBindTextViewHolder(holder as BaseChatMessageViewHolder, position)
-            ATTACH_IMAGE_OUTCOMING, ATTACH_IMAGE_INCOMING -> onBindAttachViewHolder(
+            TEXT_OUTCOMING -> onBindTextViewHolderOutComing(
+                holder as ChatMessageOutcomingViewHolder,
+                position
+            )
+            TEXT_INCOMING -> onBindTextViewHolderInComing(
+                holder as ChatMessageIncomingViewHolder,
+                position
+            )
+            ATTACH_IMAGE_OUTCOMING -> onBindAttachViewHolderOutComing(
                 holder as BaseChatMessageViewHolder,
+                position
+            )
+            ATTACH_IMAGE_INCOMING -> onBindAttachViewHolderInComing(
+                holder as ChatImageAttachIncomingViewHolder,
                 position
             )
             IN_PROGRESS -> (holder as NetworkStateItemViewHolder).bindTo(
@@ -94,23 +132,84 @@ class ChatMessageAdapter(
         }
     }
 
-    private fun onBindTextViewHolder(holder: BaseChatMessageViewHolder, position: Int) {
+    fun onBindTextViewHolderOutComing(holder: ChatMessageOutcomingViewHolder, position: Int) {
         val message = getItem(position)
-        with(holder) {
-            bindTo(message!!)
+        message?.let {
+            with(holder) {
+                bindTo(it)
+            }
         }
     }
 
-    private fun onBindAttachViewHolder(holder: BaseChatMessageViewHolder, position: Int) {
+    fun onBindTextViewHolderInComing(holder: ChatMessageIncomingViewHolder, position: Int) {
         val message = getItem(position)
-        with(holder) {
-            bindTo(message!!)
-            message.let {
+        message?.let {
+            with(holder) {
+                bindTo(it, showAvatar(position, message), showName(position, message))
+            }
+        }
+    }
+
+    fun onBindAttachViewHolderOutComing(holder: BaseChatMessageViewHolder,
+                                        position: Int
+    ) {
+        val message = getItem(position)
+        message?.let {
+            with(holder) {
+                bindTo(it)
+                message.let {
+                    itemView.setOnClickListener {
+                        attachmentClickListener(message.attachments.first())
+                    }
+                }
+            }
+        }
+    }
+
+    fun onBindAttachViewHolderInComing(holder: ChatImageAttachIncomingViewHolder, position: Int) {
+        val message = getItem(position)
+        message?.let {
+            with(holder) {
+                bindTo(it, showAvatar(position, message), showName(position, message))
                 itemView.setOnClickListener {
                     attachmentClickListener(message.attachments.first())
                 }
             }
         }
+    }
+
+    private fun showAvatar(position: Int, currentMsg: ConnectycubeChatMessage): Boolean {
+        return chatDialog.isPrivate || isNeedShowExtraData(position, currentMsg)
+    }
+
+    private fun showName(position: Int, currentMsg: ConnectycubeChatMessage): Boolean {
+        return !chatDialog.isPrivate && isNeedShowExtraData(position, currentMsg)
+    }
+
+    private fun isNeedShowExtraData(position: Int, currentMsg: ConnectycubeChatMessage): Boolean {
+        fun isPreviousTheSameSender(position: Int,
+                                    currentMsg: ConnectycubeChatMessage
+        ): Boolean {
+            val previousPosition = position + 1
+            if (previousPosition >= itemCount) {
+                return false
+            }
+            val previousMsg = getItem(previousPosition)
+            previousMsg?.let {
+                return currentMsg.senderId == previousMsg.senderId
+            }
+            return false
+        }
+
+        fun isPreviousHeader(position: Int): Boolean {
+            val previousPosition = position + 1
+            if (previousPosition >= itemCount) {
+                return true
+            }
+            return isHeaderView(previousPosition)
+        }
+
+        return !isPreviousTheSameSender(position, currentMsg) || isPreviousHeader(position)
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -166,7 +265,7 @@ class ChatMessageAdapter(
         val dateView = view.findViewById<TextView>(R.id.header_text_view)
 
         val chatMessage = getItem(position)
-        chatMessage?.let{
+        chatMessage?.let {
             dateView.text = getPrettyMessageDate(context, chatMessage.dateSent * 1000)
         }
     }
@@ -178,6 +277,21 @@ class ChatMessageAdapter(
             messageIsSent(msg) -> imgStatus?.setImageResource(R.drawable.ic_check_black_16dp)
             else -> imgStatus?.setImageResource(android.R.color.transparent)
         }
+    }
+
+    private fun setProgress(progressBar: ProgressBar?, value: Int) {
+        progressBar?.apply {
+            if (value < 100) {
+                visibility = View.VISIBLE
+                progress = value
+            } else {
+                visibility = View.GONE
+            }
+        }
+    }
+
+    fun updateAttachmentProgress(position: Int, progress: Int) {
+        notifyItemChanged(position, PAYLOAD_PROGRESS(progress))
     }
 
     private fun hasExtraRow() = networkState != null && networkState != NetworkState.LOADED
@@ -196,6 +310,13 @@ class ChatMessageAdapter(
         } else if (hasExtraRow && previousState != newNetworkState) {
             notifyItemChanged(itemCount - 1)
         }
+    }
+
+    fun setOccupants(newOccupants: Map<Int, ConnectycubeUser>) {
+        occupants.clear()
+        occupants.putAll(newOccupants)
+        occupantsIds.clear()
+        occupantsIds.addAll(newOccupants.keys.toList())
     }
 
     fun isIncoming(chatMessage: ConnectycubeChatMessage): Boolean {
@@ -220,7 +341,9 @@ class ChatMessageAdapter(
     }
 
     private fun isRead(chatMessage: ConnectycubeChatMessage): Boolean {
-        return !CollectionsUtil.isEmpty(chatMessage.readIds) && chatMessage.readIds.contains(localUserId)
+        return !CollectionsUtil.isEmpty(chatMessage.readIds) && chatMessage.readIds.contains(
+            localUserId
+        )
     }
 
     companion object {
@@ -230,7 +353,9 @@ class ChatMessageAdapter(
          */
         private val PAYLOAD_STATUS = Any()
         private val diffCallback = object : DiffUtil.ItemCallback<ConnectycubeChatMessage>() {
-            override fun areItemsTheSame(oldItem: ConnectycubeChatMessage, newItem: ConnectycubeChatMessage): Boolean =
+            override fun areItemsTheSame(oldItem: ConnectycubeChatMessage,
+                                         newItem: ConnectycubeChatMessage
+            ): Boolean =
                 oldItem.id == newItem.id
 
             override fun areContentsTheSame(
@@ -239,31 +364,36 @@ class ChatMessageAdapter(
             ): Boolean =
                 oldItem.id == newItem.id && oldItem.readIds == newItem.readIds && oldItem.deliveredIds == newItem.deliveredIds
 
-            override fun getChangePayload(oldItem: ConnectycubeChatMessage, newItem: ConnectycubeChatMessage): Any? {
+            override fun getChangePayload(oldItem: ConnectycubeChatMessage,
+                                          newItem: ConnectycubeChatMessage
+            ): Any? {
                 return if (sameExceptStatus(oldItem, newItem)) {
                     PAYLOAD_STATUS
                 } else null
             }
 
-            fun sameExceptStatus(oldItem: ConnectycubeChatMessage, newItem: ConnectycubeChatMessage): Boolean {
+            fun sameExceptStatus(oldItem: ConnectycubeChatMessage,
+                                 newItem: ConnectycubeChatMessage
+            ): Boolean {
                 return newItem.readIds != oldItem.readIds || newItem.deliveredIds != oldItem.deliveredIds
             }
         }
     }
 
     private fun messageIsSent(message: ConnectycubeChatMessage): Boolean {
-        return message.deliveredIds?.contains(localUserId)?: false
+        return message.deliveredIds?.contains(localUserId) ?: false
     }
 
     private fun messageIsRead(message: ConnectycubeChatMessage): Boolean {
         if (chatDialog.isPrivate) return message.readIds != null &&
                 (message.recipientId == null || message.readIds.contains(message.recipientId))
-        return message.readIds != null && message.readIds.any { it in occupantIds }
+        return message.readIds != null && message.readIds.any { it in occupantsIds }
     }
 
     private fun messageIsDelivered(message: ConnectycubeChatMessage): Boolean {
-        if (chatDialog.isPrivate) return message.deliveredIds?.contains(message.recipientId)?: false
-        return message.deliveredIds != null && message.deliveredIds.any { it in occupantIds }
+        if (chatDialog.isPrivate) return message.deliveredIds?.contains(message.recipientId)
+            ?: false
+        return message.deliveredIds != null && message.deliveredIds.any { it in occupantsIds }
     }
 
     fun getAttachImageUrl(attachment: ConnectycubeAttachment): String {
@@ -300,15 +430,36 @@ class ChatMessageAdapter(
     inner class ChatMessageIncomingViewHolder(parent: ViewGroup, @LayoutRes chatItem: Int) :
         BaseChatMessageTextViewHolder(parent, chatItem) {
         private val imgAvatar: ImageView = itemView.findViewById(R.id.avatar_image_view)
+        private val senderName: TextView = itemView.findViewById(R.id.text_message_sender)
 
-        override fun bindTo(message: ConnectycubeChatMessage) {
+        fun bindTo(message: ConnectycubeChatMessage, showAvatar: Boolean, showName: Boolean) {
             super.bindTo(message)
-            loadChatMessagePhoto(
-                chatDialog.type == ConnectycubeDialogType.PRIVATE,
-                "",
-                imgAvatar,
-                context
-            )
+            if (showAvatar || showName) {
+                val sender = occupants[message.senderId]
+                if (showAvatar) {
+                    imgAvatar.visibility = View.VISIBLE
+
+                    loadChatMessagePhoto(
+                        chatDialog.type == ConnectycubeDialogType.PRIVATE,
+                        sender?.avatar,
+                        imgAvatar,
+                        context
+                    )
+                } else {
+                    imgAvatar.visibility = View.INVISIBLE
+                }
+                if (showName) {
+                    senderName.visibility = View.VISIBLE
+                    sender?.let {
+                        senderName.text = sender.fullName ?: sender.login
+                    }
+                } else {
+                    senderName.visibility = View.GONE
+                }
+            } else {
+                imgAvatar.visibility = View.INVISIBLE
+                senderName.visibility = View.GONE
+            }
         }
     }
 
@@ -341,14 +492,35 @@ class ChatMessageAdapter(
     inner class ChatImageAttachIncomingViewHolder(parent: ViewGroup, @LayoutRes chatItem: Int) :
         BaseChatImageAttachViewHolder(parent, chatItem) {
         private val imgAvatar: ImageView = itemView.findViewById(R.id.avatar_image_view)
-        override fun bindTo(message: ConnectycubeChatMessage) {
+        private val senderName: TextView = itemView.findViewById(R.id.text_message_sender)
+
+        fun bindTo(message: ConnectycubeChatMessage, showAvatar: Boolean, showName: Boolean) {
             super.bindTo(message)
-            loadChatMessagePhoto(
-                chatDialog.isPrivate,
-                "",
-                imgAvatar,
-                context
-            )
+            if (showAvatar || showName) {
+                val sender = occupants[message.senderId]
+                if (showAvatar) {
+                    imgAvatar.visibility = View.VISIBLE
+                    loadChatMessagePhoto(
+                        chatDialog.type == ConnectycubeDialogType.PRIVATE,
+                        sender?.avatar,
+                        imgAvatar,
+                        context
+                    )
+                } else {
+                    imgAvatar.visibility = View.INVISIBLE
+                }
+                if (showName) {
+                    senderName.visibility = View.VISIBLE
+                    sender?.let {
+                        senderName.text = sender.fullName ?: sender.login
+                    }
+                } else {
+                    senderName.visibility = View.GONE
+                }
+            } else {
+                imgAvatar.visibility = View.INVISIBLE
+                senderName.visibility = View.GONE
+            }
         }
     }
 
@@ -360,4 +532,6 @@ class ChatMessageAdapter(
             setStatus(imgStatus, message)
         }
     }
+
+    data class ProgressMessage(val progress: Int = 0)
 }
