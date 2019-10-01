@@ -456,6 +456,9 @@ class ChatMessageAdapter(
                 } else {
                     senderName.visibility = View.GONE
                 }
+            } else {
+                imgAvatar.visibility = View.INVISIBLE
+                senderName.visibility = View.GONE
             }
         }
     }
@@ -514,6 +517,9 @@ class ChatMessageAdapter(
                 } else {
                     senderName.visibility = View.GONE
                 }
+            } else {
+                imgAvatar.visibility = View.INVISIBLE
+                senderName.visibility = View.GONE
             }
         }
     }
