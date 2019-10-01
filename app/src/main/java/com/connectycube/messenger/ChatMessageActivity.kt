@@ -322,6 +322,17 @@ class ChatMessageActivity : BaseChatActivity() {
                 resources.getDimension(R.dimen.margin_normal).toInt()
             )
         )
+
+        chatAdapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+
+            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                if (modelChatMessageList.scroll) {
+                    scrollDown()
+                    return
+                }
+            }
+        })
+
         messages_recycleview.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             fun shrinkFab() {
                 scroll_fb.iconGravity = ICON_GRAVITY_START
@@ -333,12 +344,7 @@ class ChatMessageActivity : BaseChatActivity() {
 
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                if (modelChatMessageList.scroll) {
-                    scrollDown()
-                    shrinkFab()
-                    return
-                }
-
+                
                 val totalItemCount = layoutManager.itemCount
                 val firstVisible = layoutManager.findFirstVisibleItemPosition()
 

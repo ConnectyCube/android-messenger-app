@@ -13,7 +13,7 @@ const val REQUEST_PERMISSION_CALL = 200
 
 class PermissionsHelper(val context: Activity) {
     private val imagePermissions: ArrayList<String> =
-        arrayListOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        arrayListOf(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA)
 
     private val callPermissions: ArrayList<String> =
         arrayListOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)
