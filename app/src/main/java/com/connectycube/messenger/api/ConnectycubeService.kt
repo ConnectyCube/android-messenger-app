@@ -67,7 +67,7 @@ class ConnectycubeService {
 
     fun updateChatSync(dialogId: String, callback: ResponsePerformer.Callback<Chat>) {
         InjectorUtils.provideSyncConnectycubeServiceForType<ConnectycubeChatDialog, Chat>()
-            .perform(
+            .performAsyncIO(
                 ConnectycubeRestChatService.getChatDialogById(dialogId),
                 object : Converter<Chat, ConnectycubeChatDialog>() {
                     override fun convertTo(response: ConnectycubeChatDialog): Chat {
