@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.annotation.LayoutRes
 import androidx.annotation.NonNull
@@ -27,7 +28,7 @@ import timber.log.Timber
 
 
 typealias AttachmentClickListener = (ConnectycubeAttachment) -> Unit
-
+private typealias PAYLOAD_PROGRESS = ChatMessageAdapter.ProgressMessage
 
 class ChatMessageAdapter(
     val context: Context,
@@ -70,17 +71,33 @@ class ChatMessageAdapter(
                                   position: Int,
                                   payloads: MutableList<Any>
     ) {
-        Timber.d("Binding view holder at position $position, payloads= ${payloads.isNotEmpty()}")
+        Timber.d("Binding view holder at position $position, payloads= ${payloads.isNotEmpty()},  payloads= $payloads")
         if (payloads.isNotEmpty()) {
-            val message = getItem(position)
-            message?.let {
-                val imgStatus =
-                    holder.itemView.findViewById<ImageView>(R.id.message_status_image_view)
-                setStatus(imgStatus, message)
+            when (val payload = payloads[0]) {
+                PAYLOAD_STATUS -> {
+                    Timber.d("PAYLOAD_STATUS")
+                    val message = getItem(position)
+                    message?.let {
+                        val imgStatus =
+                            holder.itemView.findViewById<ImageView>(R.id.message_status_image_view)
+                        setStatus(imgStatus, message)
+                    }
+                }
+                is PAYLOAD_PROGRESS -> {
+                    Timber.d("PROGRESS payloads= ${payload.progress}")
+                    val progressBar =
+                        holder.itemView.findViewById<ProgressBar>(R.id.progressbar)
+                    setProgress(progressBar, payload.progress)
+                }
             }
         } else {
             super.onBindViewHolder(holder, position, payloads)
         }
+    }
+
+
+    fun getItemByPosition(position: Int): ConnectycubeChatMessage? {
+        return getItem(position)
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
@@ -260,6 +277,21 @@ class ChatMessageAdapter(
             messageIsSent(msg) -> imgStatus?.setImageResource(R.drawable.ic_check_black_16dp)
             else -> imgStatus?.setImageResource(android.R.color.transparent)
         }
+    }
+
+    private fun setProgress(progressBar: ProgressBar?, value: Int) {
+        progressBar?.apply {
+            if (value < 100) {
+                visibility = View.VISIBLE
+                progress = value
+            } else {
+                visibility = View.INVISIBLE
+            }
+        }
+    }
+
+    fun updateAttachmentProgress(position: Int, progress: Int) {
+        notifyItemChanged(position, PAYLOAD_PROGRESS(progress))
     }
 
     private fun hasExtraRow() = networkState != null && networkState != NetworkState.LOADED
@@ -494,4 +526,6 @@ class ChatMessageAdapter(
             setStatus(imgStatus, message)
         }
     }
+
+    data class ProgressMessage(val progress: Int = 0)
 }

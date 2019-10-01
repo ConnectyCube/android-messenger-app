@@ -182,8 +182,12 @@ class ChatMessageActivity : BaseChatActivity() {
         modelMessageSender.liveMessageAttachmentSender.observe(this, Observer { resource ->
             when {
                 resource.status == com.connectycube.messenger.vo.Status.LOADING -> {
-                    if(resource.progress != 0) {
-//ToDo add progress implementation on view
+                    resource.progress?.let {
+                        val msg = resource.data
+                        if(msg?.id == chatAdapter.getItemByPosition(0)?.id) {
+                            Timber.d("subscribeMessageSenderAttachment LOADING progress= $it")
+                            chatAdapter.updateAttachmentProgress(0, it)
+                        }
                     }
                 }
                 resource.status == com.connectycube.messenger.vo.Status.SUCCESS -> {
@@ -319,16 +323,16 @@ class ChatMessageActivity : BaseChatActivity() {
             )
         )
         messages_recycleview.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            fun shrinkFab() {
+                scroll_fb.iconGravity = ICON_GRAVITY_START
+                scroll_fb.shrink()
+                scroll_fb.hide(false)
+                scroll_fb.text = ""
+                modelChatMessageList.unreadCounter = 0
+            }
+
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                fun shrinkFab() {
-                    scroll_fb.iconGravity = ICON_GRAVITY_START
-                    scroll_fb.shrink()
-                    scroll_fb.hide(false)
-                    scroll_fb.text = ""
-                    modelChatMessageList.unreadCounter = 0
-                }
-
                 if (modelChatMessageList.scroll) {
                     scrollDown()
                     shrinkFab()

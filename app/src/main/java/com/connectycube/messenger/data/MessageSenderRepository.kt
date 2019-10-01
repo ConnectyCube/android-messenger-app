@@ -36,7 +36,7 @@ class MessageSenderRepository private constructor(private val messageDao: Messag
                     result.value = Resource.success(null)
                 }
                 is ApiProgressResponse -> {
-                    result.value = Resource.loadingProgress(null, response.progress)
+                    result.value = Resource.loadingProgress(messageToTempSave, response.progress)
                 }
                 is ApiErrorResponse -> {
                     result.value = Resource.error(response.errorMessage, null)
