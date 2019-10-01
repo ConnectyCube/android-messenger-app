@@ -285,7 +285,7 @@ class ChatMessageAdapter(
                 visibility = View.VISIBLE
                 progress = value
             } else {
-                visibility = View.INVISIBLE
+                visibility = View.GONE
             }
         }
     }
