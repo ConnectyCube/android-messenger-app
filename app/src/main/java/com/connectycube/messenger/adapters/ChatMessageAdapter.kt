@@ -179,7 +179,7 @@ class ChatMessageAdapter(
     }
 
     private fun showAvatar(position: Int, currentMsg: ConnectycubeChatMessage): Boolean {
-        return chatDialog.isPrivate || isNeedShowExtraData(position, currentMsg)
+        return isNeedShowExtraData(position, currentMsg)
     }
 
     private fun showName(position: Int, currentMsg: ConnectycubeChatMessage): Boolean {
