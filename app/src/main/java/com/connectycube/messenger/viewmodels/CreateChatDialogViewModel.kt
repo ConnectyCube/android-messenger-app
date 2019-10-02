@@ -9,6 +9,7 @@ import com.connectycube.messenger.R
 import com.connectycube.messenger.data.Chat
 import com.connectycube.messenger.data.ChatRepository
 import com.connectycube.messenger.data.UserRepository
+import com.connectycube.messenger.utilities.SharedPreferencesManager
 import com.connectycube.messenger.vo.Resource
 import com.connectycube.messenger.vo.Status
 import com.connectycube.users.model.ConnectycubeUser
@@ -54,7 +55,7 @@ class CreateChatDialogViewModel internal constructor(
     }
 
     private fun isCurrentUser(user: ConnectycubeUser): Boolean {
-        val currentUser = ConnectycubeChatService.getInstance().user
+        val currentUser = SharedPreferencesManager.getInstance(getApplication()).getCurrentUser()
         return currentUser.login == user.login
     }
 
