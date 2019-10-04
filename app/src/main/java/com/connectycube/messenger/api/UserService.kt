@@ -6,6 +6,7 @@ import com.connectycube.core.exception.ResponseException
 import com.connectycube.messenger.ChatConnectionManager
 import com.connectycube.messenger.data.AppDatabase
 import com.connectycube.messenger.helpers.RTCSessionManager
+import com.connectycube.pushnotifications.services.SubscribeService
 import com.connectycube.users.ConnectycubeUsers
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -24,6 +25,7 @@ class UserService private constructor() {
     suspend fun ultimateLogout(applicationContext: Context) {
         ChatConnectionManager.getInstance().terminate()
         clearDatabaseAsync(applicationContext).await()
+        SubscribeService.unSubscribeFromPushes(applicationContext)
         signOut()
     }
 
