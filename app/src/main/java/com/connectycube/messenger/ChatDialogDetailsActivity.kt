@@ -172,7 +172,7 @@ class ChatDialogDetailsActivity : BaseChatActivity(),
 
     private fun removeOccupants() {
         val intent = Intent(this, SelectUsersFromExistActivity::class.java)
-        intent.putIntegerArrayListExtra(EXTRA_USERS_TO_LOAD, ArrayList(currentChatDialog.occupants))
+        intent.putIntegerArrayListExtra(EXTRA_USERS_TO_LOAD, ArrayList(currentChatDialog.occupants.filter { it != currentChatDialog.userId }))
         startActivityForResult(intent, REQUEST_REMOVE_OCCUPANTS)
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
     }
