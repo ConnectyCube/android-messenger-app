@@ -43,7 +43,7 @@ android {
 }
 
 ext {
-    sdkVersion = '1.8.1'
+    sdkVersion = '1.8.0'
     roomVersion = '2.2.0-beta01'
     lifecycleVersion = '2.2.0-alpha02'
     workVersion = '2.1.0'
