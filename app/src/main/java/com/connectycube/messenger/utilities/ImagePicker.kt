@@ -45,6 +45,7 @@ fun requestImage(activity: Activity) {
             // DO SOMETHING IMMEDIATELY HERE
             Timber.d("isChecked= isChecked=$isChecked")
         })
+        .theme(R.style.Matisse_Connecticube)
         .forResult(REQUEST_CODE_CHOOSE)
 }
 
