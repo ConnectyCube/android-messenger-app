@@ -102,7 +102,7 @@ private static void kotlinComponents(configuration, kotlin_version) {
 
 private static void externalMediaComponents(configuration) {
     configuration.implementation "com.zhihu.android:matisse:0.5.1-beta1"
-    configuration.implementation 'com.github.yalantis:ucrop:2.2.3'
+    configuration.implementation 'com.github.yalantis:ucrop:2.2.4'
     configuration.implementation "com.github.bumptech.glide:glide:4.9.0"
     configuration.implementation 'com.github.chrisbanes:PhotoView:2.1.4'
 }
