@@ -2,7 +2,6 @@ package com.connectycube.messenger
 
 import androidx.activity.viewModels
 import androidx.lifecycle.observe
-import com.connectycube.messenger.adapters.CheckableUsersAdapter
 import com.connectycube.messenger.utilities.InjectorUtils
 import com.connectycube.messenger.viewmodels.SelectUsersViewModel
 import com.connectycube.messenger.vo.Status
@@ -10,8 +9,7 @@ import kotlinx.android.synthetic.main.activity_create_chat.*
 
 const val EXTRA_FILTER_IDS = "filter_ids"
 
-class SelectUsersActivity : SelectUsersBaseActivity<SelectUsersViewModel>(),
-    CheckableUsersAdapter.CheckableUsersAdapterCallback {
+class SelectUsersActivity : SelectUsersBaseActivity<SelectUsersViewModel>() {
 
     override fun getViewMode(): SelectUsersViewModel {
         val selectedUsersViewModel: SelectUsersViewModel by viewModels {

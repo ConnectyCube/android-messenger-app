@@ -3,7 +3,6 @@ package com.connectycube.messenger
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
-import com.connectycube.messenger.adapters.CheckableUsersAdapter
 import com.connectycube.messenger.helpers.EXTRA_CALL_TYPE
 import com.connectycube.messenger.helpers.startCall
 import com.connectycube.users.model.ConnectycubeUser
@@ -11,7 +10,7 @@ import java.util.*
 
 const val MAX_OPPONENTS_LIMIT = 3
 
-class SelectCallMembersActivity : SelectUsersFromExistActivity(), CheckableUsersAdapter.CheckableUsersAdapterCallback {
+class SelectCallMembersActivity : SelectUsersFromExistActivity() {
 
     override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
         val menuItemDone: MenuItem? = menu?.findItem(R.id.action_done)
