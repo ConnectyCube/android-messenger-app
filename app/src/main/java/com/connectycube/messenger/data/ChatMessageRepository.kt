@@ -45,9 +45,9 @@ class ChatMessageRepository(
                 Timber.d("updateItemDeliveredStatus itemId= $itemId, userId= $userId")
                 val message: Message? = db.messageDao().loadItem(itemId)
                 message?.let {
-                    if (message.cubeMessage.deliveredIds != null) message.cubeMessage.deliveredIds.add(userId)
-                    else message.cubeMessage.deliveredIds = listOf(userId)
-                    message.deliveredIds.add(userId)
+                    if (message.deliveredIds != null) message.deliveredIds.add(userId)
+                    else message.deliveredIds = mutableListOf(userId)
+
                     db.messageDao().update(message)
                 }
             }
@@ -60,12 +60,12 @@ class ChatMessageRepository(
                 Timber.d("updateItemSentStatus itemId= $itemId, userId= $userId")
                 val message: Message? = db.messageDao().loadItem(itemId)
                 message?.let {
-                    val needUpdate = message.cubeMessage.readIds == null &&
-                            (message.cubeMessage.deliveredIds == null || !message.cubeMessage.deliveredIds.contains(userId))
+                    val needUpdate = message.readIds == null &&
+                            (message.deliveredIds == null || !message.deliveredIds.contains(userId))
                     Timber.d("updateItemSentStatus needUpdate= $needUpdate")
                     if (needUpdate) {
-                        if (message.cubeMessage.deliveredIds != null) message.cubeMessage.deliveredIds.add(userId)
-                        else message.cubeMessage.deliveredIds = listOf(userId)
+                        if (message.deliveredIds != null) message.deliveredIds.add(userId)
+                        else message.deliveredIds = mutableListOf(userId)
                         db.messageDao().update(message)
                     }
                 }
@@ -79,8 +79,8 @@ class ChatMessageRepository(
                 Timber.d("updateItemReadStatus itemId= $itemId, userId= $userId")
                 val message: Message? = db.messageDao().loadItem(itemId)
                 message?.let {
-                    if (message.cubeMessage.readIds != null) message.cubeMessage.readIds.add(userId)
-                    else message.cubeMessage.readIds = listOf(userId)
+                    if (message.readIds != null) message.readIds.add(userId)
+                    else message.readIds = mutableListOf(userId)
                     message.readIds.add(userId)
                     db.messageDao().update(message)
                 }
@@ -134,7 +134,7 @@ class ChatMessageRepository(
     }
 
     @MainThread
-    fun postsOfDialogId(dialogId: String, pageSize: Int): Listing<ConnectycubeChatMessage> {
+    fun postsOfDialogId(dialogId: String, pageSize: Int): Listing<Message> {
         // create a boundary callback which will observe when the user reaches to the edges of
         // the list and update the database with extra data.
         val boundaryCallback = MessageBoundaryCallback(
@@ -157,7 +157,7 @@ class ChatMessageRepository(
             .setPageSize(pageSize)
             .build()
 
-        val dataSourceConnectycubeChatMessage = db.messageDao().postsByDialogId(dialogId).map { it.cubeMessage }
+        val dataSourceConnectycubeChatMessage = db.messageDao().postsByDialogId(dialogId).map { it }
 
 //        val dataSourceConnectycubeChatMessage = LivePagedListBuilder(db.messageDao().postsByDialogId(dialogId).map { it.cubeMessage }, config).setBoundaryCallback(boundaryCallback).build()
         val livePagedList = dataSourceConnectycubeChatMessage.toLiveData(

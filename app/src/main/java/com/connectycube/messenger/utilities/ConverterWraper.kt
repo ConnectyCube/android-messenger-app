@@ -48,11 +48,15 @@ fun convertToMessages(items: ArrayList<ConnectycubeChatMessage>): List<Message> 
 }
 
 fun convertToMessage(item: ConnectycubeChatMessage): Message {
-    val listReadIds = {
-        if (item.readIds != null) item.readIds.toMutableList() else mutableListOf()
+    return Message(item.id).apply {
+        id = item.id
+        body = item.body
+        dialogId = item.dialogId
+        dateSent = item.dateSent
+        senderId = item.senderId
+        recipientId = item.recipientId
+        readIds = item.readIds
+        deliveredIds = item.deliveredIds
+        attachments = item.attachments
     }
-    val listDeliveredIds = {
-        if (item.deliveredIds != null) item.deliveredIds.toMutableList() else mutableListOf()
-    }
-    return Message(item.id, item.dialogId, item.dateSent, listReadIds.invoke(), listDeliveredIds.invoke(), item)
 }

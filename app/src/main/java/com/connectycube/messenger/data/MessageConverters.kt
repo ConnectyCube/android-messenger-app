@@ -1,37 +1,50 @@
 package com.connectycube.messenger.data
 
 import androidx.room.TypeConverter
-import com.connectycube.chat.model.ConnectycubeChatMessage
+import com.connectycube.chat.model.ConnectycubeAttachment
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import java.util.*
+
 
 /**
  * Type converters to allow Room to reference complex data types.
  */
+
 class MessageConverters {
     @TypeConverter
-    fun fromString(value: String): ConnectycubeChatMessage {
-        val chat = object : TypeToken<ConnectycubeChatMessage>() {
-
-        }.type
-        return Gson().fromJson(value, chat)
+    fun toStringAttachment(value: String): ConnectycubeAttachment {
+        return Gson().fromJson(value, ConnectycubeAttachment::class.java)
     }
 
     @TypeConverter
-    fun fromConnectycubeChat(chat: ConnectycubeChatMessage): String {
+    fun fromStringAttachment(attachment: ConnectycubeAttachment): String? {
         val gson = Gson()
-        return gson.toJson(chat)
+        return gson.toJson(attachment)
     }
 
     @TypeConverter
-    fun fromIdsListString(value: String): List<Int> {
-        val listType = object : TypeToken<List<Int>>() {
+    fun fromStringAttachmentList(value: String?): Collection<ConnectycubeAttachment>? {
+        val listType = object : TypeToken<Collection<ConnectycubeAttachment>>() {
         }.type
         return Gson().fromJson(value, listType)
     }
 
     @TypeConverter
-    fun fromIdsListString(list: List<Int>): String {
+    fun toStringAttachmentList(chat: Collection<ConnectycubeAttachment>?): String? {
+        val gson = Gson()
+        return gson.toJson(chat)
+    }
+
+    @TypeConverter
+    fun fromIdsCollectionString(value: String): Collection<Int>? {
+        val listType = object : TypeToken<Collection<Int>>() {
+        }.type
+        return Gson().fromJson(value, listType)
+    }
+
+    @TypeConverter
+    fun toIdsCollectionString(list: Collection<Int>?): String? {
         val gson = Gson()
         return gson.toJson(list)
     }

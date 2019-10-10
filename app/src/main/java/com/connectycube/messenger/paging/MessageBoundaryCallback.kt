@@ -26,7 +26,7 @@ class MessageBoundaryCallback(
     private val handleResponse: (List<Message>?) -> Unit,
     private val ioExecutor: Executor,
     private val networkPageSize: Int
-) : PagedList.BoundaryCallback<ConnectycubeChatMessage>() {
+) : PagedList.BoundaryCallback<Message>() {
 
     val helper = PagingRequestHelper(ioExecutor)
     val networkState = helper.createStatusLiveData()
@@ -50,7 +50,7 @@ class MessageBoundaryCallback(
      * User reached to the end of the list.
      */
     @MainThread
-    override fun onItemAtEndLoaded(itemAtEnd: ConnectycubeChatMessage) {
+    override fun onItemAtEndLoaded(itemAtEnd: Message) {
         Timber.d("onItemAtEndLoaded itemAtEnd= ${itemAtEnd.body}")
         helper.runIfNotRunning(PagingRequestHelper.RequestType.BEFORE) {
             chatMessageApi.getTopBefore(
@@ -76,7 +76,7 @@ class MessageBoundaryCallback(
         }
     }
 
-    override fun onItemAtFrontLoaded(itemAtFront: ConnectycubeChatMessage) {
+    override fun onItemAtFrontLoaded(itemAtFront: Message) {
         Timber.d("onItemAtFrontLoaded= ${itemAtFront.body}")
         helper.runIfNotRunning(PagingRequestHelper.RequestType.AFTER) {
             chatMessageApi.getTopAfter(

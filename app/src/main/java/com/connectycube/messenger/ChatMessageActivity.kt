@@ -338,7 +338,7 @@ class ChatMessageActivity : BaseChatActivity() {
 
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                
+
                 val totalItemCount = layoutManager.itemCount
                 val firstVisible = layoutManager.findFirstVisibleItemPosition()
 
