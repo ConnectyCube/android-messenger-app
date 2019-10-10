@@ -24,6 +24,10 @@ allprojects {
         maven {
             url "https://github.com/ConnectyCube/connectycube-android-sdk-releases/raw/master/"
         }
+
+        maven {
+            url "file://Users/tereha/StudioProjects/connectycube-android-sdk-releases"
+        }
     }
 }
 

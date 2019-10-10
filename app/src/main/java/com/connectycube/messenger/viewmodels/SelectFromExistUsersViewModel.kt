@@ -3,13 +3,13 @@ package com.connectycube.messenger.viewmodels
 import android.app.Application
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
-import com.connectycube.chat.ConnectycubeChatService
 import com.connectycube.messenger.R
 import com.connectycube.messenger.data.UserRepository
+import com.connectycube.messenger.utilities.SharedPreferencesManager
 import com.connectycube.messenger.vo.Resource
 import com.connectycube.users.model.ConnectycubeUser
 
-class SelectCallMembersViewModel internal constructor(
+class SelectFromExistUsersViewModel internal constructor(
     applicationContext: Application,
     private val usersRepository: UserRepository
 ) : SelectUsersViewModel (applicationContext, usersRepository) {
@@ -36,6 +36,6 @@ class SelectCallMembersViewModel internal constructor(
     }
 
     private fun getCurrentUser(): ConnectycubeUser {
-        return ConnectycubeChatService.getInstance().user
+        return SharedPreferencesManager.getInstance(getApplication()).getCurrentUser()
     }
 }
