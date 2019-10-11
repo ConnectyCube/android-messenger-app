@@ -79,9 +79,9 @@ class ChatMessageRepository(
                 Timber.d("updateItemReadStatus itemId= $itemId, userId= $userId")
                 val message: Message? = db.messageDao().loadItem(itemId)
                 message?.let {
-                    if (message.readIds != null) message.readIds.add(userId)
-                    else message.readIds = mutableListOf(userId)
-                    message.readIds.add(userId)
+                    if (message.readIds != null && message.readIds.contains(userId)) return@runInTransaction
+                    if (message.readIds == null) message.readIds = mutableListOf(userId)
+                    else message.readIds.add(userId)
                     db.messageDao().update(message)
                 }
             }
@@ -134,7 +134,7 @@ class ChatMessageRepository(
     }
 
     @MainThread
-    fun postsOfDialogId(dialogId: String, pageSize: Int): Listing<Message> {
+    fun postsOfDialogId(dialogId: String, pageSize: Int): Listing<ConnectycubeChatMessage> {
         // create a boundary callback which will observe when the user reaches to the edges of
         // the list and update the database with extra data.
         val boundaryCallback = MessageBoundaryCallback(
@@ -157,7 +157,8 @@ class ChatMessageRepository(
             .setPageSize(pageSize)
             .build()
 
-        val dataSourceConnectycubeChatMessage = db.messageDao().postsByDialogId(dialogId).map { it }
+        val dataSourceConnectycubeChatMessage =
+            db.messageDao().postsByDialogId(dialogId).map { it as ConnectycubeChatMessage }
 
 //        val dataSourceConnectycubeChatMessage = LivePagedListBuilder(db.messageDao().postsByDialogId(dialogId).map { it.cubeMessage }, config).setBoundaryCallback(boundaryCallback).build()
         val livePagedList = dataSourceConnectycubeChatMessage.toLiveData(
@@ -187,9 +188,10 @@ class ChatMessageRepository(
 
         fun getInstance(context: Context) =
             instance ?: synchronized(this) {
-                instance ?: ChatMessageRepository(AppDatabase.getInstance(context.applicationContext)).also {
-                    instance = it
-                }
+                instance
+                    ?: ChatMessageRepository(AppDatabase.getInstance(context.applicationContext)).also {
+                        instance = it
+                    }
             }
     }
 }

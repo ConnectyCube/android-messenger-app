@@ -20,7 +20,6 @@ import com.connectycube.chat.model.ConnectycubeChatMessage
 import com.connectycube.chat.model.ConnectycubeDialogType
 import com.connectycube.core.helper.CollectionsUtil
 import com.connectycube.messenger.R
-import com.connectycube.messenger.data.Message
 import com.connectycube.messenger.paging.NetworkState
 import com.connectycube.messenger.utilities.*
 import com.connectycube.users.model.ConnectycubeUser
@@ -35,7 +34,7 @@ class ChatMessageAdapter(
     val context: Context,
     var chatDialog: ConnectycubeChatDialog,
     private val attachmentClickListener: AttachmentClickListener
-) : PagedListAdapter<Message, RecyclerView.ViewHolder>(diffCallback),
+) : PagedListAdapter<ConnectycubeChatMessage, RecyclerView.ViewHolder>(diffCallback),
     StickyRecyclerHeadersAdapter<RecyclerView.ViewHolder> {
 
     val IN_PROGRESS = -1
@@ -353,28 +352,28 @@ class ChatMessageAdapter(
          * PagedLists arrive.
          */
         private val PAYLOAD_STATUS = Any()
-        private val diffCallback = object : DiffUtil.ItemCallback<Message>() {
-            override fun areItemsTheSame(oldItem: Message,
-                                         newItem: Message
+        private val diffCallback = object : DiffUtil.ItemCallback<ConnectycubeChatMessage>() {
+            override fun areItemsTheSame(oldItem: ConnectycubeChatMessage,
+                                         newItem: ConnectycubeChatMessage
             ): Boolean =
                 oldItem.id == newItem.id
 
             override fun areContentsTheSame(
-                oldItem: Message,
-                newItem: Message
+                oldItem: ConnectycubeChatMessage,
+                newItem: ConnectycubeChatMessage
             ): Boolean =
                 oldItem.id == newItem.id && oldItem.readIds == newItem.readIds && oldItem.deliveredIds == newItem.deliveredIds
 
-            override fun getChangePayload(oldItem: Message,
-                                          newItem: Message
+            override fun getChangePayload(oldItem: ConnectycubeChatMessage,
+                                          newItem: ConnectycubeChatMessage
             ): Any? {
                 return if (sameExceptStatus(oldItem, newItem)) {
                     PAYLOAD_STATUS
                 } else null
             }
 
-            fun sameExceptStatus(oldItem: Message,
-                                 newItem: Message
+            fun sameExceptStatus(oldItem: ConnectycubeChatMessage,
+                                 newItem: ConnectycubeChatMessage
             ): Boolean {
                 return newItem.readIds != oldItem.readIds || newItem.deliveredIds != oldItem.deliveredIds
             }

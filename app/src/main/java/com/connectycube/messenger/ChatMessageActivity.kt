@@ -62,6 +62,7 @@ class ChatMessageActivity : BaseChatActivity() {
     private val messageSentListener: ChatDialogMessageSentListener = ChatMessagesSentListener()
     private val messageTypingListener: ChatDialogTypingListener = ChatTypingListener()
     private val permissionsHelper = PermissionsHelper(this)
+    private val layoutManager = LinearLayoutManager(this)
     private lateinit var chatAdapter: ChatMessageAdapter
     private lateinit var chatDialog: ConnectycubeChatDialog
     private lateinit var modelChatMessageList: ChatMessageListViewModel
@@ -177,11 +178,17 @@ class ChatMessageActivity : BaseChatActivity() {
         modelMessageSender.liveMessageAttachmentSender.observe(this, Observer { resource ->
             when {
                 resource.status == com.connectycube.messenger.vo.Status.LOADING -> {
-                    resource.progress?.let {
+                    resource.progress?.let { progress ->
                         val msg = resource.data
-                        if(msg?.id == chatAdapter.getItemByPosition(0)?.id) {
-                            Timber.d("subscribeMessageSenderAttachment LOADING progress= $it")
-                            chatAdapter.updateAttachmentProgress(0, it)
+                        val firstPosition = layoutManager.findFirstVisibleItemPosition()
+                        val lastPosition = layoutManager.findLastVisibleItemPosition()
+
+                        val range = firstPosition..lastPosition
+                        range.forEach { position ->
+                            if (msg?.id == chatAdapter.getItemByPosition(position)?.id) {
+                                Timber.d("subscribeMessageSenderAttachment LOADING progress= $progress")
+                                chatAdapter.updateAttachmentProgress(position, progress)
+                            }
                         }
                     }
                 }
@@ -307,7 +314,6 @@ class ChatMessageActivity : BaseChatActivity() {
     private fun initChatAdapter() {
         chatAdapter = ChatMessageAdapter(this, chatDialog, attachmentClickListener)
         scroll_fb.setOnClickListener { scrollDown() }
-        val layoutManager = LinearLayoutManager(this)
         layoutManager.stackFromEnd = false
         layoutManager.reverseLayout = true
         messages_recycleview.layoutManager = layoutManager
