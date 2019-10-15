@@ -113,8 +113,8 @@ class ChatDialogDetailsViewModel internal constructor(
         }
     }
 
-    fun removeOccupantUser(dialogId: String, userId: Int) {
-        chatRepository.removeChatOccupants(dialogId, userId) { error, chat ->
+    fun removeOccupants(dialogId: String, vararg usersIds: Int) {
+        chatRepository.removeChatOccupants(dialogId, *usersIds) { error, chat ->
             liveDialog().postValue(Resource.error(error, chat.cubeChat))
         }
     }
