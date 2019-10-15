@@ -24,7 +24,7 @@
     </style>
 
     <!-- Custom color theme for Matisse image picker -->
-    <style name="Matisse.Connecticube" parent="Matisse.Zhihu">
+    <style name="Matisse.ConnectyCube" parent="Matisse.Zhihu">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="bottomToolbar.apply.textColor">@color/colorPrimary</item>
