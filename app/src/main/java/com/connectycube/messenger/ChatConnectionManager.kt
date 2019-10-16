@@ -18,10 +18,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 class ChatConnectionManager {
 
-    private val isLoggedInAtomic = AtomicBoolean(false)
-    val isLoggedIn: Boolean
-        get() = isLoggedInAtomic.get()
-
     companion object {
         @Volatile
         private var instance: ChatConnectionManager? = null
@@ -68,13 +64,11 @@ class ChatConnectionManager {
                                                                         AbstractConnectionListener() {
             override fun authenticated(connection: XMPPConnection?, resumed: Boolean) {
                 Timber.d("authenticated")
-                isLoggedInAtomic.set(true)
                 notifySuccessLoginToChat(ConnectycubeChatService.getInstance().user)
             }
 
             override fun connectionClosedOnError(e: Exception) {
                 Timber.d("connectionClosedOnError e= $e")
-                isLoggedInAtomic.set(false)
                 notifyErrorLoginToChat(e)
             }
         })
@@ -98,7 +92,6 @@ class ChatConnectionManager {
     fun terminate() {
         ConnectycubeChatService.getInstance().destroy()
         isPending.set(false)
-        isLoggedInAtomic.set(false)
         isInitialized.set(false)
         instance = null
     }

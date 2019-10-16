@@ -67,7 +67,7 @@ class ConnectycubeService {
 
     fun updateChatSync(dialogId: String, callback: ResponsePerformer.Callback<Chat>) {
         InjectorUtils.provideSyncConnectycubeServiceForType<ConnectycubeChatDialog, Chat>()
-            .performAsyncIO(
+            .perform(
                 ConnectycubeRestChatService.getChatDialogById(dialogId),
                 object : Converter<Chat, ConnectycubeChatDialog>() {
                     override fun convertTo(response: ConnectycubeChatDialog): Chat {
@@ -80,7 +80,7 @@ class ConnectycubeService {
     fun loadChatsSlice(): LiveData<ApiResponse<List<Chat>>> {
         val requestGetBuilder = RequestGetBuilder().apply { limit = 10 }
         return InjectorUtils.provideConnectycubeServiceForType<ArrayList<ConnectycubeChatDialog>, List<Chat>>()
-            .performAsyncIO(
+            .perform(
                 ConnectycubeRestChatService.getChatDialogs(null, requestGetBuilder),
                 object : Converter<List<Chat>, ArrayList<ConnectycubeChatDialog>>() {
                     override fun convertTo(response: ArrayList<ConnectycubeChatDialog>): List<Chat> {
@@ -95,7 +95,7 @@ class ConnectycubeService {
             .`in`(Consts.DIALOG_TYPE, 2, 3)
 
         return InjectorUtils.provideConnectycubeServiceForType<ArrayList<ConnectycubeChatDialog>, List<Chat>>()
-            .performAsyncIO(
+            .perform(
                 ConnectycubeRestChatService.getChatDialogs(null, requestBuilder),
                 object : Converter<List<Chat>, ArrayList<ConnectycubeChatDialog>>() {
                     override fun convertTo(response: ArrayList<ConnectycubeChatDialog>): List<Chat> {
