@@ -10,6 +10,7 @@
     <string name="user">User %1$s</string>
     <string name="login_chat_login_error">Login Chat error. Please relogin. Error %s</string>
     <string name="loading_users_error">Loading users error. Error %s</string>
+    <string name="loading_users_empty">There are no such users in the application.</string>
 
     <!--DialogsActivity-->
     <string name="yesterday">Yesterday</string>
