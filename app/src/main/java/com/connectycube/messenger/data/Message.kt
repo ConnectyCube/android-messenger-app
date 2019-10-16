@@ -7,7 +7,7 @@ import com.connectycube.chat.model.ConnectycubeChatMessage
 
 @Entity(
     tableName = "messages",
-    ignoredColumns = ["properties", "packetExtension", "complexProperties", "saveToHistory", "delayed"]
+    ignoredColumns = ["properties", "packetExtension", "complexProperties", "saveToHistory", "delayed", "attachments"]
 )
 data class Message(
     @PrimaryKey
