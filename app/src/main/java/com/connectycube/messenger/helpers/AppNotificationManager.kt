@@ -10,7 +10,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.*
@@ -20,6 +19,7 @@ import com.connectycube.messenger.data.AppDatabase
 import com.connectycube.messenger.data.Chat
 import com.connectycube.messenger.data.ChatRepository
 import com.connectycube.messenger.utilities.SharedPreferencesManager
+import com.connectycube.videochat.RTCConfig
 import java.util.*
 
 
@@ -171,10 +171,13 @@ class AppNotificationManager {
             .setContentText(data[PARAM_MESSAGE])
             .setContentIntent(pendingIntent)
 
+        var cancelNotificationTimeoutSec = RTCConfig.getAnswerTimeInterval()
         val answerTimeout = data[PARAM_ANSWER_TIMEOUT]?.toLong()
         if (answerTimeout != null && answerTimeout > 0) {
-            builder.setTimeoutAfter(answerTimeout)
+            cancelNotificationTimeoutSec = answerTimeout
         }
+
+        builder.setTimeoutAfter(cancelNotificationTimeoutSec * 1000)
 
         displayNotification(context, CALL_NOTIFICATION_ID, builder.build())
     }
