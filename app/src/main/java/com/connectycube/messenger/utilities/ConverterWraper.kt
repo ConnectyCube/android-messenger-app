@@ -22,18 +22,21 @@ fun convertToUser(user: ConnectycubeUser): User {
 fun convertToChats(list: ArrayList<ConnectycubeChatDialog>): List<Chat> {
     val chats = ArrayList<Chat>()
     list.forEach {
-        chats.add(
-            Chat(
-                it.dialogId,
-                it.lastMessageDateSent,
-                it.createdAt.time,
-                it.unreadMessageCount,
-                it.name,
-                it
-            )
-        )
+        chats.add(convertToChat(it))
     }
     return chats
+}
+
+fun convertToChat(dialog: ConnectycubeChatDialog): Chat {
+    return Chat(
+        dialog.dialogId,
+        dialog.lastMessageDateSent,
+        dialog.createdAt.time,
+        dialog.updatedAt.time,
+        dialog.unreadMessageCount ?: 0,
+        dialog.name,
+        dialog
+    )
 }
 
 fun convertToMessages(items: ArrayList<ConnectycubeChatMessage>): List<Message> {

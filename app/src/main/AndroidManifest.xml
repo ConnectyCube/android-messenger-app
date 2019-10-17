@@ -6,6 +6,11 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
             android:name=".App"
@@ -68,6 +73,26 @@
                 android:name=".SelectUsersActivity"
                 android:label="@string/title_select_users_activity" />
 
+        <activity
+                android:name=".SelectUsersFromExistActivity" />
+
+        <activity
+                android:name=".CallActivity"
+                android:theme="@style/AppTheme.NoActionBar"
+                android:screenOrientation="portrait"/>
+
+        <activity
+            android:name=".SelectCallMembersActivity"
+            android:label="@string/title_select_call_members" />
+
+        <service android:name=".fcm.PushListenerService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <service android:name=".SendFastReplyMessageService" />
+
         <provider
                 android:name="androidx.core.content.FileProvider"
                 android:authorities="${applicationId}.fileprovider"
@@ -77,6 +102,10 @@
                     android:name="android.support.FILE_PROVIDER_PATHS"
                     android:resource="@xml/file_paths_public" />
         </provider>
+
+        <meta-data android:name="com.connectycube.pushnotifications.TYPE" android:value="FCM" />
+        <meta-data android:name="com.connectycube.pushnotifications.SENDER_ID" android:value="@string/sender_id" />
+        <meta-data android:name="com.connectycube.pushnotifications.ENVIRONMENT" android:value="DEVELOPMENT" />
     </application>
 
 </manifest>

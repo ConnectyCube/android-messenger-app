@@ -1,12 +1,15 @@
 package com.connectycube.messenger.viewmodels
 
 import android.app.Application
-import androidx.lifecycle.*
-import com.connectycube.chat.ConnectycubeChatService
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.MutableLiveData
 import com.connectycube.chat.model.ConnectycubeChatDialog
 import com.connectycube.messenger.R
 import com.connectycube.messenger.data.ChatRepository
 import com.connectycube.messenger.data.UserRepository
+import com.connectycube.messenger.utilities.SharedPreferencesManager
 import com.connectycube.messenger.vo.Resource
 import com.connectycube.users.model.ConnectycubeUser
 
@@ -64,12 +67,19 @@ class ChatDialogDetailsViewModel internal constructor(
     }
 
     fun isCurrentUser(user: ConnectycubeUser): Boolean {
-        val currentUser = ConnectycubeChatService.getInstance().user
+        val currentUser = getCurrentUser()
         return currentUser.login == user.login
     }
 
     fun getCurrentUser(): ConnectycubeUser {
-        return ConnectycubeChatService.getInstance().user
+        return SharedPreferencesManager.getInstance(getApplication()).getCurrentUser()
+    }
+
+    fun updateGroupPhoto(dialogId: String, newPhoto: String) {
+        liveDialog().postValue(Resource.loading(null))
+        chatRepository.updateChatPhoto(dialogId, newPhoto, { error, chat ->
+            liveDialog().postValue(Resource.error(error, chat.cubeChat))
+        }, { progress -> liveDialog().postValue(Resource.loadingProgress(null, progress)) })
     }
 
     fun updateGroupDescription(dialogId: String, newDescription: String) {
@@ -103,8 +113,8 @@ class ChatDialogDetailsViewModel internal constructor(
         }
     }
 
-    fun removeOccupantUser(dialogId: String, userId: Int) {
-        chatRepository.removeChatOccupants(dialogId, userId) { error, chat ->
+    fun removeOccupants(dialogId: String, vararg usersIds: Int) {
+        chatRepository.removeChatOccupants(dialogId, *usersIds) { error, chat ->
             liveDialog().postValue(Resource.error(error, chat.cubeChat))
         }
     }

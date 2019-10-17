@@ -9,20 +9,28 @@ import androidx.core.content.ContextCompat
 
 
 const val REQUEST_PERMISSION_IMAGE = 100
+const val REQUEST_PERMISSION_CALL = 200
 
 class PermissionsHelper(val context: Activity) {
-    private val permissions: ArrayList<String> = arrayListOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    private val imagePermissions: ArrayList<String> =
+        arrayListOf(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA)
+
+    private val callPermissions: ArrayList<String> =
+        arrayListOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)
 
 
     fun areAllImageGranted(): Boolean {
         return Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
-                permissions.all { permission ->
-                    ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
+                imagePermissions.all { permission ->
+                    ContextCompat.checkSelfPermission(
+                        context,
+                        permission
+                    ) == PackageManager.PERMISSION_GRANTED
                 }
     }
 
     fun requestImagePermissions() {
-        requestPermissions(REQUEST_PERMISSION_IMAGE, permissions)
+        requestPermissions(REQUEST_PERMISSION_IMAGE, imagePermissions)
     }
 
     private fun requestPermissions(requestCode: Int, permissions: ArrayList<String>) {
@@ -32,4 +40,17 @@ class PermissionsHelper(val context: Activity) {
         ActivityCompat.requestPermissions(context, array, requestCode)
     }
 
+    fun areCallPermissionsGranted(): Boolean {
+        return Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
+                callPermissions.all { permission ->
+                    ContextCompat.checkSelfPermission(
+                        context,
+                        permission
+                    ) == PackageManager.PERMISSION_GRANTED
+                }
+    }
+
+    fun requestCallPermissions() {
+        requestPermissions(REQUEST_PERMISSION_CALL, callPermissions)
+    }
 }

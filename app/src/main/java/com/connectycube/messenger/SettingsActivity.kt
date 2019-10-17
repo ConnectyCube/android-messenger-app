@@ -8,7 +8,6 @@ import android.view.MenuItem
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.lifecycle.observe
-import com.connectycube.chat.ConnectycubeChatService
 import com.connectycube.messenger.utilities.*
 import com.connectycube.messenger.viewmodels.UserDetailsViewModel
 import com.connectycube.messenger.vo.Status
@@ -25,10 +24,11 @@ const val EXTRA_LOGOUT = "chat_logout"
 class SettingsActivity : BaseChatActivity() {
     private val permissionsHelper = PermissionsHelper(this)
     var currentUser: ConnectycubeUser? = null
+
     private val userDetailsViewModel: UserDetailsViewModel by viewModels {
         InjectorUtils.provideUserViewModelFactory(
             this.application,
-            ConnectycubeChatService.getInstance().user.id
+            SharedPreferencesManager.getInstance(this).getCurrentUser().id
         )
     }
 
@@ -62,11 +62,7 @@ class SettingsActivity : BaseChatActivity() {
                     }
                 }
                 Status.LOADING -> {
-                    showProgress(progressbar)
-                    if (resource.progress != null) {
-                        if (progressbar.isIndeterminate) progressbar.isIndeterminate = false
-                        progressbar.progress = resource.progress
-                    } else if (!progressbar.isIndeterminate) progressbar.isIndeterminate = true
+                    showProgressValueIfNotNull(progressbar, resource.progress)
                 }
                 Status.ERROR -> {
                     hideProgress(progressbar)

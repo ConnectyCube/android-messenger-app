@@ -10,14 +10,14 @@ import com.connectycube.messenger.data.UserRepository
 import com.connectycube.messenger.vo.Resource
 import com.connectycube.users.model.ConnectycubeUser
 
-class SelectUsersViewModel internal constructor(
+open class SelectUsersViewModel internal constructor(
     applicationContext: Application,
     private val usersRepository: UserRepository
 ) : AndroidViewModel(applicationContext) {
 
     internal var liveSelectedUsers = MutableLiveData<ArrayList<ConnectycubeUser>>()
 
-    fun getUsers(filterUsers: List<Int>): LiveData<Resource<List<ConnectycubeUser>>> {
+    open fun getUsers(filterUsers: List<Int>): LiveData<Resource<List<ConnectycubeUser>>> {
         val result = MediatorLiveData<Resource<List<ConnectycubeUser>>>()
         result.value = Resource.loading(null)
 

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    <LinearLayout
+            android:id="@+id/layout_call"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_normal"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingLeft="64dp"
+            android:paddingRight="64dp"
+            app:layout_constraintBottom_toTopOf="@+id/call_hang_up"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+        <include layout="@layout/outgoing_view" />
+
+        <Chronometer
+                android:id="@+id/chronometer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="@dimen/margin_normal"
+                android:textColor="@color/dark_grey"
+                android:textSize="16sp"
+                android:visibility="invisible"
+                tools:visibility="visible"/>
+
+        <TextView
+                android:id="@+id/text_on_call"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="48dp"
+                android:text="@string/incoming_audio_call_opponents"
+                android:textColor="@color/dark_grey"
+                android:textSize="16sp" />
+
+        <TextView
+                android:id="@+id/text_other_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center"
+                android:textColor="@color/dark"
+                android:textSize="16sp"
+                tools:text="Amanda, Brad, Celesta" />
+
+    </LinearLayout>
+
+
+    <include
+            android:id="@+id/call_hang_up"
+            layout="@layout/call_hang_up"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/margin_big"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

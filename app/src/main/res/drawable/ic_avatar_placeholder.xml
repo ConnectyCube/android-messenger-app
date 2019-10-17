@@ -1,19 +1,14 @@
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="120dp"
-    android:height="120dp"
-    android:viewportWidth="120"
-    android:viewportHeight="120">
-
-    <path
-        android:fillColor="#E1E1E1"
-        android:pathData="m119.967,60a59.967,59.967 0,0 1,-59.715 59.967,59.967 59.967,0 0,1 -60.217,-59.462 59.967,59.967 0,0 1,59.208 -60.467,59.967 59.967,0 0,1 60.715,58.954"
-        android:strokeWidth="0.06547602"
-        android:strokeLineCap="round"
-        android:strokeLineJoin="miter" />
-    <path
-        android:fillColor="#fff"
-        android:pathData="m59.653,18.575a27.466,27.466 92.791,0 0,-27.118 27.694,27.466 27.466,92.791 0,0 11.047,21.759 37.469,37.469 85.723,0 0,-21.051 33.945,37.469 37.469,85.723 0,0 0.439,5.116 59.967,59.967 94.01,0 0,2.951 2.223,34.971 34.971,92.849 0,1 -0.891,-7.361 34.971,34.971 92.849,0 1,20.987 -32.307,27.466 27.466,92.791 0,0 14.098,3.858 27.466,27.466 92.791,0 0,13.872 -3.862,34.971 34.971,92.849 0,1 20.979,31.429l0.005,0.588a34.971,34.971 92.849,0 1,-0.858 7.578,59.967 59.967,94.01 0,0 2.922,-2.089 37.469,37.469 85.723,0 0,0.434 -5.489l-0.005,-0.63a37.469,37.469 85.723,0 0,-21.011 -33.032,27.466 27.466,92.791 0,1 -0.069,0.047 27.466,27.466 92.791,0 0,11.081 -22.004l-0.004,-0.463A27.466,27.466 92.791,0 0,59.653 18.575ZM59.685,21.071A24.969,24.969 94.736,0 1,84.965 45.618l0.004,0.42a24.969,24.969 94.736,0 1,-24.864 24.969,24.969 24.969,94.736 0,1 -25.073,-24.759 24.969,24.969 94.736,0 1,24.653 -25.177z"
-        android:strokeWidth="0.25984651"
-        android:strokeLineCap="round"
-        android:strokeLineJoin="miter" />
-</vector>
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="#E1E1E1"/>
+        </shape>
+    </item>
+    <item
+        android:drawable="@drawable/ic_account"
+        android:bottom="2dp"
+        android:left="2dp"
+        android:right="2dp"
+        android:top="2dp" />
+</layer-list>

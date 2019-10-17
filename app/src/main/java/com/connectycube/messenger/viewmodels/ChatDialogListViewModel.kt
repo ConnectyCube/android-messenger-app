@@ -13,7 +13,6 @@ import kotlinx.coroutines.launch
 class ChatDialogListViewModel internal constructor(val chatRepository: ChatRepository) :
     ViewModel() {
     var chatLiveData = MutableLiveData<Resource<List<Chat>>>()
-    val chatMediatorLiveData = MediatorLiveData<Resource<List<Chat>>>()
 
     val chatLiveDataLazy by lazy {
         return@lazy getChatDialogs()
@@ -28,11 +27,7 @@ class ChatDialogListViewModel internal constructor(val chatRepository: ChatRepos
     }
 
     private fun getChats(): LiveData<Resource<List<Chat>>> {
-        val chatListLiveData = chatRepository.loadChats()
-        chatMediatorLiveData.addSource(chatListLiveData) { data ->
-            chatMediatorLiveData.value = data
-        }
-        return chatMediatorLiveData
+        return chatRepository.loadChats()
     }
 
     fun getChatDialogs(): LiveData<Resource<List<ConnectycubeChatDialog>>>{
@@ -47,9 +42,7 @@ class ChatDialogListViewModel internal constructor(val chatRepository: ChatRepos
     }
 
     fun updateChat(dialogId: String) {
-        chatMediatorLiveData.addSource(chatRepository.update(dialogId)) { data ->
-            chatMediatorLiveData.value = data
-        }
+        chatRepository.updateChat(dialogId)
     }
 
     fun deleteChat(chatDialog: ConnectycubeChatDialog): LiveData<Resource<List<ConnectycubeChatDialog>>>{

@@ -37,12 +37,12 @@ object InjectorUtils {
 
     fun provideChatMessageListViewModelFactory(
         application: Application,
-        chat: ConnectycubeChatDialog
+        dialogId: String
     ): ChatMessageListViewModelFactory {
         val chatMessageRepository = getChatMessageRepository(application.baseContext)
         val userRepository = getUserRepository(application.baseContext)
         val chatRepository = getChatRepository(application.baseContext)
-        return ChatMessageListViewModelFactory(application, chatMessageRepository, userRepository, chatRepository, chat)
+        return ChatMessageListViewModelFactory(application, chatMessageRepository, userRepository, chatRepository, dialogId)
     }
 
     private fun getChatMessageRepository(context: Context): ChatMessageRepository {
@@ -72,6 +72,11 @@ object InjectorUtils {
         return SelectUsersViewModelFactory(application, usersRepository)
     }
 
+    fun provideSelectFromExistUsersViewModelFactory(application: Application): SelectFromExistUsersViewModelFactory {
+        val usersRepository = getUserRepository(application.baseContext)
+        return SelectFromExistUsersViewModelFactory(application, usersRepository)
+    }
+
     fun provideChatDialogDetailsViewModelFactory(
         application: Application,
         dialogId: String
@@ -97,5 +102,21 @@ object InjectorUtils {
     fun provideCreateDialogDetailsViewModelFactory(application: Application): CreateDialogDetailsViewModelFactory {
         val repository = getAvatarRepositoryViewRepository()
         return CreateDialogDetailsViewModelFactory(application, repository)
+    }
+
+    fun provideCallViewModelFactory(application: Application): CallViewModelFactory {
+        val userRepository = getUserRepository(application)
+        return CallViewModelFactory(application, userRepository)
+    }
+
+    private fun getMessageSenderViewRepository(context: Context): MessageSenderRepository {
+        return MessageSenderRepository.getInstance(AppDatabase.getInstance(context.applicationContext).messageDao())
+    }
+
+    fun provideMessageSenderViewModelFactory(application: Application,
+                                             dialog: ConnectycubeChatDialog
+    ):  MessageSenderViewModelFactory {
+        val repository = getMessageSenderViewRepository(application)
+        return MessageSenderViewModelFactory(application, dialog, repository)
     }
 }

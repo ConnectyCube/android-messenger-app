@@ -19,21 +19,37 @@
         tools:src="@drawable/ic_avatar_placeholder" />
 
     <TextView
+        android:id="@+id/role_txt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:background="@drawable/green_rounded_bg"
+        android:gravity="center"
+        android:padding="2dp"
+        android:textColor="@color/colorPrimary"
+        android:textSize="10sp"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="@+id/name_text_viw"
+        app:layout_constraintStart_toEndOf="@+id/avatar_image_view"
+        app:layout_constraintTop_toTopOf="@+id/name_text_viw"
+        app:layout_goneMarginStart="8dp"
+        tools:text="Admin" />
+
+    <TextView
         android:id="@+id/name_text_viw"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
         android:ellipsize="end"
         android:maxLines="1"
-        android:paddingStart="8dp"
-        android:paddingLeft="8dp"
-        android:paddingEnd="4dp"
-        android:paddingRight="4dp"
         android:textColor="#454545"
         android:textSize="16sp"
         android:textStyle="bold"
-        app:layout_constraintEnd_toStartOf="@+id/role_txt"
+        app:layout_constraintEnd_toStartOf="@+id/context_menu_img"
         app:layout_constraintHorizontal_bias="0.01"
-        app:layout_constraintStart_toEndOf="@+id/avatar_image_view"
+        app:layout_constraintStart_toEndOf="@+id/role_txt"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Bramanta Rio" />
 
@@ -41,43 +57,43 @@
         android:id="@+id/last_activity_title_txt"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:paddingStart="8dp"
-        android:paddingLeft="8dp"
-        android:paddingEnd="4dp"
-        android:paddingRight="4dp"
         android:text="@string/last_activity"
         android:textColor="#909090"
         android:textSize="14sp"
         app:layout_constraintHorizontal_bias="0.01"
-        app:layout_constraintStart_toStartOf="@+id/name_text_viw"
-        app:layout_constraintTop_toBottomOf="@+id/name_text_viw" />
+        app:layout_constraintStart_toStartOf="@+id/role_txt"
+        app:layout_constraintTop_toBottomOf="@+id/name_text_viw"
+        app:layout_goneMarginStart="8dp" />
 
     <TextView
         android:id="@+id/last_activity_text_view"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginLeft="4dp"
         android:ellipsize="end"
         android:maxLines="1"
         android:textColor="#909090"
         android:textSize="14sp"
-        app:layout_constraintEnd_toStartOf="@+id/role_txt"
+        app:layout_constraintEnd_toStartOf="@+id/context_menu_img"
         app:layout_constraintHorizontal_bias="0.01"
         app:layout_constraintStart_toEndOf="@+id/last_activity_title_txt"
         app:layout_constraintTop_toTopOf="@+id/last_activity_title_txt"
         tools:text="Yesterday at 19:20 PM" />
 
 
-    <TextView
-        android:id="@+id/role_txt"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/green_rounded_bg"
-        android:gravity="center"
-        android:padding="4dp"
-        android:textColor="@color/colorPrimary"
-        android:textSize="12sp"
+    <androidx.appcompat.widget.AppCompatImageButton
+        android:id="@+id/context_menu_img"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:background="?selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_dots_vertical"
+        android:tint="@color/dark_grey"
+        android:alpha="0.7"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="Administrator" />
+        tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

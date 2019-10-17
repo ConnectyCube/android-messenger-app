@@ -35,10 +35,15 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 ext {
-    sdkVersion = '1.8.0'
+    sdkVersion = '1.8.1'
     roomVersion = '2.2.0-beta01'
     lifecycleVersion = '2.2.0-alpha02'
     workVersion = '2.1.0'
@@ -56,11 +61,18 @@ dependencies { configuration ->
 
     implementation "com.google.android.material:material:$materialVersion"
     implementation 'com.jakewharton.timber:timber:4.7.1'
+
+    implementation "com.google.android.gms:play-services-gcm:17.0.0"
+    implementation "com.google.firebase:firebase-messaging:20.0.0"
+    implementation "com.google.firebase:firebase-core:17.2.0"
+    implementation "com.timehop.stickyheadersrecyclerview:library:0.4.3"
 }
 
 private static void connectycubeComponents(configuration, version) {
     configuration.implementation "com.connectycube:connectycube-android-sdk-chat:$version"
     configuration.implementation "com.connectycube:connectycube-android-sdk-storage:$version"
+    configuration.implementation "com.connectycube:connectycube-android-sdk-videochat:$version"
+    configuration.implementation "com.connectycube:connectycube-android-sdk-pushnotifications:$version"
 }
 
 private static void androidJetPackComponents(configuration, roomVersion, lifecycleVersion,
@@ -89,8 +101,10 @@ private static void kotlinComponents(configuration, kotlin_version) {
 }
 
 private static void externalMediaComponents(configuration) {
-    configuration.implementation "com.zhihu.android:matisse:0.5.1-beta1"
-    configuration.implementation 'com.github.yalantis:ucrop:2.2.3'
+    configuration.implementation "com.zhihu.android:matisse:0.5.3-beta1"
+    configuration.implementation 'com.github.yalantis:ucrop:2.2.4'
     configuration.implementation "com.github.bumptech.glide:glide:4.9.0"
     configuration.implementation 'com.github.chrisbanes:PhotoView:2.1.4'
 }
+
+//apply plugin: 'com.google.gms.google-services'

@@ -11,11 +11,14 @@ import com.connectycube.core.helper.StringifyArrayList
 import com.connectycube.chat.model.ConnectycubeChatMessage
 import com.connectycube.chat.request.MessageGetBuilder
 import com.connectycube.core.request.RequestGetBuilder
+import com.connectycube.messenger.api.utils.PerformerTask.uploadDialogPhotoTask
 import com.connectycube.messenger.api.utils.PerformerTask.uploadUserAvatarTask
 import com.connectycube.messenger.data.Chat
 import com.connectycube.messenger.data.Message
 import com.connectycube.messenger.data.User
 import com.connectycube.messenger.utilities.*
+import com.connectycube.pushnotifications.ConnectycubePushNotifications
+import com.connectycube.pushnotifications.model.ConnectycubeEvent
 import com.connectycube.storage.ConnectycubeStorage
 import com.connectycube.storage.model.ConnectycubeFile
 import com.connectycube.users.ConnectycubeUsers
@@ -62,6 +65,18 @@ class ConnectycubeService {
             })
     }
 
+    fun updateChatSync(dialogId: String, callback: ResponsePerformer.Callback<Chat>) {
+        InjectorUtils.provideSyncConnectycubeServiceForType<ConnectycubeChatDialog, Chat>()
+            .perform(
+                ConnectycubeRestChatService.getChatDialogById(dialogId),
+                object : Converter<Chat, ConnectycubeChatDialog>() {
+                    override fun convertTo(response: ConnectycubeChatDialog): Chat {
+                        return convertToChat(response)
+                    }
+                }, callback
+            )
+    }
+
     fun loadChatsSlice(): LiveData<ApiResponse<List<Chat>>> {
         val requestGetBuilder = RequestGetBuilder().apply { limit = 10 }
         return InjectorUtils.provideConnectycubeServiceForType<ArrayList<ConnectycubeChatDialog>, List<Chat>>()
@@ -97,14 +112,7 @@ class ConnectycubeService {
                 ConnectycubeRestChatService.createChatDialog(chatDialog),
                 object : Converter<Chat, ConnectycubeChatDialog>() {
                     override fun convertTo(response: ConnectycubeChatDialog): Chat {
-                        return Chat(
-                            response.dialogId,
-                            response.lastMessageDateSent,
-                            response.createdAt.time,
-                            response.unreadMessageCount ?: 0,
-                            response.name,
-                            response
-                        )
+                        return convertToChat(response)
                     }
                 })
     }
@@ -177,6 +185,24 @@ class ConnectycubeService {
         chatDialog.photo = newGroupPhotoUrl
 
         return updateChatDialog(chatDialog)
+    }
+
+    fun updateDialogPhoto(dialogId: String,
+                          newGroupPhotoUrl: String,
+                          callback: ResponsePerformer.Callback<Chat>
+    ) {
+        val file = File(newGroupPhotoUrl)
+        val service =
+            InjectorUtils.provideSyncConnectycubeServiceForType<ConnectycubeChatDialog, Chat>()
+        service.performProgress(
+            uploadDialogPhotoTask(dialogId, file, true)
+            {service.progressCallBack?.onProgressUpdate(it)},
+            object : Converter<Chat, ConnectycubeChatDialog>() {
+                override fun convertTo(response: ConnectycubeChatDialog): Chat {
+                    return convertToChat(response)
+                }
+            }, callback
+        )
     }
 
     fun addDialogOccupants(dialogId: String, vararg usersIds: Int): LiveData<ApiResponse<Chat>> {
@@ -260,14 +286,7 @@ class ConnectycubeService {
                 ConnectycubeRestChatService.updateChatDialog(chatDialog, requestBuilder),
                 object : Converter<Chat, ConnectycubeChatDialog>() {
                     override fun convertTo(response: ConnectycubeChatDialog): Chat {
-                        return Chat(
-                            response.dialogId,
-                            response.lastMessageDateSent,
-                            response.createdAt.time,
-                            response.unreadMessageCount ?: 0,
-                            response.name,
-                            response
-                        )
+                        return convertToChat(response)
                     }
                 })
     }
@@ -281,14 +300,7 @@ class ConnectycubeService {
             .perform(ConnectycubeRestChatService.updateChatDialog(chatDialog, requestBuilder),
                 object : Converter<Chat, ConnectycubeChatDialog>() {
                     override fun convertTo(response: ConnectycubeChatDialog): Chat {
-                        return Chat(
-                            response.dialogId,
-                            response.lastMessageDateSent,
-                            response.createdAt.time,
-                            response.unreadMessageCount ?: 0,
-                            response.name,
-                            response
-                        )
+                        return convertToChat(response)
                     }
                 }, callback
             )
@@ -308,5 +320,10 @@ class ConnectycubeService {
                     return response.publicUrl
                 }
             })
+    }
+
+    fun createPushEvent(event: ConnectycubeEvent, callback: ResponsePerformer.Callback<ConnectycubeEvent>?) {
+        InjectorUtils.provideSyncConnectycubeServiceForType<ConnectycubeEvent, ConnectycubeEvent>()
+            .perform(ConnectycubePushNotifications.createEvent(event), callback)
     }
 }

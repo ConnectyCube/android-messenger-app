@@ -35,7 +35,7 @@
                 tools:ignore="ContentDescription"
                 tools:src="@drawable/ic_launcher_background" />
 
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageButton
                 android:id="@+id/edit_avatar_btn"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
@@ -43,7 +43,10 @@
                 android:layout_alignRight="@id/avatar_img"
                 android:layout_alignBottom="@id/avatar_img"
                 android:background="?actionBarItemBackground"
+                android:scaleType="centerCrop"
                 android:src="@drawable/btn_edit_photo"
+                android:foregroundTint="@color/white"
+                android:tooltipText="@string/change_group_avatar"
                 tools:ignore="ContentDescription" />
 
             <TextView
@@ -81,6 +84,7 @@
                 android:background="?actionBarItemBackground"
                 android:src="@drawable/ic_edit"
                 android:tint="@color/white"
+                android:tooltipText="@string/change_group_name"
                 tools:ignore="ContentDescription" />
 
         </RelativeLayout>
@@ -125,7 +129,7 @@
                         android:layout_height="wrap_content"
                         android:layout_alignParentStart="true"
                         android:layout_alignParentLeft="true"
-                        android:text="@string/description"
+                        android:text="@string/group_description"
                         android:textColor="@color/colorPrimary"
                         android:textSize="16sp"
                         tools:ignore="RelativeOverlap" />
@@ -135,9 +139,9 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_below="@id/description_title_txt"
-                        android:text="@string/description"
+                        android:text="@string/group_description"
                         android:textSize="16sp"
-                        tools:text="@string/description" />
+                        tools:text="@string/group_description" />
 
                     <androidx.appcompat.widget.AppCompatImageButton
                         android:id="@+id/edit_grop_description_btn"
@@ -148,6 +152,7 @@
                         android:background="?selectableItemBackgroundBorderless"
                         android:src="@drawable/ic_edit"
                         android:tint="@color/colorPrimary"
+                        android:tooltipText="@string/change_group_description"
                         android:visibility="visible"
                         tools:visibility="visible" />
                 </RelativeLayout>
@@ -197,11 +202,12 @@
                             android:id="@+id/remove_occupants_img"
                             android:layout_width="24dp"
                             android:layout_height="24dp"
-                            android:layout_marginEnd="8dp"
-                            android:layout_marginRight="8dp"
+                            android:layout_marginEnd="16dp"
+                            android:layout_marginRight="16dp"
                             android:background="?selectableItemBackgroundBorderless"
                             android:src="@drawable/ic_remove_occupants"
                             android:tint="@color/colorAccent"
+                            android:tooltipText="@string/remove_occupants"
                             android:visibility="gone"
                             tools:visibility="visible" />
 
@@ -212,6 +218,7 @@
                             android:background="?selectableItemBackgroundBorderless"
                             android:src="@drawable/ic_add_occupants"
                             android:tint="@color/colorPrimary"
+                            android:tooltipText="@string/add_occupants"
                             android:visibility="visible"
                             tools:visibility="visible" />
                     </LinearLayout>

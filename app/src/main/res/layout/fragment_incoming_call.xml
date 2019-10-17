@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+    <LinearLayout
+            android:id="@+id/layout_call"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="?attr/actionBarSize"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingLeft="64dp"
+            android:paddingRight="64dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.15">
+
+        <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/image_avatar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_avatar_placeholder" />
+
+        <TextView
+                android:id="@+id/text_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:maxLines="1"
+                android:paddingTop="20dp"
+                android:textColor="@color/dark"
+                android:textSize="22sp"
+                tools:text="Opponent's Name" />
+
+        <TextView
+                android:id="@+id/text_call_type"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textColor="@color/dark_grey"
+                android:textSize="16sp"
+                tools:text="@string/incoming_audio_call_title" />
+
+        <TextView
+                android:id="@+id/text_on_call"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="48dp"
+                android:text="@string/incoming_audio_call_opponents"
+                android:textColor="@color/dark_grey"
+                android:textSize="16sp"
+                android:visibility="invisible"
+                tools:visibility="visible" />
+
+        <TextView
+                android:id="@+id/text_other_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center"
+                android:textColor="@color/dark"
+                android:textSize="16sp"
+                tools:text="Amanda, Brad, Celesta" />
+
+    </LinearLayout>
+
+    <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/button_reject_call"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginBottom="@dimen/margin_big"
+            android:background="@drawable/selector_call_finish"
+            android:padding="16dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_call_end_black_24dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/button_accept_call"
+            app:layout_constraintStart_toStartOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/button_accept_call"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginBottom="@dimen/margin_big"
+            android:background="@drawable/selector_call_start"
+            android:padding="16dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_phone_white_24dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/button_reject_call" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

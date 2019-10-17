@@ -57,7 +57,7 @@ internal class ChatDialogAdapter(private val context: Context) :
         previousList: List<ConnectycubeChatDialog>,
         currentList: List<ConnectycubeChatDialog>
     ) {
-        callback!!.onChatDialogsListUpdated(currentList)
+        callback?.onChatDialogsListUpdated(currentList)
     }
 
     internal class ChatDialogViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView),
@@ -160,6 +160,7 @@ internal class ChatDialogAdapter(private val context: Context) :
                     && oldItem.lastMessage == newItem.lastMessage
                     && oldItem.unreadMessageCount == newItem.unreadMessageCount
                     && oldItem.name == newItem.name
+                    && oldItem.updatedAt == newItem.updatedAt
         }
     }
 
