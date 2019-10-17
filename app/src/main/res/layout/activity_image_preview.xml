@@ -8,13 +8,14 @@
         android:background="#000"
         tools:ignore="RtlHardcoded,RtlSymmetry">
 
-    <com.github.chrisbanes.photoview.PhotoView
+    <com.connectycube.messenger.utilities.CircleRectPhotoView
             android:id="@+id/image_view"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_gravity="center"
             android:adjustViewBounds="true"
             app:layout_constraintBottom_toTopOf="parent"
+            android:transitionName="img_full_screen"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

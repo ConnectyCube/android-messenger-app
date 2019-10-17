@@ -27,7 +27,6 @@ import com.connectycube.chat.model.ConnectycubeChatMessage
 import com.connectycube.chat.model.ConnectycubeDialogType
 import com.connectycube.core.EntityCallback
 import com.connectycube.core.exception.ResponseException
-import com.connectycube.messenger.adapters.AttachmentClickListener
 import com.connectycube.messenger.adapters.ChatMessageAdapter
 import com.connectycube.messenger.events.EVENT_CHAT_LOGIN
 import com.connectycube.messenger.events.EventChatConnection
@@ -54,9 +53,8 @@ const val EXTRA_CHAT_ID = "chat_id"
 
 const val REQUEST_CODE_DETAILS = 55
 
-class ChatMessageActivity : BaseChatActivity() {
+class ChatMessageActivity : BaseChatActivity(), ChatMessageAdapter.ImageAttachClickListener {
 
-    private val attachmentClickListener: AttachmentClickListener = this::onMessageAttachmentClicked
     private val messageListener: ChatDialogMessageListener = ChatMessageListener()
     private val messageStatusListener: MessageStatusListener = ChatMessagesStatusListener()
     private val messageSentListener: ChatDialogMessageSentListener = ChatMessagesSentListener()
@@ -305,7 +303,7 @@ class ChatMessageActivity : BaseChatActivity() {
     }
 
     private fun initChatAdapter() {
-        chatAdapter = ChatMessageAdapter(this, chatDialog, attachmentClickListener)
+        chatAdapter = ChatMessageAdapter(this, chatDialog, this)
         scroll_fb.setOnClickListener { scrollDown() }
         val layoutManager = LinearLayoutManager(this)
         layoutManager.stackFromEnd = false
@@ -435,16 +433,13 @@ class ChatMessageActivity : BaseChatActivity() {
         if (text.isNotEmpty()) sendChatMessage(text)
     }
 
-    private fun onMessageAttachmentClicked(attach: ConnectycubeAttachment) {
-        Timber.d("message attachment= $attach")
-        startAttachmentPreview(attach)
+    override fun onImageAttachClicked(connectycubeAttachment: ConnectycubeAttachment,
+                                      attachImageContainer: View) {
+        startAttachmentPreview(connectycubeAttachment, attachImageContainer)
     }
 
-    private fun startAttachmentPreview(attach: ConnectycubeAttachment) {
-        val intent = Intent(this, AttachmentPreviewActivity::class.java)
-        intent.putExtra(EXTRA_URL, attach.url)
-        startActivity(intent)
-        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+    private fun startAttachmentPreview(attach: ConnectycubeAttachment, view: View) {
+        startImagePreview(this, attach.url, getText(R.string.attachment_preview_label), view)
     }
 
     private fun sendChatMessage(text: String) {
@@ -523,7 +518,7 @@ class ChatMessageActivity : BaseChatActivity() {
         val intent = Intent(this, ChatDialogDetailsActivity::class.java)
         intent.putExtra(EXTRA_CHAT_DIALOG_ID, chatDialog.dialogId)
         startActivityForResult(intent, REQUEST_CODE_DETAILS)
-        overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_top)
+        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
     }
 
     override fun onRequestPermissionsResult(

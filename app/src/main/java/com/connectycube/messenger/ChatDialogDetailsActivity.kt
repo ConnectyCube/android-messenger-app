@@ -4,6 +4,8 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.ImageView
+import android.widget.ImageView.ScaleType.CENTER_CROP
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.lifecycle.Observer
@@ -161,6 +163,9 @@ class ChatDialogDetailsActivity : BaseChatActivity(),
         chat_dialog_name_txt.text = chatDialog.name
         remove_occupants_img.visibility = if (isUserAdmin(getCurrentUser()) || isUserCreator(getCurrentUser())) View.VISIBLE else View.GONE
         loadChatDialogPhoto(this, chatDialog.isPrivate, chatDialog.photo, avatar_img)
+        if (!chatDialog.photo.isNullOrEmpty()){
+            avatar_img.setOnClickListener { startAvatarPreview(chatDialog.photo) }
+        }
     }
 
     private fun addOccupants() {
@@ -287,6 +292,10 @@ class ChatDialogDetailsActivity : BaseChatActivity(),
         )
     }
 
+    private fun startAvatarPreview(url: String) {
+        startImagePreview(this, url, null, avatar_img)
+    }
+
     override fun onAddUserToAdmins(userId: Int) {
         chatDialogDetailsViewModel.addUserToAdmins(currentChatDialog.dialogId, userId)
     }
@@ -322,6 +331,6 @@ class ChatDialogDetailsActivity : BaseChatActivity(),
 
     override fun finish() {
         super.finish()
-        overridePendingTransition(0, R.anim.slide_out_bottom)
+        overridePendingTransition(0, R.anim.slide_out_right)
     }
 }

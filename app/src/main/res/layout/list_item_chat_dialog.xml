@@ -18,6 +18,16 @@
         tools:ignore="ContentDescription"
         tools:src="@drawable/ic_avatar_placeholder" />
 
+    <ImageView
+        android:id="@+id/group_chat_indicator_img"
+        android:layout_width="18dp"
+        android:layout_height="18dp"
+        android:src="@drawable/ic_group_indicator"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/avatar_image_view"
+        app:layout_constraintEnd_toEndOf="@+id/avatar_image_view"
+        tools:visibility="visible" />
+
     <TextView
         android:id="@+id/name_text_viw"
         android:layout_width="0dp"

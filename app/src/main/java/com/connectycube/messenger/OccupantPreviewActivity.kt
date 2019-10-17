@@ -29,6 +29,9 @@ class OccupantPreviewActivity : BaseChatActivity() {
         val user: ConnectycubeUser = intent.getSerializableExtra(EXTRA_USER) as ConnectycubeUser
         user_name_txt.text = user.fullName ?: user.login
         loadUserAvatar(this, user, avatar_img)
+        if (!user.avatar.isNullOrEmpty()){
+            avatar_img.setOnClickListener { startImagePreview(this, user.avatar, user_name_txt.text, it) }
+        }
 
         val currentUser = SharedPreferencesManager.getInstance(this).getCurrentUser()
         val isCurrentUser = currentUser.id != null && user.id == currentUser.id

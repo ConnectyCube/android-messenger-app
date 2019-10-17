@@ -70,6 +70,7 @@ internal class ChatDialogAdapter(private val context: Context) :
         private val txtLastMessage: TextView = itemView.findViewById(R.id.last_message_text_view)
         private val txtUnreadMessagesCount: TextView = itemView.findViewById(R.id.unread_message_count_text_view)
         private val txtLastMessageDate: TextView = itemView.findViewById(R.id.last_masage_date_text_view)
+        private val imgGroupIndicator: View = itemView.findViewById(R.id.group_chat_indicator_img)
 
         fun bind(activityContext: Context, chatDialog: ConnectycubeChatDialog, callback: ChatDialogViewHolderCallback) {
             this.model = chatDialog
@@ -95,6 +96,11 @@ internal class ChatDialogAdapter(private val context: Context) :
                 txtUnreadMessagesCount.visibility = View.GONE
                 setTextColor(activityContext, txtLastMessageDate, R.color.dark_grey)
             }
+
+            imgGroupIndicator.visibility =
+                if (chatDialog.type == ConnectycubeDialogType.GROUP
+                    && !chatDialog.photo.isNullOrEmpty()) View.VISIBLE
+                else View.GONE
 
             itemView.setOnClickListener { notifyItemSelected() }
             itemView.setOnCreateContextMenuListener(this)

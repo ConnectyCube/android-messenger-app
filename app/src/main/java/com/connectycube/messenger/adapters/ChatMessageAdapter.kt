@@ -27,13 +27,12 @@ import com.timehop.stickyheadersrecyclerview.StickyRecyclerHeadersAdapter
 import timber.log.Timber
 
 
-typealias AttachmentClickListener = (ConnectycubeAttachment) -> Unit
 private typealias PAYLOAD_PROGRESS = ChatMessageAdapter.ProgressMessage
 
 class ChatMessageAdapter(
     val context: Context,
     var chatDialog: ConnectycubeChatDialog,
-    private val attachmentClickListener: AttachmentClickListener
+    private val attachmentClickListener: ImageAttachClickListener
 ) : PagedListAdapter<ConnectycubeChatMessage, RecyclerView.ViewHolder>(diffCallback),
     StickyRecyclerHeadersAdapter<RecyclerView.ViewHolder> {
 
@@ -119,7 +118,7 @@ class ChatMessageAdapter(
                 position
             )
             ATTACH_IMAGE_OUTCOMING -> onBindAttachViewHolderOutComing(
-                holder as BaseChatMessageViewHolder,
+                holder as ChatImageAttachOutcomingViewHolder,
                 position
             )
             ATTACH_IMAGE_INCOMING -> onBindAttachViewHolderInComing(
@@ -150,7 +149,7 @@ class ChatMessageAdapter(
         }
     }
 
-    fun onBindAttachViewHolderOutComing(holder: BaseChatMessageViewHolder,
+    fun onBindAttachViewHolderOutComing(holder: ChatImageAttachOutcomingViewHolder,
                                         position: Int
     ) {
         val message = getItem(position)
@@ -159,7 +158,7 @@ class ChatMessageAdapter(
                 bindTo(it)
                 message.let {
                     itemView.setOnClickListener {
-                        attachmentClickListener(message.attachments.first())
+                        attachmentClickListener.onImageAttachClicked(message.attachments.first(), holder.attachmentView)
                     }
                 }
             }
@@ -172,7 +171,7 @@ class ChatMessageAdapter(
             with(holder) {
                 bindTo(it, showAvatar(position, message), showName(position, message))
                 itemView.setOnClickListener {
-                    attachmentClickListener(message.attachments.first())
+                    attachmentClickListener.onImageAttachClicked(message.attachments.first(), holder.attachmentView)
                 }
             }
         }
@@ -476,7 +475,7 @@ class ChatMessageAdapter(
         BaseChatMessageViewHolder(
             LayoutInflater.from(parent.context).inflate(chatItem, parent, false)
         ) {
-        private val attachmentView: ImageView = itemView.findViewById(R.id.attachment_image_view)
+        val attachmentView: ImageView = itemView.findViewById(R.id.attachment_image_view)
 
         override fun bindTo(message: ConnectycubeChatMessage) {
             super.bindTo(message)
@@ -534,4 +533,8 @@ class ChatMessageAdapter(
     }
 
     data class ProgressMessage(val progress: Int = 0)
+
+    interface ImageAttachClickListener {
+        fun onImageAttachClicked(connectycubeAttachment: ConnectycubeAttachment, attachImageContainer: View)
+    }
 }
