@@ -491,6 +491,7 @@ class ChatMessageAdapter(
                 if (attachment.height != 0 && attachment.width != 0) {
                     height = attachment.height
                     width = attachment.width
+                    Timber.d("height= $height, width= $width")
                 } else {
                     height = LinearLayout.LayoutParams.WRAP_CONTENT
                     width = LinearLayout.LayoutParams.WRAP_CONTENT

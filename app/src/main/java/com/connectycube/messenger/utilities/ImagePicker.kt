@@ -15,6 +15,11 @@ import com.zhihu.matisse.internal.entity.CaptureStrategy
 import com.zhihu.matisse.listener.OnCheckedListener
 import timber.log.Timber
 import java.io.File
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import java.io.FileInputStream
+import java.io.FileOutputStream
+
 
 const val REQUEST_CODE_CHOOSE = 23
 
@@ -80,4 +85,45 @@ fun getImageSize(path: String): Size {
     val width = exif.getAttributeInt(ExifInterface.TAG_IMAGE_WIDTH, 0)
     val height = exif.getAttributeInt(ExifInterface.TAG_IMAGE_LENGTH, 0)
     return Size(width, height)
+}
+
+fun compressImage(file: File): File {
+    try {
+
+        // BitmapFactory options to downsize the image
+        val o = BitmapFactory.Options()
+        o.inJustDecodeBounds = true
+        o.inSampleSize = 6
+        // factor of downsizing the image
+
+        var inputStream = FileInputStream(file)
+        BitmapFactory.decodeStream(inputStream, null, o)
+        inputStream.close()
+
+        // The new size we want to scale to
+        val REQUIRED_SIZE = 75
+
+        // Find the correct scale value. It should be the power of 2.
+        var scale = 1
+        while (o.outWidth / scale / 2 >= REQUIRED_SIZE && o.outHeight / scale / 2 >= REQUIRED_SIZE) {
+            scale *= 2
+        }
+
+        val o2 = BitmapFactory.Options()
+        o2.inSampleSize = scale
+        inputStream = FileInputStream(file)
+
+        val selectedBitmap = BitmapFactory.decodeStream(inputStream, null, o2)
+        inputStream.close()
+
+        //create new file instead of the original image file
+        val newFile = File(file.path, "tmp.png")
+        val outputStream = FileOutputStream(newFile)
+
+        selectedBitmap?.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
+
+        return newFile
+    } catch (e: Exception) {
+        return file
+    }
 }

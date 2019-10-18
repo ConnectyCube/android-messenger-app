@@ -7,11 +7,12 @@ import com.connectycube.chat.model.ConnectycubeChatDialog
 import com.connectycube.chat.model.ConnectycubeChatMessage
 import com.connectycube.messenger.data.MessageSenderRepository
 import com.connectycube.messenger.utilities.SingleLiveEvent
+import com.connectycube.messenger.utilities.image.compressFile
 import com.connectycube.messenger.vo.Resource
 import com.connectycube.messenger.vo.Status
 
 class MessageSenderViewModel internal constructor(
-    applicationContext: Application,
+    val applicationContext: Application,
     private val dialog: ConnectycubeChatDialog,
     private val messageSenderRepo: MessageSenderRepository
 ) :
@@ -21,7 +22,8 @@ class MessageSenderViewModel internal constructor(
     val liveMessageAttachmentSender = MediatorLiveData<Resource<ConnectycubeChatMessage>>()
 
     fun sendAttachment(path: String, type: String, text: String) {
-        val resource = messageSenderRepo.sendMessageAttachment(path, type, text, dialog)
+        val pathResized = compressFile(applicationContext, path)
+        val resource = messageSenderRepo.sendMessageAttachment(pathResized, type, text, dialog)
         liveMessageAttachmentSender.addSource(resource) { response ->
             liveMessageAttachmentSender.value = response
             when {
