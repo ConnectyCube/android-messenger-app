@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.annotation.LayoutRes
@@ -484,7 +485,17 @@ class ChatMessageAdapter(
         }
 
         private fun showImageAttachment(message: ConnectycubeChatMessage) {
-            val validUrl = getAttachImageUrl(message.attachments.iterator().next())
+            val attachment = message.attachments.iterator().next()
+            val validUrl = getAttachImageUrl(attachment)
+            attachmentView.layoutParams.apply {
+                if (attachment.height != 0 && attachment.width != 0) {
+                    height = attachment.height
+                    width = attachment.width
+                } else {
+                    height = LinearLayout.LayoutParams.WRAP_CONTENT
+                    width = LinearLayout.LayoutParams.WRAP_CONTENT
+                }
+            }
             loadAttachImage(validUrl, attachmentView, context)
         }
     }

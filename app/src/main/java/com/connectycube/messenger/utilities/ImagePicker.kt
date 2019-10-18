@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.net.Uri
 import android.widget.Toast
+import androidx.exifinterface.media.ExifInterface
 import com.connectycube.messenger.R
 import com.yalantis.ucrop.UCrop
 import com.zhihu.matisse.Matisse
@@ -72,4 +73,11 @@ fun handleCropError(ctx: Context, result: Intent) {
     } else {
         Timber.d("handleCropError: unexpected error")
     }
+}
+
+fun getImageSize(path: String): Size {
+    val exif = ExifInterface(path)
+    val width = exif.getAttributeInt(ExifInterface.TAG_IMAGE_WIDTH, 0)
+    val height = exif.getAttributeInt(ExifInterface.TAG_IMAGE_LENGTH, 0)
+    return Size(width, height)
 }

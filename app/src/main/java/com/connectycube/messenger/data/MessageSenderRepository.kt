@@ -63,7 +63,6 @@ class MessageSenderRepository private constructor(private val messageDao: Messag
         return result
     }
 
-    //    ToDo check if Attachment is deleted Cascade
     private fun deleteTempMessage(messageId: String, attachId: String? = null) {
         appExecutors.diskIO().execute {
             attachId?.let { attachmentDao.deleteById(attachId) }
