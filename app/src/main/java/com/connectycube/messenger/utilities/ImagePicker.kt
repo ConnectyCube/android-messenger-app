@@ -20,6 +20,7 @@ const val REQUEST_CODE_CHOOSE = 23
 fun requestImage(activity: Activity) {
     Matisse.from(activity)
         .choose(MimeType.ofImage(), false)
+        .showSingleMediaType(true)
         .countable(false)
         .capture(true)
         .captureStrategy(
