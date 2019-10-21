@@ -2,18 +2,28 @@ package com.connectycube.messenger.utilities.image
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.net.Uri
+import com.connectycube.messenger.R
+import timber.log.Timber
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
 
+const val TEMP_CROPPED_FILE_PREFIX = "croppedImage"
+const val TEMP_CROPPED_FILE_SUFFIX = ".jpg"
 
-fun compressFile(context: Context, path: String, desiredWidth: Int = 400, desiredHeight: Int = 800): String {
-    var strMyImagePath: String? = null
-    var scaledBitmap: Bitmap? = null
+fun compressFileIfNeed(context: Context, path: String,
+                       desiredWidth: Int = context.resources.getDimensionPixelSize(
+                           R.dimen.attach_image_width
+                       ),
+                       desiredHeight: Int = context.resources.getDimensionPixelSize(
+                           R.dimen.attach_image_height
+                       )
+): String {
+    var tempImagePath: String? = null
+    val scaledBitmap: Bitmap?
 
     try {
-        // Part 1: Decode image
+        // Decode image
         val unscaledBitmap =
             ScalingUtilities.decodeFile(
                 path,
@@ -22,8 +32,8 @@ fun compressFile(context: Context, path: String, desiredWidth: Int = 400, desire
                 ScalingUtilities.ScalingLogic.FIT
             )
 
-        if (!(unscaledBitmap.getWidth() <= desiredWidth && unscaledBitmap.height <= desiredHeight)) {
-            // Part 2: Scale image
+        if (!(unscaledBitmap.width <= desiredWidth && unscaledBitmap.height <= desiredHeight)) {
+            // Scale image
             scaledBitmap = ScalingUtilities.createScaledBitmap(
                 unscaledBitmap,
                 desiredWidth,
@@ -37,14 +47,16 @@ fun compressFile(context: Context, path: String, desiredWidth: Int = 400, desire
 
         // Store to tmp file
 
-        val destinationFileName = "decodedImage.jpg"
-        val destination = Uri.fromFile(File(context.cacheDir, destinationFileName))
-        val f = File(destination.path)
+        val tempFile = File.createTempFile(
+            TEMP_CROPPED_FILE_PREFIX,
+            TEMP_CROPPED_FILE_SUFFIX,
+            context.cacheDir
+        )
 
-        strMyImagePath = f.absolutePath
-        var fos: FileOutputStream? = null
+        tempImagePath = tempFile.absolutePath
+        val fos: FileOutputStream?
         try {
-            fos = FileOutputStream(f)
+            fos = FileOutputStream(tempFile)
             scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 75, fos)
             fos.flush()
             fos.close()
@@ -58,8 +70,24 @@ fun compressFile(context: Context, path: String, desiredWidth: Int = 400, desire
 
         scaledBitmap.recycle()
     } catch (e: Throwable) {
+        Timber.e("$e")
     }
 
-    return strMyImagePath ?: path
+    return tempImagePath ?: path
+}
+
+fun deleteImageCacheIfNeed(pathToDelete: String) {
+    val isTempFile = pathToDelete.contains(TEMP_CROPPED_FILE_PREFIX)
+    Timber.d("pathToDelete= $pathToDelete, will be deleted = $isTempFile")
+    if (!isTempFile) {
+        return
+    }
+    val doomedFile = File(pathToDelete)
+    try {
+        val result = doomedFile.delete()
+        Timber.d("deleteCache result= $result")
+    } catch (e: Exception) {
+        Timber.e("$e")
+    }
 
 }
