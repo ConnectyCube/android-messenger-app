@@ -8,6 +8,7 @@ import com.connectycube.chat.model.ConnectycubeChatMessage
 import com.connectycube.messenger.api.*
 import com.connectycube.messenger.utilities.convertToListAttachment
 import com.connectycube.messenger.utilities.convertToMessage
+import com.connectycube.messenger.utilities.getImageSize
 import com.connectycube.messenger.vo.AppExecutors
 import com.connectycube.messenger.vo.Resource
 import org.jivesoftware.smack.SmackException
@@ -25,7 +26,8 @@ class MessageSenderRepository private constructor(private val messageDao: Messag
                               dialog: ConnectycubeChatDialog
     ): LiveData<Resource<ConnectycubeChatMessage>> {
         val messageToTempSave = createMessage(dialog, text)
-        messageToTempSave.addAttachment(createAttachment(path, type))
+        val attachmentToTempSave = createAttachment(path, type)
+        messageToTempSave.addAttachment(attachmentToTempSave)
         saveMediatorResult(messageToTempSave)
 
         val result = MediatorLiveData<Resource<ConnectycubeChatMessage>>()
@@ -47,6 +49,7 @@ class MessageSenderRepository private constructor(private val messageDao: Messag
                 }
                 is ApiSuccessResponse -> {
                     val attachment = response.body
+                    updateAttachmentSize(attachmentToTempSave, attachment)
 
                     val messageUpdated = buildMessage(messageToTempSave, attachment, dialog)
                     result.removeSource(apiResponse)
@@ -122,9 +125,14 @@ class MessageSenderRepository private constructor(private val messageDao: Messag
     }
 
     private fun createAttachment(path: String, type: String): ConnectycubeAttachment {
+        val size = getImageSize(path)
+
         val attachment = ConnectycubeAttachment(type)
         attachment.id = path.hashCode().toString()
         attachment.url = path
+        attachment.height = size.height
+        attachment.width = size.width
+
         return attachment
     }
 
@@ -143,6 +151,13 @@ class MessageSenderRepository private constructor(private val messageDao: Messag
         chatMessage.dialogId = dialog.dialogId
         chatMessage.body = text
         return chatMessage
+    }
+
+    private fun updateAttachmentSize(attachmentToTempSave: ConnectycubeAttachment,
+                                     attachmentResult: ConnectycubeAttachment
+    ) {
+        attachmentResult.height = attachmentToTempSave.height
+        attachmentResult.width = attachmentToTempSave.width
     }
 
     private fun buildMessage(messageToTempSave: ConnectycubeChatMessage,
@@ -170,7 +185,11 @@ class MessageSenderRepository private constructor(private val messageDao: Messag
 
         fun getInstance(messageDao: MessageDao, attachmentDao: AttachmentDao) =
             instance ?: synchronized(this) {
-                instance ?: MessageSenderRepository(messageDao, attachmentDao, AppExecutors()).also {
+                instance ?: MessageSenderRepository(
+                    messageDao,
+                    attachmentDao,
+                    AppExecutors()
+                ).also {
                     instance = it
                 }
             }

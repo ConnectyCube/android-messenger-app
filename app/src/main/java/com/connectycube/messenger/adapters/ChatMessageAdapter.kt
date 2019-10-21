@@ -362,8 +362,15 @@ class ChatMessageAdapter(
             override fun areContentsTheSame(
                 oldItem: ConnectycubeChatMessage,
                 newItem: ConnectycubeChatMessage
-            ): Boolean =
-                oldItem.id == newItem.id && oldItem.readIds == newItem.readIds && oldItem.deliveredIds == newItem.deliveredIds
+            ): Boolean {
+                val resultMessage =
+                    oldItem.id == newItem.id && oldItem.readIds == newItem.readIds && oldItem.deliveredIds == newItem.deliveredIds
+                var resultAttachment = true
+                if (!(oldItem.attachments.isNullOrEmpty() && newItem.attachments.isNullOrEmpty())) {
+                    resultAttachment = oldItem.attachments?.first() == newItem.attachments?.first()
+                }
+                return resultMessage && resultAttachment
+            }
 
             override fun getChangePayload(oldItem: ConnectycubeChatMessage,
                                           newItem: ConnectycubeChatMessage
