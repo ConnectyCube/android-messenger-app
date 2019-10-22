@@ -34,10 +34,13 @@ class ChatRepository private constructor(private val chatDao: ChatDao, private v
 
                 override fun saveCallResult(item: Chat) {
                     val chat = chatDao.getChatSync(chatId)
-                    val shouldUpdate = chat != item
+                    val shouldUpdate = chat != null && chat != item
+                    val shouldInsert = chat == null
                     Timber.d("shouldUpdate= $shouldUpdate")
                     if (shouldUpdate) {
                         chatDao.update(item)
+                    } else if (shouldInsert) {
+                        chatDao.insert(item)
                     }
                 }
             }
@@ -193,7 +196,7 @@ class ChatRepository private constructor(private val chatDao: ChatDao, private v
     private fun getRequestProcessor(chatId: String, errorAction: Function2<String, Chat, Unit>): UpdateResourceProcessor<Chat> {
         return object : UpdateResourceProcessor<Chat>(appExecutors){
             override fun processError(errorMessage: String) {
-                errorAction.invoke(errorMessage, chatDao.getChatSync(chatId))
+                chatDao.getChatSync(chatId)?.let { errorAction.invoke(errorMessage, it) }
             }
 
             override fun saveCallResult(item: Chat) {
@@ -208,7 +211,7 @@ class ChatRepository private constructor(private val chatDao: ChatDao, private v
     ): UpdateResourceProgressProcessor<Chat> {
         return object : UpdateResourceProgressProcessor<Chat>(appExecutors) {
             override fun processError(errorMessage: String) {
-                errorAction.invoke(errorMessage, chatDao.getChatSync(chatId))
+                chatDao.getChatSync(chatId)?.let{ errorAction.invoke(errorMessage, it)}
             }
 
             override fun saveCallResult(item: Chat) {
