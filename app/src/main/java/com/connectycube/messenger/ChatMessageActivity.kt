@@ -155,8 +155,6 @@ class ChatMessageActivity : BaseChatActivity() {
     private fun bindChatDialog(chatDialog: ConnectycubeChatDialog) {
         this.chatDialog = chatDialog
 
-        modelChatMessageList.unreadCounter = chatDialog.unreadMessageCount ?: 0
-
         initChatAdapter()
         initToolbar()
         initModelSender()
@@ -339,7 +337,6 @@ class ChatMessageActivity : BaseChatActivity() {
                 scroll_fb.shrink()
                 scroll_fb.hide(false)
                 scroll_fb.text = ""
-                modelChatMessageList.unreadCounter = 0
             }
 
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
@@ -348,23 +345,37 @@ class ChatMessageActivity : BaseChatActivity() {
                 val totalItemCount = layoutManager.itemCount
                 val firstVisible = layoutManager.findFirstVisibleItemPosition()
 
-                val shouldShow = firstVisible >= 1
+                var shouldShow = firstVisible >= 1
+                if (dy < 0) {
+//                    onScrolled Upwards
+                } else if (dy > 0) {
+//                    onScrolled Downwards
+                    shouldShow = false
+                }
+
                 if (totalItemCount > 0 && shouldShow) {
                     if (!scroll_fb.isShown) {
                         scroll_fb.show(false)
                         scroll_fb.alpha = 0.3f
                     }
-                    val count: String? = Regex(pattern = "\\d+").find(input = scroll_fb.text.toString())?.value
+                    val count: String? =
+                        Regex(pattern = "\\d+").find(input = scroll_fb.text.toString())?.value
                     val shouldAddCounter =
                         scroll_fb.text.isEmpty() || count?.toInt() != modelChatMessageList.unreadCounter
                     if (modelChatMessageList.unreadCounter > 0 && shouldAddCounter) {
                         scroll_fb.iconGravity = ICON_GRAVITY_TEXT_END
                         scroll_fb.text =
-                            getString(R.string.fbd_scroll_counter_label, modelChatMessageList.unreadCounter.toString())
+                            getString(
+                                R.string.fbd_scroll_counter_label,
+                                modelChatMessageList.unreadCounter.toString()
+                            )
                         scroll_fb.extend()
                     }
                 } else {
                     if (scroll_fb.isShown) shrinkFab()
+                }
+                if (firstVisible == 0) {
+                    modelChatMessageList.unreadCounter = 0
                 }
             }
         })
@@ -468,8 +479,21 @@ class ChatMessageActivity : BaseChatActivity() {
         modelChatMessageList.postItem(message)
     }
 
+    fun scrollDownIfNextToBottomList() {
+        val firstPosition = layoutManager.findFirstVisibleItemPosition()
+        val lastPosition = layoutManager.findLastVisibleItemPosition()
+
+        val count = lastPosition - firstPosition
+
+        if (firstPosition < count) {
+            modelChatMessageList.scroll = true
+        } else {
+            modelChatMessageList.unreadCounter++
+        }
+    }
+
     fun scrollDown() {
-        messages_recycleview.smoothScrollToPosition(0)
+        messages_recycleview.scrollToPosition(0)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -592,7 +616,7 @@ class ChatMessageActivity : BaseChatActivity() {
             Timber.d("ChatMessageListener processMessage ${chatMessage.body}")
             val isIncoming = senderId != ConnectycubeChatService.getInstance().user.id
             if (isIncoming) {
-                modelChatMessageList.unreadCounter++
+                scrollDownIfNextToBottomList()
             } else {
                 modelChatMessageList.scroll = true
             }
