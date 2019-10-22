@@ -279,7 +279,7 @@ class ChatMessageActivity : BaseChatActivity() {
                 }
                 com.connectycube.messenger.vo.Status.SUCCESS -> {
                     resource.data?.let {
-                        val occupantsWithoutCurrent = resource.data.filter { it.id != ConnectycubeSessionManager.getInstance().activeSession.userId }
+                        val occupantsWithoutCurrent = resource.data.filter { it.id != SharedPreferencesManager.getInstance(this).getCurrentUser().id }
                         occupants.putAll(occupantsWithoutCurrent.associateBy({ it.id }, { it }))
                         updateChatAdapter()
                     }
@@ -325,7 +325,7 @@ class ChatMessageActivity : BaseChatActivity() {
         chatAdapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
 
             override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
-                if (modelChatMessageList.scroll) {
+                if (positionStart == 0 && modelChatMessageList.scroll) {
                     scrollDown()
                 }
             }
@@ -617,10 +617,8 @@ class ChatMessageActivity : BaseChatActivity() {
             val isIncoming = senderId != ConnectycubeChatService.getInstance().user.id
             if (isIncoming) {
                 scrollDownIfNextToBottomList()
-            } else {
-                modelChatMessageList.scroll = true
+                submitMessage(chatMessage)
             }
-            submitMessage(chatMessage)
         }
 
         override fun processError(s: String, e: ChatException, chatMessage: ConnectycubeChatMessage, integer: Int?) {

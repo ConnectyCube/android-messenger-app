@@ -44,7 +44,7 @@ class ChatMessageAdapter(
     val ATTACH_IMAGE_OUTCOMING = 3
     val ATTACH_IMAGE_INCOMING = 4
 
-    val localUserId = ConnectycubeSessionManager.getInstance().sessionParameters.userId
+    val localUserId = SharedPreferencesManager.getInstance(context).getCurrentUser().id
     val occupantsIds: ArrayList<Int> =
         ArrayList<Int>(chatDialog.occupants).apply { remove(localUserId) }
     val occupants: MutableMap<Int, ConnectycubeUser> = mutableMapOf()
