@@ -161,7 +161,7 @@ class ChatMessageActivity : BaseChatActivity() {
 
         subscribeToOccupants()
 
-        if (ChatConnectionManager.getInstance().isLoggedIn) {
+        if (ConnectycubeChatService.getInstance().isLoggedIn) {
             bindToChatConnection()
         } else {
             subscribeToChatConnectionChanges()

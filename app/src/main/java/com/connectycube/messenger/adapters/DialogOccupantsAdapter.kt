@@ -123,6 +123,7 @@ internal class DialogOccupantsAdapter(
         private val txtLastActivityTitle: TextView = itemView.findViewById(R.id.last_activity_title_txt)
         private val txtLastActivity: TextView = itemView.findViewById(R.id.last_activity_text_view)
         private val txtRole: TextView = itemView.findViewById(R.id.role_txt)
+        private val btnContextMenu: ImageView = itemView.findViewById(R.id.context_menu_img)
 
         fun bind(
             activityContext: Context,
@@ -164,7 +165,14 @@ internal class DialogOccupantsAdapter(
                 else -> txtRole.visibility = View.GONE
             }
 
-            itemView.setOnCreateContextMenuListener(this)
+            if (isCurrentUserCreatorOrAdministrator() && !isCreator() && !isCurrentUser()) {
+                itemView.setOnCreateContextMenuListener(this)
+                btnContextMenu.setOnClickListener { itemView.showContextMenu() }
+                itemView.setOnLongClickListener { itemView.showContextMenu() }
+                btnContextMenu.visibility = View.VISIBLE
+            } else {
+                btnContextMenu.visibility = View.GONE
+            }
         }
 
         private fun isAdministrator(): Boolean {

@@ -67,13 +67,14 @@
             android:id="@+id/edit_group_name_btn"
             android:layout_width="16dp"
             android:layout_height="16dp"
-            android:layout_margin="8dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginLeft="32dp"
             android:background="?actionBarItemBackground"
             android:src="@drawable/ic_edit"
-            android:tint="@color/white"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:tint="@color/colorPrimary"
+            app:layout_constraintBottom_toBottomOf="@+id/chat_dialog_name_txt"
             app:layout_constraintStart_toEndOf="@+id/chat_dialog_name_txt"
-            app:layout_constraintTop_toBottomOf="@+id/chat_dialog_name_txt"
+            app:layout_constraintTop_toTopOf="@+id/chat_dialog_name_txt"
             tools:ignore="ContentDescription" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

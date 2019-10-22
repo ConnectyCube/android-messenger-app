@@ -10,6 +10,7 @@
     <string name="user">User %1$s</string>
     <string name="login_chat_login_error">Login Chat error. Please relogin. Error %s</string>
     <string name="loading_users_error">Loading users error. Error %s</string>
+    <string name="loading_users_empty">There are no such users in the application.</string>
 
     <!--DialogsActivity-->
     <string name="yesterday">Yesterday</string>
@@ -22,7 +23,7 @@
     <string name="occupants">Occupants</string>
     <string name="you">You</string>
     <string name="creator">Creator</string>
-    <string name="admin">Administrator</string>
+    <string name="admin">Admin</string>
     <string name="view_details">View Details</string>
     <string name="edit_group_description">Edit Group Description</string>
     <string name="group_description">Group Description</string>
@@ -33,6 +34,11 @@
     <string name="edit_group_name">Edit Group Name</string>
     <string name="group_name">Group Name</string>
     <string name="put_name_for_group">Put name for group</string>
+    <string name="change_group_avatar">Change dialog avatar</string>
+    <string name="change_group_name">Change group name</string>
+    <string name="change_group_description">Change group description</string>
+    <string name="add_occupants">Add occupants</string>
+    <string name="remove_occupants">Remove occupants</string>
 
     <!--SelectUsersActivity-->
     <string name="not_user_to_select">Not users to select</string>
@@ -140,6 +146,7 @@
     <string name="delete">Delete</string>
     <string name="id_format">id: %s</string>
     <string name="title_select_call_members">Select call members</string>
+    <string name="parentheses_format">(%s)</string>
 
     <!--fix for Matisse lib-->
     <plurals name="error_over_count">

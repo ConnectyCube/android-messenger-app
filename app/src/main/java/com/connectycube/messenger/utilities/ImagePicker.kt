@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.net.Uri
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.exifinterface.media.ExifInterface
 import com.connectycube.messenger.R
 import com.yalantis.ucrop.UCrop
@@ -51,16 +52,23 @@ fun requestImage(activity: Activity) {
             // DO SOMETHING IMMEDIATELY HERE
             Timber.d("isChecked= isChecked=$isChecked")
         })
+        .theme(R.style.Matisse_ConnectyCube)
         .forResult(REQUEST_CODE_CHOOSE)
 }
 
-fun cropImage(activity: Activity, path: String) {
+fun cropImage(activity: AppCompatActivity, path: String) {
     val ratioX = 3f
     val ratioY = 4f
     val maxWidth = 600
     val maxHeight = 800
     val options = UCrop.Options()
     options.setCircleDimmedLayer(true)
+    options.setToolbarColor(activity.resources.getColor(R.color.colorPrimary))
+    options.setStatusBarColor(activity.resources.getColor(R.color.colorPrimaryDark))
+    options.setToolbarWidgetColor(activity.resources.getColor(R.color.white))
+    options.setActiveControlsWidgetColor(activity.resources.getColor(R.color.white))
+    options.setActiveWidgetColor(activity.resources.getColor(R.color.colorPrimary))
+
     val sourceUri = Uri.fromFile(File(path))
     val destinationFileName = "croppedImage.jpg"
     val destination = Uri.fromFile(File(activity.cacheDir, destinationFileName))

@@ -72,9 +72,9 @@ object InjectorUtils {
         return SelectUsersViewModelFactory(application, usersRepository)
     }
 
-    fun provideSelectCallMembersViewModelFactory(application: Application): SelectCallMembersViewModelFactory {
+    fun provideSelectFromExistUsersViewModelFactory(application: Application): SelectFromExistUsersViewModelFactory {
         val usersRepository = getUserRepository(application.baseContext)
-        return SelectCallMembersViewModelFactory(application, usersRepository)
+        return SelectFromExistUsersViewModelFactory(application, usersRepository)
     }
 
     fun provideChatDialogDetailsViewModelFactory(

@@ -9,7 +9,6 @@ import com.connectycube.messenger.api.ApiResponse
 import com.connectycube.messenger.vo.AppExecutors
 
 open class ResponsePerformer<T, R> {
-    val appExecutors = AppExecutors()
     var progressCallBack: ConnectycubeProgressCallback? = null
 
     open fun perform(performer: Performer<T>, converter: Converter<R, T>, callback: Callback<R>?) {
@@ -35,20 +34,6 @@ open class ResponsePerformer<T, R> {
                 callback?.onResult(ApiResponse.create(ex))
             }
         })
-    }
-
-    open fun performAsyncIO(performer: Performer<T>, converter: Converter<R, T>,
-                            callback: Callback<R>?
-    ) {
-        appExecutors.networkIO().execute {
-            try {
-                val result = performer.perform()
-                val wrapped = converter.convertTo(result)
-                callback?.onResult(ApiResponse.create(wrapped, Bundle.EMPTY))
-            } catch (ex: ResponseException) {
-                callback?.onResult(ApiResponse.create(ex))
-            }
-        }
     }
 
     open fun performProgress(performer: Performer<T>,

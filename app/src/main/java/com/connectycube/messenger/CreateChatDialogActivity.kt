@@ -86,6 +86,12 @@ class CreateChatDialogActivity : BaseChatActivity(),
         val menuItemDone: MenuItem? = menu?.findItem(R.id.action_done)
         menuItemDone?.isVisible = selectedUsers.isNotEmpty()
 
+        if (selectedUsers.size == 1) {
+            menuItemDone?.icon = resources.getDrawable(R.drawable.ic_account_check)
+        } else if (selectedUsers.size > 1){
+            menuItemDone?.icon = resources.getDrawable(R.drawable.ic_account_multiple_check)
+        }
+
         return super.onPrepareOptionsMenu(menu)
     }
 

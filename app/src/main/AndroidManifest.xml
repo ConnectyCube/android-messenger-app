@@ -72,6 +72,10 @@
         <activity
                 android:name=".SelectUsersActivity"
                 android:label="@string/title_select_users_activity" />
+
+        <activity
+                android:name=".SelectUsersFromExistActivity" />
+
         <activity
                 android:name=".CallActivity"
                 android:theme="@style/AppTheme.NoActionBar"
