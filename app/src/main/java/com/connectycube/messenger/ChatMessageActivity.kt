@@ -553,7 +553,7 @@ class ChatMessageActivity : BaseChatActivity() {
         val intent = Intent(this, ChatDialogDetailsActivity::class.java)
         intent.putExtra(EXTRA_CHAT_DIALOG_ID, chatDialog.dialogId)
         startActivityForResult(intent, REQUEST_CODE_DETAILS)
-        overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_top)
+        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
     }
 
     override fun onRequestPermissionsResult(
