@@ -16,10 +16,6 @@ import com.zhihu.matisse.internal.entity.CaptureStrategy
 import com.zhihu.matisse.listener.OnCheckedListener
 import timber.log.Timber
 import java.io.File
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import java.io.FileInputStream
-import java.io.FileOutputStream
 
 
 const val REQUEST_CODE_CHOOSE = 23
