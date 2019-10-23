@@ -110,7 +110,10 @@ object InjectorUtils {
     }
 
     private fun getMessageSenderViewRepository(context: Context): MessageSenderRepository {
-        return MessageSenderRepository.getInstance(AppDatabase.getInstance(context.applicationContext).messageDao())
+        return MessageSenderRepository.getInstance(
+            AppDatabase.getInstance(context.applicationContext).messageDao(),
+            AppDatabase.getInstance(context.applicationContext).attachmentDao()
+        )
     }
 
     fun provideMessageSenderViewModelFactory(application: Application,

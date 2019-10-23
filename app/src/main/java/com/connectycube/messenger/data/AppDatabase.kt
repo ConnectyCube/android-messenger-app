@@ -15,12 +15,14 @@ import timber.log.Timber
 /**
  * The Room database for this app
  */
-@Database(entities = [User::class, Chat::class, Message::class], version = 2, exportSchema = false)
+@Database(entities = [User::class, Chat::class, Message::class, Attachment::class], version = 2, exportSchema = false)
 @TypeConverters(UserConverters::class, ChatConverters::class, MessageConverters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun chatDao(): ChatDao
     abstract fun messageDao(): MessageDao
+    abstract fun attachmentDao(): AttachmentDao
+    abstract fun messageWithAttachmentDao(): MessageWithAttachmentsDao
 
     companion object {
 
@@ -52,5 +54,6 @@ abstract class AppDatabase : RoomDatabase() {
     fun clearTablesForLogout() {
         chatDao().nukeTable()
         messageDao().nukeTable()
+        attachmentDao().nukeTable()
     }
 }

@@ -10,6 +10,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.observe
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.connectycube.chat.ConnectycubeChatService
 import com.connectycube.chat.IncomingMessagesManager
 import com.connectycube.chat.exception.ChatException
@@ -79,6 +80,24 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
         chats_recycler_view.layoutManager = LinearLayoutManager(this)
         chats_recycler_view.itemAnimator = DefaultItemAnimator()
         chats_recycler_view.adapter = chatDialogAdapter
+
+        chatDialogAdapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+            override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
+                scrollUp()
+            }
+
+            override fun onItemRangeMoved(fromPosition: Int, toPosition: Int, itemCount: Int) {
+                scrollUp()
+            }
+
+            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                scrollUp()
+            }
+        })
+    }
+
+    private fun scrollUp() {
+        chats_recycler_view.scrollToPosition(0)
     }
 
     private fun subscribeUi() {
@@ -168,7 +187,7 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
     }
 
     override fun onChatDialogDelete(chatDialog: ConnectycubeChatDialog) {
-        Timber.d("Try delete dialog " + chatDialog.dialogId)
+        Timber.d("Try delete dialog= ${chatDialog.dialogId}")
         chatDialogListViewModel.deleteChat(chatDialog).observe(this) { resource ->
             when (resource.status) {
                 Status.SUCCESS -> hideProgress(progressbar)
@@ -187,6 +206,7 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
             putExtra(EXTRA_CHAT, chat)
         }
         startActivity(intent)
+        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
     }
 
     override fun onBackPressed() {
@@ -233,9 +253,9 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
             chatMessage: ConnectycubeChatMessage,
             senderId: Int?
         ) {
-            Timber.d("processMessage chatMessage= " + chatMessage.body + ", from senderId $senderId")
+            Timber.d("processMessage chatMessage= ${chatMessage.body}, from senderId $senderId")
             if (senderId != ConnectycubeChatService.getInstance().user.id) {
-                Timber.d("processMessage chatDialogListViewModel.updateChat chatMessage= " + chatMessage.body)
+                Timber.d("processMessage chatDialogListViewModel.updateChat chatMessage= ${chatMessage.body}")
                 chatDialogListViewModel.updateChat(dialogId)
             }
         }

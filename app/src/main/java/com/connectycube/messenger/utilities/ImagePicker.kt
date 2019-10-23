@@ -7,6 +7,7 @@ import android.content.pm.ActivityInfo
 import android.net.Uri
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.exifinterface.media.ExifInterface
 import com.connectycube.messenger.R
 import com.yalantis.ucrop.UCrop
 import com.zhihu.matisse.Matisse
@@ -16,11 +17,13 @@ import com.zhihu.matisse.listener.OnCheckedListener
 import timber.log.Timber
 import java.io.File
 
+
 const val REQUEST_CODE_CHOOSE = 23
 
 fun requestImage(activity: Activity) {
     Matisse.from(activity)
         .choose(MimeType.ofImage(), false)
+        .showSingleMediaType(true)
         .countable(false)
         .capture(true)
         .captureStrategy(
@@ -79,4 +82,11 @@ fun handleCropError(ctx: Context, result: Intent) {
     } else {
         Timber.d("handleCropError: unexpected error")
     }
+}
+
+fun getImageSize(path: String): Size {
+    val exif = ExifInterface(path)
+    val width = exif.getAttributeInt(ExifInterface.TAG_IMAGE_WIDTH, 0)
+    val height = exif.getAttributeInt(ExifInterface.TAG_IMAGE_LENGTH, 0)
+    return Size(width, height)
 }

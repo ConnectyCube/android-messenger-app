@@ -319,9 +319,4 @@ class ChatDialogDetailsActivity : BaseChatActivity(),
         super.onBackPressed()
         setResult(REQUEST_CODE_DETAILS)
     }
-
-    override fun finish() {
-        super.finish()
-        overridePendingTransition(0, R.anim.slide_out_bottom)
-    }
 }

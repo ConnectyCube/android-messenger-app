@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.annotation.LayoutRes
@@ -43,7 +44,7 @@ class ChatMessageAdapter(
     val ATTACH_IMAGE_OUTCOMING = 3
     val ATTACH_IMAGE_INCOMING = 4
 
-    val localUserId = ConnectycubeSessionManager.getInstance().sessionParameters.userId
+    val localUserId = SharedPreferencesManager.getInstance(context).getCurrentUser().id
     val occupantsIds: ArrayList<Int> =
         ArrayList<Int>(chatDialog.occupants).apply { remove(localUserId) }
     val occupants: MutableMap<Int, ConnectycubeUser> = mutableMapOf()
@@ -361,8 +362,15 @@ class ChatMessageAdapter(
             override fun areContentsTheSame(
                 oldItem: ConnectycubeChatMessage,
                 newItem: ConnectycubeChatMessage
-            ): Boolean =
-                oldItem.id == newItem.id && oldItem.readIds == newItem.readIds && oldItem.deliveredIds == newItem.deliveredIds
+            ): Boolean {
+                val resultMessage =
+                    oldItem.id == newItem.id && oldItem.readIds == newItem.readIds && oldItem.deliveredIds == newItem.deliveredIds
+                var resultAttachment = true
+                if (!(oldItem.attachments.isNullOrEmpty() && newItem.attachments.isNullOrEmpty())) {
+                    resultAttachment = oldItem.attachments?.first() == newItem.attachments?.first()
+                }
+                return resultMessage && resultAttachment
+            }
 
             override fun getChangePayload(oldItem: ConnectycubeChatMessage,
                                           newItem: ConnectycubeChatMessage
@@ -484,7 +492,18 @@ class ChatMessageAdapter(
         }
 
         private fun showImageAttachment(message: ConnectycubeChatMessage) {
-            val validUrl = getAttachImageUrl(message.attachments.iterator().next())
+            val attachment = message.attachments.iterator().next()
+            val validUrl = getAttachImageUrl(attachment)
+            attachmentView.layoutParams.apply {
+                if (attachment.height != 0 && attachment.width != 0) {
+                    height = attachment.height
+                    width = attachment.width
+                    Timber.d("height= $height, width= $width")
+                } else {
+                    height = LinearLayout.LayoutParams.WRAP_CONTENT
+                    width = LinearLayout.LayoutParams.WRAP_CONTENT
+                }
+            }
             loadAttachImage(validUrl, attachmentView, context)
         }
     }

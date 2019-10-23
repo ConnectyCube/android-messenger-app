@@ -119,6 +119,7 @@ class ConnectycubeService {
 
     fun loadFileAsAttachment(path: String, type: String): LiveData<ApiResponse<ConnectycubeAttachment>> {
         val file = File(path)
+
         Timber.d("loadFileAsAttachment path= $path")
         val service =
             InjectorUtils.provideConnectycubeServiceProgressForType<ConnectycubeFile, ConnectycubeAttachment>()
