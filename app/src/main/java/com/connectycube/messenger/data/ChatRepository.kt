@@ -80,8 +80,6 @@ class ChatRepository private constructor(private val chatDao: ChatDao, private v
                 newChatDialogId = item.chatId
                 //TODO VT to save correct name for private dialog (delete TODO code after server fix and uncomment stable code)
                 item.name = chat.name
-                //FIXME check me
-//                 val createdDialog = item.copy(name = chat.name)
                 chatDao.insert(item)
                 //TODO end
 

@@ -3,16 +3,18 @@ package com.connectycube.messenger.data
 import androidx.room.Embedded
 import androidx.room.Relation
 
-
-class MessageWithAttachments {
+data class MessageWithAttachments(
     @Embedded
-    lateinit var message: Message
-
+    val message: Message,
     @Relation(
         parentColumn = "id",
         entityColumn = "messageId"
     )
-    var attachments: List<Attachment>? = null
+    val attachments: List<Attachment>?
+) {
+    init {
+        message.attachments = attachments
+    }
 
     override fun toString() =
         "messageId= ${message.messageId}, body= ${message.body}, attachments= $attachments"
