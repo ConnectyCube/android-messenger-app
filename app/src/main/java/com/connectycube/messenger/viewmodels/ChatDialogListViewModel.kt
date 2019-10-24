@@ -53,7 +53,7 @@ class ChatDialogListViewModel internal constructor(val chatRepository: ChatRepos
         return Transformations.map(source){
             when(it.status){
                 Status.LOADING -> Resource.loading(null)
-                Status.SUCCESS -> Resource.success(it.data?.map { chat -> chat.cubeChat })
+                Status.SUCCESS -> Resource.success(it.data)
                 Status.ERROR -> Resource.error(it.message.toString(), null)
             }
         }

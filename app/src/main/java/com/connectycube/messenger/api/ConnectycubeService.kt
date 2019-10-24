@@ -105,11 +105,9 @@ class ConnectycubeService {
     }
 
     fun createChatDialog(chat: Chat): LiveData<ApiResponse<Chat>> {
-        val chatDialog: ConnectycubeChatDialog = chat.cubeChat
-
         return InjectorUtils.provideConnectycubeServiceForType<ConnectycubeChatDialog, Chat>()
             .perform(
-                ConnectycubeRestChatService.createChatDialog(chatDialog),
+                ConnectycubeRestChatService.createChatDialog(chat),
                 object : Converter<Chat, ConnectycubeChatDialog>() {
                     override fun convertTo(response: ConnectycubeChatDialog): Chat {
                         return convertToChat(response)

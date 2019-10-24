@@ -79,9 +79,10 @@ class ChatRepository private constructor(private val chatDao: ChatDao, private v
             override fun saveCallResult(item: Chat) {
                 newChatDialogId = item.chatId
                 //TODO VT to save correct name for private dialog (delete TODO code after server fix and uncomment stable code)
-                item.cubeChat.name = chat.name
-                val createdDialog = item.copy(name = chat.name)
-                chatDao.insert(createdDialog)
+                item.name = chat.name
+                //FIXME check me
+//                 val createdDialog = item.copy(name = chat.name)
+                chatDao.insert(item)
                 //TODO end
 
 //                chatDao.insert(item)

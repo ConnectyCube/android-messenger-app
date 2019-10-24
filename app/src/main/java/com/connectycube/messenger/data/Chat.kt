@@ -5,19 +5,27 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.connectycube.chat.model.ConnectycubeChatDialog
+import com.connectycube.chat.model.ConnectycubeDialogType
 
-@Entity(tableName = "chats")
+@Entity(
+    tableName = "chats",
+    ignoredColumns = ["id", "customData", "type"]
+)
 data class Chat(
     @PrimaryKey
     @NonNull
-    @ColumnInfo(name = "id") val chatId: String,
-    val lastMessageDateSent: Long,
-    val createdAt: Long,
-    val updatedAt: Long,
-    val unreadMessageCount: Int,
-    val name: String,
-    val cubeChat: ConnectycubeChatDialog
-) {
-    override fun toString() = "chatId $chatId, lastMessageDateSent= $lastMessageDateSent, createdAt= $createdAt, " +
-            "updatedAt= $updatedAt, unreadMessageCount= $unreadMessageCount, name= $name"
+    @ColumnInfo(name = "chat_id") val chatId: String,
+    val dialogType: Int
+) : ConnectycubeChatDialog() {
+    init {
+        type = ConnectycubeDialogType.parseByCode(dialogType)
+    }
+
+    fun getOccupantsIds(): List<Int>? {
+        return occupants
+    }
+
+    override fun toString() =
+        "chatId $chatId, lastMessageDateSent= $lastMessageDateSent, createdAt= $createdAt, lastMessage= $lastMessage, " +
+                "updatedAt= $updatedAt, unreadMessageCount= $unreadMessageCount, name= $name, dialogType= $dialogType"
 }

@@ -2,7 +2,6 @@ package com.connectycube.messenger.viewmodels
 
 import android.app.Application
 import androidx.lifecycle.*
-import com.connectycube.chat.ConnectycubeChatService
 import com.connectycube.chat.model.ConnectycubeChatDialog
 import com.connectycube.chat.utils.DialogUtils
 import com.connectycube.messenger.R
@@ -10,6 +9,7 @@ import com.connectycube.messenger.data.Chat
 import com.connectycube.messenger.data.ChatRepository
 import com.connectycube.messenger.data.UserRepository
 import com.connectycube.messenger.utilities.SharedPreferencesManager
+import com.connectycube.messenger.utilities.convertToChat
 import com.connectycube.messenger.vo.Resource
 import com.connectycube.messenger.vo.Status
 import com.connectycube.users.model.ConnectycubeUser
@@ -70,23 +70,17 @@ class CreateChatDialogViewModel internal constructor(
         val array = arrayOfNulls<ConnectycubeUser>(liveSelectedUsers.value!!.size)
         liveSelectedUsers.value?.toArray(array)
         val chatDialog: ConnectycubeChatDialog = DialogUtils.buildDialog(*array)
-        name?.let{chatDialog.name = name}
-        avatar?.let{chatDialog.photo = avatar}
+        name?.let { chatDialog.name = name }
+        avatar?.let { chatDialog.photo = avatar }
         return Transformations.map(
             chatRepository.createChatDialog(
-                Chat(
-                    chatId = chatDialog.dialogId,
-                    lastMessageDateSent = chatDialog.lastMessageDateSent,
-                    createdAt = if (chatDialog.createdAt != null) chatDialog.createdAt.time else 0,
-                    updatedAt = if (chatDialog.updatedAt != null) chatDialog.updatedAt.time else 0,
-                    unreadMessageCount = if (chatDialog.unreadMessageCount != null) chatDialog.unreadMessageCount else 0,
-                    name = chatDialog.name ?: (array[0]?.fullName ?: ""),
-                    cubeChat = chatDialog
-                )
+                convertToChat(chatDialog).apply {
+                    this.name = chatDialog.name ?: (array[0]?.fullName ?: "")
+                }
             )
         ) {
             when {
-                it.status == Status.SUCCESS -> Resource.success(it.data?.cubeChat)
+                it.status == Status.SUCCESS -> Resource.success(it.data)
                 it.status == Status.ERROR -> it.message?.let { it1 -> Resource.error(it1, null) }
                 else -> Resource.loading(null)
             }

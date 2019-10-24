@@ -30,15 +30,25 @@ fun convertToChats(list: ArrayList<ConnectycubeChatDialog>): List<Chat> {
 }
 
 fun convertToChat(dialog: ConnectycubeChatDialog): Chat {
-    return Chat(
-        dialog.dialogId,
-        dialog.lastMessageDateSent,
-        dialog.createdAt.time,
-        dialog.updatedAt.time,
-        dialog.unreadMessageCount ?: 0,
-        dialog.name,
-        dialog
-    )
+    return Chat(dialog.dialogId, dialog.type.code).apply {
+        dialogId = dialog.dialogId
+        lastMessage = dialog.lastMessage
+        lastMessageDateSent = dialog.lastMessageDateSent
+        lastMessageUserId = dialog.lastMessageUserId
+        photo = dialog.photo
+        userId = dialog.userId
+        unreadMessageCount = dialog.unreadMessageCount ?: 0
+        name = dialog.name
+        setOccupantsIds(dialog.occupants)
+        pinnedMessagesIds = dialog.pinnedMessagesIds
+        type = dialog.type
+        adminsIds = dialog.adminsIds
+        customData = dialog.customData
+        description = dialog.description
+        occupantsCount = dialog.occupantsCount
+        createdAt = dialog.createdAt
+        updatedAt = dialog.updatedAt
+    }
 }
 
 fun convertToMessages(items: ArrayList<ConnectycubeChatMessage>): List<Message> {
