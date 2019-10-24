@@ -3,6 +3,7 @@ package com.connectycube.messenger.viewmodels
 import androidx.lifecycle.*
 import com.connectycube.chat.model.ConnectycubeChatDialog
 import com.connectycube.messenger.data.Chat
+import com.connectycube.messenger.data.ChatMessageRepository
 import com.connectycube.messenger.data.ChatRepository
 import com.connectycube.messenger.vo.Resource
 import com.connectycube.messenger.vo.Status
@@ -10,7 +11,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
-class ChatDialogListViewModel internal constructor(val chatRepository: ChatRepository) :
+class ChatDialogListViewModel internal constructor(val chatRepository: ChatRepository,
+                                                   val messageRepository: ChatMessageRepository) :
     ViewModel() {
     var chatLiveData = MutableLiveData<Resource<List<Chat>>>()
 
@@ -47,6 +49,14 @@ class ChatDialogListViewModel internal constructor(val chatRepository: ChatRepos
 
     fun deleteChat(chatDialog: ConnectycubeChatDialog): LiveData<Resource<List<ConnectycubeChatDialog>>>{
         return transformData(chatRepository.deleteChats(false, chatsIds = *arrayOf(chatDialog.dialogId)))
+    }
+
+    fun updateMessageReadStatus(messageId: String, userId: Int) {
+        messageRepository.updateItemReadStatus(messageId, userId)
+    }
+
+    fun updateMessageDeliveredStatus(messageId: String, userId: Int) {
+        messageRepository.updateItemDeliveredStatus(messageId, userId)
     }
 
     private fun transformData(source: LiveData<Resource<List<Chat>>>): LiveData<Resource<List<ConnectycubeChatDialog>>>{

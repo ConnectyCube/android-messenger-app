@@ -15,6 +15,7 @@ import com.connectycube.chat.ConnectycubeChatService
 import com.connectycube.chat.IncomingMessagesManager
 import com.connectycube.chat.exception.ChatException
 import com.connectycube.chat.listeners.ChatDialogMessageListener
+import com.connectycube.chat.listeners.MessageStatusListener
 import com.connectycube.chat.model.ConnectycubeChatDialog
 import com.connectycube.chat.model.ConnectycubeChatMessage
 import com.connectycube.messenger.adapters.ChatDialogAdapter
@@ -45,6 +46,7 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
 
     private lateinit var chatDialogAdapter: ChatDialogAdapter
     private var incomingMessagesManager: IncomingMessagesManager? = null
+    private val messageStatusListener: MessageStatusListener = ChatMessagesStatusListener()
 
     private var currentDialogId: String? = null
 
@@ -135,11 +137,13 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
     }
 
     fun initManagers() {
+        ConnectycubeChatService.getInstance().messageStatusesManager.addMessageStatusListener(messageStatusListener)
         incomingMessagesManager = ConnectycubeChatService.getInstance().incomingMessagesManager
         incomingMessagesManager?.addDialogMessageListener(AllMessageListener())
     }
 
     fun unregisterChatManagers() {
+        ConnectycubeChatService.getInstance().messageStatusesManager.removeMessageStatusListener(messageStatusListener)
         incomingMessagesManager?.dialogMessageListeners?.forEach {
             incomingMessagesManager?.removeDialogMessageListrener(
                 it
@@ -259,5 +263,18 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
                 chatDialogListViewModel.updateChat(dialogId)
             }
         }
+    }
+
+    private inner class ChatMessagesStatusListener : MessageStatusListener {
+        override fun processMessageRead(messageID: String, dialogId: String, userId: Int) {
+            Timber.d("processMessageRead messageID= $messageID")
+            chatDialogListViewModel.updateMessageReadStatus(messageID, userId)
+        }
+
+        override fun processMessageDelivered(messageID: String, dialogId: String, userId: Int) {
+            Timber.d("processMessageDelivered messageID= $messageID")
+            chatDialogListViewModel.updateMessageDeliveredStatus(messageID, userId)
+        }
+
     }
 }

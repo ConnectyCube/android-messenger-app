@@ -25,8 +25,9 @@ object InjectorUtils {
     }
 
     fun provideChatDialogListViewModelFactory(context: Context): ChatDialogListViewModelFactory {
-        val repository = getChatRepository(context)
-        return ChatDialogListViewModelFactory(repository)
+        val chatRepository = getChatRepository(context)
+        val messageRepository = getChatMessageRepository(context)
+        return ChatDialogListViewModelFactory(chatRepository, messageRepository)
     }
 
     private fun getChatRepository(context: Context): ChatRepository {
