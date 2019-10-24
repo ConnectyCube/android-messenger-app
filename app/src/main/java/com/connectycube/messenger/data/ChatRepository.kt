@@ -36,7 +36,7 @@ class ChatRepository private constructor(private val chatDao: ChatDao, private v
                     val chat = chatDao.getChatSync(chatId)
                     val shouldUpdate = chat != null && chat != item
                     val shouldInsert = chat == null
-                    Timber.d("shouldUpdate= $shouldUpdate")
+                    Timber.d("shouldUpdate= $shouldUpdate, shouldInsert= $shouldInsert")
                     if (shouldUpdate) {
                         chatDao.update(item)
                     } else if (shouldInsert) {
