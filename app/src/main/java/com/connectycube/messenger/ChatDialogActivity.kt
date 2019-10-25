@@ -137,13 +137,13 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
     }
 
     fun initManagers() {
-        ConnectycubeChatService.getInstance().messageStatusesManager.addMessageStatusListener(messageStatusListener)
+        ConnectycubeChatService.getInstance().messageStatusesManager?.addMessageStatusListener(messageStatusListener)
         incomingMessagesManager = ConnectycubeChatService.getInstance().incomingMessagesManager
         incomingMessagesManager?.addDialogMessageListener(AllMessageListener())
     }
 
     fun unregisterChatManagers() {
-        ConnectycubeChatService.getInstance().messageStatusesManager.removeMessageStatusListener(messageStatusListener)
+        ConnectycubeChatService.getInstance().messageStatusesManager?.removeMessageStatusListener(messageStatusListener)
         incomingMessagesManager?.dialogMessageListeners?.forEach {
             incomingMessagesManager?.removeDialogMessageListrener(
                 it

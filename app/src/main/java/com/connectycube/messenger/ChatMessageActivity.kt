@@ -56,7 +56,7 @@ const val REQUEST_CODE_DETAILS = 55
 class ChatMessageActivity : BaseChatActivity() {
 
     private val attachmentClickListener: AttachmentClickListener = this::onMessageAttachmentClicked
-    private val markAsReadListener: MarkAsReadListener = this::onMarkAsReadClicked
+    private val markAsReadListener: MarkAsReadListener = this::onMarkAsReadPerform
     private val messageListener: ChatDialogMessageListener = ChatMessageListener()
     private val messageSentListener: ChatDialogMessageSentListener = ChatMessagesSentListener()
     private val messageTypingListener: ChatDialogTypingListener = ChatTypingListener()
@@ -460,13 +460,16 @@ class ChatMessageActivity : BaseChatActivity() {
         startAttachmentPreview(attach)
     }
 
-    private fun onMarkAsReadClicked(chatMessage: ConnectycubeChatMessage) {
-        try {
-            chatDialog.readMessage(chatMessage, null)
-            modelChatMessageList.updateItemReadStatus(chatMessage.id, localUserId)
-        } catch (ex: Exception) {
-            Timber.d(ex)
-        }
+    private fun onMarkAsReadPerform(chatMessage: ConnectycubeChatMessage) {
+        chatDialog.readMessage(chatMessage, object : EntityCallback<Void> {
+            override fun onSuccess(v: Void?, b: Bundle?) {
+                modelChatMessageList.updateItemReadStatus(chatMessage.id, localUserId)
+            }
+
+            override fun onError(ex: ResponseException) {
+                Timber.d("readMessage ex= $ex")
+            }
+        })
     }
 
     private fun startAttachmentPreview(attach: ConnectycubeAttachment) {
