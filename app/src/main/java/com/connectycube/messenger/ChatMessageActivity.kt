@@ -573,6 +573,15 @@ class ChatMessageActivity : BaseChatActivity() {
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
     }
 
+    private fun setDialogIdResult() {
+        setResult(RESULT_OK, Intent().apply { putExtra(EXTRA_DIALOG_ID, chatDialog.dialogId) })
+    }
+
+    override fun onBackPressed() {
+        setDialogIdResult()
+        super.onBackPressed()
+    }
+
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>, grantResults: IntArray

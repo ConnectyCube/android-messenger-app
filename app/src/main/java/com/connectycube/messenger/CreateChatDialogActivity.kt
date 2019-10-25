@@ -2,6 +2,7 @@ package com.connectycube.messenger
 
 import android.app.Activity
 import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_FORWARD_RESULT
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -150,6 +151,7 @@ class CreateChatDialogActivity : BaseChatActivity(),
 
     private fun startChatActivity(chat: ConnectycubeChatDialog) {
         val intent = Intent(this, ChatMessageActivity::class.java)
+        intent.addFlags(FLAG_ACTIVITY_FORWARD_RESULT)
         intent.putExtra(EXTRA_CHAT, chat)
         startActivity(intent)
     }

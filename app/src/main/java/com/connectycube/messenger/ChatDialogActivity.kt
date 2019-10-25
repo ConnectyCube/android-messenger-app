@@ -37,6 +37,8 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 
 const val REQUEST_SETTING_SCREEN = 50
+const val REQUEST_CHAT_DIALOG_ID = 55
+const val EXTRA_DIALOG_ID = "chat_dialog_id"
 
 class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapterCallback {
 
@@ -63,7 +65,6 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
     override fun onResume() {
         super.onResume()
         setCurrentUser()
-        currentDialogId?.let { chatDialogListViewModel.updateChat(it) }
     }
 
     private fun initToolbar() {
@@ -136,18 +137,16 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
         chatDialogAdapter.callback = this
     }
 
-    fun initManagers() {
+    private fun initManagers() {
         ConnectycubeChatService.getInstance().messageStatusesManager?.addMessageStatusListener(messageStatusListener)
         incomingMessagesManager = ConnectycubeChatService.getInstance().incomingMessagesManager
         incomingMessagesManager?.addDialogMessageListener(AllMessageListener())
     }
 
-    fun unregisterChatManagers() {
+    private fun unregisterChatManagers() {
         ConnectycubeChatService.getInstance().messageStatusesManager?.removeMessageStatusListener(messageStatusListener)
         incomingMessagesManager?.dialogMessageListeners?.forEach {
-            incomingMessagesManager?.removeDialogMessageListrener(
-                it
-            )
+            incomingMessagesManager?.removeDialogMessageListrener(it)
         }
     }
 
@@ -160,6 +159,10 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
                 if (data.getBooleanExtra(EXTRA_LOGOUT, false)) {
                     logout()
                 }
+            }
+            REQUEST_CHAT_DIALOG_ID -> {
+                val chatDialogIdForUpdate = data.getStringExtra(EXTRA_DIALOG_ID)
+                chatDialogIdForUpdate?.let { chatDialogListViewModel.updateChat(it) }
             }
         }
     }
@@ -177,7 +180,7 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
 
     fun onCreateNewChatClick(view: View) {
         val intent = Intent(this, CreateChatDialogActivity::class.java)
-        startActivity(intent)
+        startActivityForResult(intent, REQUEST_CHAT_DIALOG_ID)
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
     }
 
@@ -209,7 +212,7 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
         val intent = Intent(this, ChatMessageActivity::class.java).apply {
             putExtra(EXTRA_CHAT, chat)
         }
-        startActivity(intent)
+        startActivityForResult(intent, REQUEST_CHAT_DIALOG_ID)
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
     }
 
