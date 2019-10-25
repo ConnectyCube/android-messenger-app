@@ -432,6 +432,8 @@ class ChatMessageActivity : BaseChatActivity() {
 
     private fun unsubscribeModels() {
         modelChatMessageList.messages.removeObservers(this)
+        modelChatMessageList.networkState.removeObservers(this)
+        modelChatMessageList.refreshState.removeObservers(this)
     }
 
     override fun onDestroy() {

@@ -63,7 +63,7 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
     override fun onResume() {
         super.onResume()
         setCurrentUser()
-        currentDialogId?.let { chatDialogListViewModel.updateChat(currentDialogId!!) }
+        currentDialogId?.let { chatDialogListViewModel.updateChat(it) }
     }
 
     private fun initToolbar() {
@@ -223,6 +223,7 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
 
     private fun logout() {
         showProgress(progressbar)
+        currentDialogId = null
         chatDialogListViewModel.chatLiveDataLazy.removeObservers(this)
         LiveDataBus.unregister(EVENT_CHAT_LOGIN)
         GlobalScope.launch(Dispatchers.Main) {
