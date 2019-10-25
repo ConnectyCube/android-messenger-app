@@ -14,7 +14,6 @@ import androidx.annotation.NonNull
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.connectycube.auth.session.ConnectycubeSessionManager
 import com.connectycube.chat.model.ConnectycubeAttachment
 import com.connectycube.chat.model.ConnectycubeChatDialog
 import com.connectycube.chat.model.ConnectycubeChatMessage
@@ -29,12 +28,14 @@ import timber.log.Timber
 
 
 typealias AttachmentClickListener = (ConnectycubeAttachment) -> Unit
+typealias MarkAsReadListener = (ConnectycubeChatMessage) -> Unit
 private typealias PAYLOAD_PROGRESS = ChatMessageAdapter.ProgressMessage
 
 class ChatMessageAdapter(
     val context: Context,
     var chatDialog: ConnectycubeChatDialog,
-    private val attachmentClickListener: AttachmentClickListener
+    private val attachmentClickListener: AttachmentClickListener,
+    private val markAsReadListener: MarkAsReadListener
 ) : PagedListAdapter<ConnectycubeChatMessage, RecyclerView.ViewHolder>(diffCallback),
     StickyRecyclerHeadersAdapter<RecyclerView.ViewHolder> {
 
@@ -106,7 +107,7 @@ class ChatMessageAdapter(
         val chatMessage = getItem(position)
         chatMessage?.let {
             if (isIncoming(chatMessage) && !isRead(chatMessage)) {
-                markAsReadMessage(chatMessage)
+                markAsReadListener(chatMessage)
             }
         }
 
@@ -331,14 +332,6 @@ class ChatMessageAdapter(
 
     fun formatDate(seconds: Long): String {
         return DateUtils.formatDateTime(context, seconds * 1000L, DateUtils.FORMAT_SHOW_TIME)
-    }
-
-    private fun markAsReadMessage(chatMessage: ConnectycubeChatMessage) {
-        try {
-            chatDialog.readMessage(chatMessage)
-        } catch (ex: Exception) {
-            Timber.d(ex)
-        }
     }
 
     private fun isRead(chatMessage: ConnectycubeChatMessage): Boolean {

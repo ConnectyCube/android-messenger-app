@@ -15,6 +15,7 @@ import com.connectycube.chat.ConnectycubeChatService
 import com.connectycube.chat.IncomingMessagesManager
 import com.connectycube.chat.exception.ChatException
 import com.connectycube.chat.listeners.ChatDialogMessageListener
+import com.connectycube.chat.listeners.MessageStatusListener
 import com.connectycube.chat.model.ConnectycubeChatDialog
 import com.connectycube.chat.model.ConnectycubeChatMessage
 import com.connectycube.messenger.adapters.ChatDialogAdapter
@@ -36,6 +37,8 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 
 const val REQUEST_SETTING_SCREEN = 50
+const val REQUEST_CHAT_DIALOG_ID = 55
+const val EXTRA_DIALOG_ID = "chat_dialog_id"
 
 class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapterCallback {
 
@@ -45,6 +48,7 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
 
     private lateinit var chatDialogAdapter: ChatDialogAdapter
     private var incomingMessagesManager: IncomingMessagesManager? = null
+    private val messageStatusListener: MessageStatusListener = ChatMessagesStatusListener()
 
     private var currentDialogId: String? = null
 
@@ -61,7 +65,6 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
     override fun onResume() {
         super.onResume()
         setCurrentUser()
-        currentDialogId?.let { chatDialogListViewModel.updateChat(currentDialogId!!) }
     }
 
     private fun initToolbar() {
@@ -134,16 +137,16 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
         chatDialogAdapter.callback = this
     }
 
-    fun initManagers() {
+    private fun initManagers() {
+        ConnectycubeChatService.getInstance().messageStatusesManager?.addMessageStatusListener(messageStatusListener)
         incomingMessagesManager = ConnectycubeChatService.getInstance().incomingMessagesManager
         incomingMessagesManager?.addDialogMessageListener(AllMessageListener())
     }
 
-    fun unregisterChatManagers() {
+    private fun unregisterChatManagers() {
+        ConnectycubeChatService.getInstance().messageStatusesManager?.removeMessageStatusListener(messageStatusListener)
         incomingMessagesManager?.dialogMessageListeners?.forEach {
-            incomingMessagesManager?.removeDialogMessageListrener(
-                it
-            )
+            incomingMessagesManager?.removeDialogMessageListrener(it)
         }
     }
 
@@ -156,6 +159,10 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
                 if (data.getBooleanExtra(EXTRA_LOGOUT, false)) {
                     logout()
                 }
+            }
+            REQUEST_CHAT_DIALOG_ID -> {
+                val chatDialogIdForUpdate = data.getStringExtra(EXTRA_DIALOG_ID)
+                chatDialogIdForUpdate?.let { chatDialogListViewModel.updateChat(it) }
             }
         }
     }
@@ -173,7 +180,7 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
 
     fun onCreateNewChatClick(view: View) {
         val intent = Intent(this, CreateChatDialogActivity::class.java)
-        startActivity(intent)
+        startActivityForResult(intent, REQUEST_CHAT_DIALOG_ID)
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
     }
 
@@ -205,7 +212,7 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
         val intent = Intent(this, ChatMessageActivity::class.java).apply {
             putExtra(EXTRA_CHAT, chat)
         }
-        startActivity(intent)
+        startActivityForResult(intent, REQUEST_CHAT_DIALOG_ID)
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
     }
 
@@ -219,6 +226,7 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
 
     private fun logout() {
         showProgress(progressbar)
+        currentDialogId = null
         chatDialogListViewModel.chatLiveDataLazy.removeObservers(this)
         LiveDataBus.unregister(EVENT_CHAT_LOGIN)
         GlobalScope.launch(Dispatchers.Main) {
@@ -259,5 +267,18 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
                 chatDialogListViewModel.updateChat(dialogId)
             }
         }
+    }
+
+    private inner class ChatMessagesStatusListener : MessageStatusListener {
+        override fun processMessageRead(messageID: String, dialogId: String, userId: Int) {
+            Timber.d("processMessageRead messageID= $messageID")
+            chatDialogListViewModel.updateMessageReadStatus(messageID, userId)
+        }
+
+        override fun processMessageDelivered(messageID: String, dialogId: String, userId: Int) {
+            Timber.d("processMessageDelivered messageID= $messageID")
+            chatDialogListViewModel.updateMessageDeliveredStatus(messageID, userId)
+        }
+
     }
 }

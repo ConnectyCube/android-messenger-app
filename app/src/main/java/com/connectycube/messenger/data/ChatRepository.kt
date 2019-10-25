@@ -36,7 +36,7 @@ class ChatRepository private constructor(private val chatDao: ChatDao, private v
                     val chat = chatDao.getChatSync(chatId)
                     val shouldUpdate = chat != null && chat != item
                     val shouldInsert = chat == null
-                    Timber.d("shouldUpdate= $shouldUpdate")
+                    Timber.d("shouldUpdate= $shouldUpdate, shouldInsert= $shouldInsert")
                     if (shouldUpdate) {
                         chatDao.update(item)
                     } else if (shouldInsert) {
@@ -79,9 +79,8 @@ class ChatRepository private constructor(private val chatDao: ChatDao, private v
             override fun saveCallResult(item: Chat) {
                 newChatDialogId = item.chatId
                 //TODO VT to save correct name for private dialog (delete TODO code after server fix and uncomment stable code)
-                item.cubeChat.name = chat.name
-                val createdDialog = item.copy(name = chat.name)
-                chatDao.insert(createdDialog)
+                item.name = chat.name
+                chatDao.insert(item)
                 //TODO end
 
 //                chatDao.insert(item)

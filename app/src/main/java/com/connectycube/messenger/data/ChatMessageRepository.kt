@@ -167,13 +167,10 @@ class ChatMessageRepository(
             .build()
 
         val dataSourceConnectycubeChatMessage: DataSource.Factory<Int, ConnectycubeChatMessage> =
-            db.messageWithAttachmentDao().postsByDialogId(dialogId).map {
-                it.message.apply {
-                    attachments = it.attachments
-                }
-            }
+            db.messageWithAttachmentDao().postsByDialogId(dialogId).map { it.message }
 
-//        val dataSourceConnectycubeChatMessage = LivePagedListBuilder(db.messageDao().postsByDialogId(dialogId).map { it.cubeMessage }, config).setBoundaryCallback(boundaryCallback).build()
+//        val livePagedList: LiveData<PagedList<ConnectycubeChatMessage>>
+//                = LivePagedListBuilder(db.messageWithAttachmentDao().postsByDialogId(dialogId).map { it.message as ConnectycubeChatMessage }, config).setBoundaryCallback(boundaryCallback).build()
         val livePagedList = dataSourceConnectycubeChatMessage.toLiveData(
             pageSize = pageSize,
             boundaryCallback = boundaryCallback
