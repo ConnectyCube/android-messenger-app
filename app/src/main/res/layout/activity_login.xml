@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<androidx.constraintlayout.motion.widget.MotionLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:background="@drawable/splash_background">
+        tools:background="@drawable/splash_background"
+        app:layoutDescription="@xml/login_scene"
+        tools:showPaths="true">
 
     <ProgressBar
             android:id="@+id/progressbar"
@@ -14,8 +16,7 @@
             android:layout_height="wrap_content"
             android:indeterminate="true"
             android:max="100"
-            android:layout_marginTop="-7dp"
-            android:visibility="gone"
+            android:visibility="invisible"
             tools:visibility="visible"
             tools:ignore="MissingConstraints"/>
 
@@ -44,4 +45,4 @@
             app:layout_constraintTop_toBottomOf="@+id/text_view"
             tools:listitem="@layout/list_item_user_simple"/>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.motion.widget.MotionLayout>
