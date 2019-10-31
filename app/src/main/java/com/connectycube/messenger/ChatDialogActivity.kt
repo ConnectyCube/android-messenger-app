@@ -56,7 +56,7 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
         super.onCreate(savedInstanceState)
         Timber.d("onCreate")
         setContentView(R.layout.activity_chatdialogs)
-        initToolbar()
+        initActionbar()
         initDialogsAdapter()
         initDialogsRecyclerView()
         subscribeUi()
@@ -67,9 +67,8 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
         setCurrentUser()
     }
 
-    private fun initToolbar() {
-        setSupportActionBar(toolbar)
-        toolbar.setOnClickListener { startSettingsActivity() }
+    private fun initActionbar() {
+        action_bar_view.setOnClickListener { startSettingsActivity() }
         setCurrentUser()
     }
 
