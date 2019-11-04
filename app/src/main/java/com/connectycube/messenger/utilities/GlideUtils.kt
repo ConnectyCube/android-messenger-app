@@ -1,10 +1,12 @@
 package com.connectycube.messenger.utilities
 
 import android.content.Context
+import android.graphics.drawable.Drawable
 import android.widget.ImageView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.RequestOptions
 import com.connectycube.messenger.R
 import com.connectycube.users.model.ConnectycubeUser
@@ -85,5 +87,20 @@ fun loadAttachImagePreview(url: String?, imageView: ImageView, ctx: Context) {
         .apply(requestOptions)
         .error(placeholder)
         .diskCacheStrategy(DiskCacheStrategy.ALL)
+        .into(imageView)
+}
+
+fun loadImagePreview(url: String?, imageView: ImageView, listener: RequestListener<Drawable>? = null) {
+    val placeholder = R.drawable.ic_image_black_24dp
+    val requestOptions = RequestOptions().transform(RoundedCorners(16))
+
+    Glide.with(imageView.context)
+        .load(url)
+        .placeholder(placeholder)
+        .dontTransform()
+        .apply(requestOptions)
+        .error(placeholder)
+        .diskCacheStrategy(DiskCacheStrategy.ALL)
+        .listener(listener)
         .into(imageView)
 }

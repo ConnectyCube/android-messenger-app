@@ -83,6 +83,7 @@
 
     <!--AttachmentPreview-->
     <string name="attachment_preview_label">Attachment Preview</string>
+    <string name="transition_name">img_full_screen</string>
 
     <!--OccupantPreview-->
     <string name="occupant_preview_label">Occupant Preview</string>

@@ -457,9 +457,9 @@ class ChatMessageActivity : BaseChatActivity() {
         if (text.isNotEmpty()) sendChatMessage(text)
     }
 
-    private fun onMessageAttachmentClicked(attach: ConnectycubeAttachment) {
-        Timber.d("message attachment= $attach")
-        startAttachmentPreview(attach)
+    private fun onMessageAttachmentClicked(attachment: ConnectycubeAttachment, attachContainer: View) {
+        Timber.d("message attachment= $attachment")
+        startAttachmentPreview(attachment, attachContainer)
     }
 
     private fun onMarkAsReadPerform(chatMessage: ConnectycubeChatMessage) {
@@ -474,11 +474,8 @@ class ChatMessageActivity : BaseChatActivity() {
         })
     }
 
-    private fun startAttachmentPreview(attach: ConnectycubeAttachment) {
-        val intent = Intent(this, AttachmentPreviewActivity::class.java)
-        intent.putExtra(EXTRA_URL, attach.url)
-        startActivity(intent)
-        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+    private fun startAttachmentPreview(attach: ConnectycubeAttachment, view: View) {
+        startImagePreview(this, attach.url, getText(R.string.attachment_preview_label), view)
     }
 
     private fun sendChatMessage(text: String) {
