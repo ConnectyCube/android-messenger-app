@@ -83,7 +83,12 @@
 
     <!--AttachmentPreview-->
     <string name="attachment_preview_label">Attachment Preview</string>
-    <string name="transition_name">img_full_screen</string>
+
+    <!--ImagePreview-->
+    <string name="image_preview_label">Image Preview</string>
+    <string name="transition_name_image_view">app:navigation:img_screen</string>
+    <string name="transition_name_toolbar">app:navigation:toolbar</string>
+    <string name="transition_name_bottom_bar">app:navigation:bottom_bar</string>
 
     <!--OccupantPreview-->
     <string name="occupant_preview_label">Occupant Preview</string>
