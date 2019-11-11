@@ -27,7 +27,7 @@ import com.timehop.stickyheadersrecyclerview.StickyRecyclerHeadersAdapter
 import timber.log.Timber
 
 
-typealias AttachmentClickListener = (ConnectycubeAttachment) -> Unit
+typealias AttachmentClickListener = (ConnectycubeAttachment, View) -> Unit
 typealias MarkAsReadListener = (ConnectycubeChatMessage) -> Unit
 private typealias PAYLOAD_PROGRESS = ChatMessageAdapter.ProgressMessage
 
@@ -121,7 +121,7 @@ class ChatMessageAdapter(
                 position
             )
             ATTACH_IMAGE_OUTCOMING -> onBindAttachViewHolderOutComing(
-                holder as BaseChatMessageViewHolder,
+                holder as ChatImageAttachOutcomingViewHolder,
                 position
             )
             ATTACH_IMAGE_INCOMING -> onBindAttachViewHolderInComing(
@@ -152,7 +152,7 @@ class ChatMessageAdapter(
         }
     }
 
-    fun onBindAttachViewHolderOutComing(holder: BaseChatMessageViewHolder,
+    fun onBindAttachViewHolderOutComing(holder: ChatImageAttachOutcomingViewHolder,
                                         position: Int
     ) {
         val message = getItem(position)
@@ -161,7 +161,7 @@ class ChatMessageAdapter(
                 bindTo(it)
                 message.let {
                     itemView.setOnClickListener {
-                        attachmentClickListener(message.attachments.first())
+                        attachmentClickListener(message.attachments.first(), holder.attachmentView)
                     }
                 }
             }
@@ -174,7 +174,7 @@ class ChatMessageAdapter(
             with(holder) {
                 bindTo(it, showAvatar(position, message), showName(position, message))
                 itemView.setOnClickListener {
-                    attachmentClickListener(message.attachments.first())
+                    attachmentClickListener(message.attachments.first(), holder.attachmentView)
                 }
             }
         }
@@ -477,7 +477,7 @@ class ChatMessageAdapter(
         BaseChatMessageViewHolder(
             LayoutInflater.from(parent.context).inflate(chatItem, parent, false)
         ) {
-        private val attachmentView: ImageView = itemView.findViewById(R.id.attachment_image_view)
+        val attachmentView: ImageView = itemView.findViewById(R.id.attachment_image_view)
 
         override fun bindTo(message: ConnectycubeChatMessage) {
             super.bindTo(message)

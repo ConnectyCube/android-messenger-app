@@ -62,6 +62,11 @@
                 android:theme="@style/AppTheme.DarkTitle" />
 
         <activity
+                android:name=".ImagePreviewActivity"
+                android:label=""
+                android:theme="@style/AppTheme.DarkTitle" />
+
+        <activity
                 android:name=".OccupantPreviewActivity"
                 android:label="@string/occupant_preview_label" />
 
