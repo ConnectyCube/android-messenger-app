@@ -32,7 +32,7 @@ class CreateChatDialogDetailActivity : BaseChatActivity() {
         setContentView(R.layout.activity_create_chat_details)
         initToolbar()
         subscribeUi()
-        edit_avatar_btn.setOnClickListener { editAvatar() }
+        edit_avatar_btn.setSingleOnClickListener { editAvatar() }
     }
 
     private fun initToolbar() {

@@ -264,7 +264,7 @@ class ChatMessageActivity : BaseChatActivity() {
 
     private fun initToolbar() {
         back_btn.setOnClickListener { onBackPressed() }
-        toolbar_layout.setOnClickListener { startChatDetailsActivity() }
+        toolbar_layout.setSingleOnClickListener { startChatDetailsActivity() }
         loadChatDialogPhoto(this, chatDialog.isPrivate, chatDialog.photo, avatar_img)
         chat_message_name.text = chatDialog.name
     }

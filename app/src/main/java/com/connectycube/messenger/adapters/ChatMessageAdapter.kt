@@ -160,7 +160,7 @@ class ChatMessageAdapter(
             with(holder) {
                 bindTo(it)
                 message.let {
-                    itemView.setOnClickListener {
+                    itemView.setSingleOnClickListener {
                         attachmentClickListener(message.attachments.first(), holder.attachmentView)
                     }
                 }
@@ -173,7 +173,7 @@ class ChatMessageAdapter(
         message?.let {
             with(holder) {
                 bindTo(it, showAvatar(position, message), showName(position, message))
-                itemView.setOnClickListener {
+                itemView.setSingleOnClickListener {
                     attachmentClickListener(message.attachments.first(), holder.attachmentView)
                 }
             }

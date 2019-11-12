@@ -45,8 +45,8 @@ class SettingsActivity : BaseChatActivity() {
     }
 
     private fun initViews() {
-        edit_name_fb.setOnClickListener { editName() }
-        avatar_img.setOnClickListener { editAvatar() }
+        edit_name_fb.setSingleOnClickListener { editName() }
+        avatar_img.setSingleOnClickListener { editAvatar() }
     }
 
     private fun initData() {
