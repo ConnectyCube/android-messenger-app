@@ -13,7 +13,7 @@
         <item name="windowNoTitle">true</item>
     </style>
 
-    <style name="AppTheme.DarkTitle" parent="AppTheme">
+    <style name="AppTheme.DarkTitle" parent="AppTheme.NoActionBar">
         <item name="colorPrimary">@color/dark</item>
         <item name="colorPrimaryDark">@color/dark</item>
         <item name="colorAccent">@color/dark</item>
@@ -24,7 +24,7 @@
     </style>
 
     <!-- Custom color theme for Matisse image picker -->
-    <style name="Matisse.Connecticube" parent="Matisse.Zhihu">
+    <style name="Matisse.ConnectyCube" parent="Matisse.Zhihu">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="bottomToolbar.apply.textColor">@color/colorPrimary</item>

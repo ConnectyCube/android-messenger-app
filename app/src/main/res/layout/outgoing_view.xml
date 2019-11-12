@@ -19,7 +19,7 @@
                 android:gravity="center"
                 android:maxLines="1"
                 android:paddingTop="20dp"
-                android:textColor="@color/dark"
+                android:textColor="?android:attr/textColorPrimary"
                 android:textSize="22sp"
                 tools:text="Amanda, Brad, Celesta" />
 
@@ -30,7 +30,7 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="8dp"
                 android:text="@string/outgoing_call_ringing"
-                android:textColor="@color/dark_grey"
+                android:textColor="?android:attr/textColorSecondary"
                 android:textSize="16sp" />
     </LinearLayout>
 </LinearLayout>

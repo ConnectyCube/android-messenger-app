@@ -16,13 +16,17 @@
             android:background="?attr/colorPrimary"
             android:clipToPadding="false"
             android:minHeight="?attr/actionBarSize"
+            android:elevation="10dp"
+            android:outlineProvider="none"
+            android:transitionName="@string/transition_name_toolbar"
             app:contentInsetEnd="0dp"
             app:contentInsetLeft="0dp"
             app:contentInsetRight="0dp"
             app:contentInsetStart="0dp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:targetApi="lollipop">
 
         <androidx.appcompat.widget.AppCompatImageButton
                 android:id="@+id/back_btn"
@@ -150,11 +154,12 @@
             android:background="?attr/colorPrimary"
             android:orientation="horizontal"
             android:id="@+id/input_layout"
+            android:transitionName="@string/transition_name_bottom_bar"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="parent"
             app:layout_constraintBottom_toBottomOf="@+id/messages_recycleview"
-            >
+            tools:targetApi="lollipop">
 
         <ImageButton
                 android:id="@+id/button_chat_attach"

@@ -57,6 +57,16 @@
                 android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
 
         <activity
+                android:name=".AttachmentPreviewActivity"
+                android:label="@string/attachment_preview_label"
+                android:theme="@style/AppTheme.DarkTitle" />
+
+        <activity
+                android:name=".ImagePreviewActivity"
+                android:label=""
+                android:theme="@style/AppTheme.DarkTitle" />
+
+        <activity
                 android:name=".OccupantPreviewActivity"
                 android:label="@string/occupant_preview_label" />
 
@@ -79,9 +89,6 @@
         <activity
             android:name=".SelectCallMembersActivity"
             android:label="@string/title_select_call_members" />
-
-        <activity android:name=".ImagePreviewActivity"
-            android:theme="@style/AppTheme.DarkTitle"/>
 
         <service android:name=".fcm.PushListenerService">
             <intent-filter>

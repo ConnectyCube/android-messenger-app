@@ -14,11 +14,11 @@ interface ChatDao {
     @Query("SELECT * FROM chats ORDER BY lastMessageDateSent DESC")
     fun getChats(): LiveData<List<Chat>>
 
-    @Query("SELECT * FROM chats WHERE id = :chatId")
+    @Query("SELECT * FROM chats WHERE chat_id = :chatId")
     fun getChat(chatId: String?): LiveData<Chat>
 
-    @Query("SELECT * FROM chats WHERE id = :chatId")
-    fun getChatSync(chatId: String): Chat
+    @Query("SELECT * FROM chats WHERE chat_id = :chatId")
+    fun getChatSync(chatId: String): Chat?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(chat: Chat)
@@ -35,7 +35,7 @@ interface ChatDao {
     @Query("DELETE FROM chats")
     fun nukeTable()
 
-    @Query("DELETE FROM chats WHERE id in (:dialogsIds)")
+    @Query("DELETE FROM chats WHERE chat_id in (:dialogsIds)")
     fun deleteChatsByIds(vararg dialogsIds: String?)
 
     @Delete

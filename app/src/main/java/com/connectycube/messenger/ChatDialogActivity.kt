@@ -10,10 +10,12 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.observe
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.connectycube.chat.ConnectycubeChatService
 import com.connectycube.chat.IncomingMessagesManager
 import com.connectycube.chat.exception.ChatException
 import com.connectycube.chat.listeners.ChatDialogMessageListener
+import com.connectycube.chat.listeners.MessageStatusListener
 import com.connectycube.chat.model.ConnectycubeChatDialog
 import com.connectycube.chat.model.ConnectycubeChatMessage
 import com.connectycube.messenger.adapters.ChatDialogAdapter
@@ -35,6 +37,8 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 
 const val REQUEST_SETTING_SCREEN = 50
+const val REQUEST_CHAT_DIALOG_ID = 55
+const val EXTRA_DIALOG_ID = "chat_dialog_id"
 
 class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapterCallback {
 
@@ -44,6 +48,7 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
 
     private lateinit var chatDialogAdapter: ChatDialogAdapter
     private var incomingMessagesManager: IncomingMessagesManager? = null
+    private val messageStatusListener: MessageStatusListener = ChatMessagesStatusListener()
 
     private var currentDialogId: String? = null
 
@@ -51,7 +56,7 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
         super.onCreate(savedInstanceState)
         Timber.d("onCreate")
         setContentView(R.layout.activity_chatdialogs)
-        initToolbar()
+        initActionbar()
         initDialogsAdapter()
         initDialogsRecyclerView()
         subscribeUi()
@@ -60,12 +65,10 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
     override fun onResume() {
         super.onResume()
         setCurrentUser()
-        currentDialogId?.let { chatDialogListViewModel.updateChat(currentDialogId!!) }
     }
 
-    private fun initToolbar() {
-        setSupportActionBar(toolbar)
-        toolbar.setOnClickListener { startSettingsActivity() }
+    private fun initActionbar() {
+        action_bar_view.setOnClickListener { startSettingsActivity() }
         setCurrentUser()
     }
 
@@ -79,14 +82,36 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
         chats_recycler_view.layoutManager = LinearLayoutManager(this)
         chats_recycler_view.itemAnimator = DefaultItemAnimator()
         chats_recycler_view.adapter = chatDialogAdapter
+
+        chatDialogAdapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+            override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
+                scrollUp()
+            }
+
+            override fun onItemRangeMoved(fromPosition: Int, toPosition: Int, itemCount: Int) {
+                scrollUp()
+            }
+
+            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                scrollUp()
+            }
+        })
+    }
+
+    private fun scrollUp() {
+        chats_recycler_view.scrollToPosition(0)
     }
 
     private fun subscribeUi() {
         Timber.d("subscribeUi")
         showProgress(progressbar)
         LiveDataBus.subscribe(EVENT_CHAT_LOGIN, this, Observer<EventChatConnection> {
-            if (it.error != null){
-                Toast.makeText(this, getString(R.string.login_chat_error_format, it.error.message), Toast.LENGTH_LONG).show()
+            if (it.error != null) {
+                val errMsg =
+                    if (it.error.message != null && !it.error.message!!.contains(getString(R.string.read_error))) {
+                        it.error.message
+                    } else getString(R.string.chat_connection_problem)
+                Toast.makeText(this, getString(R.string.login_chat_error_format, errMsg), Toast.LENGTH_LONG).show()
             } else if (it.connected) {
                 initManagers()
             }
@@ -115,16 +140,16 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
         chatDialogAdapter.callback = this
     }
 
-    fun initManagers() {
+    private fun initManagers() {
+        ConnectycubeChatService.getInstance().messageStatusesManager?.addMessageStatusListener(messageStatusListener)
         incomingMessagesManager = ConnectycubeChatService.getInstance().incomingMessagesManager
         incomingMessagesManager?.addDialogMessageListener(AllMessageListener())
     }
 
-    fun unregisterChatManagers() {
+    private fun unregisterChatManagers() {
+        ConnectycubeChatService.getInstance().messageStatusesManager?.removeMessageStatusListener(messageStatusListener)
         incomingMessagesManager?.dialogMessageListeners?.forEach {
-            incomingMessagesManager?.removeDialogMessageListrener(
-                it
-            )
+            incomingMessagesManager?.removeDialogMessageListrener(it)
         }
     }
 
@@ -137,6 +162,10 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
                 if (data.getBooleanExtra(EXTRA_LOGOUT, false)) {
                     logout()
                 }
+            }
+            REQUEST_CHAT_DIALOG_ID -> {
+                val chatDialogIdForUpdate = data.getStringExtra(EXTRA_DIALOG_ID)
+                chatDialogIdForUpdate?.let { chatDialogListViewModel.updateChat(it) }
             }
         }
     }
@@ -154,7 +183,7 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
 
     fun onCreateNewChatClick(view: View) {
         val intent = Intent(this, CreateChatDialogActivity::class.java)
-        startActivity(intent)
+        startActivityForResult(intent, REQUEST_CHAT_DIALOG_ID)
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
     }
 
@@ -168,7 +197,7 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
     }
 
     override fun onChatDialogDelete(chatDialog: ConnectycubeChatDialog) {
-        Timber.d("Try delete dialog " + chatDialog.dialogId)
+        Timber.d("Try delete dialog= ${chatDialog.dialogId}")
         chatDialogListViewModel.deleteChat(chatDialog).observe(this) { resource ->
             when (resource.status) {
                 Status.SUCCESS -> hideProgress(progressbar)
@@ -186,7 +215,8 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
         val intent = Intent(this, ChatMessageActivity::class.java).apply {
             putExtra(EXTRA_CHAT, chat)
         }
-        startActivity(intent)
+        startActivityForResult(intent, REQUEST_CHAT_DIALOG_ID)
+        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
     }
 
     override fun onBackPressed() {
@@ -199,6 +229,7 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
 
     private fun logout() {
         showProgress(progressbar)
+        currentDialogId = null
         chatDialogListViewModel.chatLiveDataLazy.removeObservers(this)
         LiveDataBus.unregister(EVENT_CHAT_LOGIN)
         GlobalScope.launch(Dispatchers.Main) {
@@ -233,11 +264,24 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
             chatMessage: ConnectycubeChatMessage,
             senderId: Int?
         ) {
-            Timber.d("processMessage chatMessage= " + chatMessage.body + ", from senderId $senderId")
+            Timber.d("processMessage chatMessage= ${chatMessage.body}, from senderId $senderId")
             if (senderId != ConnectycubeChatService.getInstance().user.id) {
-                Timber.d("processMessage chatDialogListViewModel.updateChat chatMessage= " + chatMessage.body)
+                Timber.d("processMessage chatDialogListViewModel.updateChat chatMessage= ${chatMessage.body}")
                 chatDialogListViewModel.updateChat(dialogId)
             }
         }
+    }
+
+    private inner class ChatMessagesStatusListener : MessageStatusListener {
+        override fun processMessageRead(messageID: String, dialogId: String, userId: Int) {
+            Timber.d("processMessageRead messageID= $messageID")
+            chatDialogListViewModel.updateMessageReadStatus(messageID, userId)
+        }
+
+        override fun processMessageDelivered(messageID: String, dialogId: String, userId: Int) {
+            Timber.d("processMessageDelivered messageID= $messageID")
+            chatDialogListViewModel.updateMessageDeliveredStatus(messageID, userId)
+        }
+
     }
 }

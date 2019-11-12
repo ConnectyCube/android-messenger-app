@@ -8,15 +8,73 @@
         android:background="#000"
         tools:ignore="RtlHardcoded,RtlSymmetry">
 
-    <com.connectycube.messenger.utilities.CircleRectPhotoView
-            android:id="@+id/image_view"
+    <androidx.appcompat.widget.Toolbar
+            android:id="@+id/image_toolbar"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:adjustViewBounds="true"
-            app:layout_constraintBottom_toTopOf="parent"
-            android:transitionName="img_full_screen"
+            android:layout_height="wrap_content"
+            android:clipToPadding="false"
+            android:elevation="10dp"
+            android:background="@color/dark_transparent"
+            android:minHeight="?attr/actionBarSize"
+            android:outlineProvider="none"
+            android:transitionName="@string/transition_name_toolbar"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:targetApi="lollipop">
+
+        <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/back_btn"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:background="?actionBarItemBackground"
+                android:src="@drawable/ic_back"
+                android:tint="@color/white"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+                android:id="@+id/image_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:textColor="@color/white"
+                android:textSize="18sp"
+                android:tint="@color/white"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/back_btn"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="@string/image_preview_label" />
+
+    </androidx.appcompat.widget.Toolbar>
+
+    <com.github.chrisbanes.photoview.PhotoView
+            android:id="@+id/image_view"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_gravity="center"
+            android:adjustViewBounds="true"
+            android:transitionName="@string/transition_name_image_view"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/image_toolbar"
+            tools:targetApi="lollipop" />
+
+    <View
+            android:id="@+id/view_stub"
+            android:layout_width="match_parent"
+            android:layout_height="?actionBarSize"
+            android:background="@android:color/transparent"
+            android:transitionName="@string/transition_name_bottom_bar"
+            app:layout_constraintBottom_toBottomOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

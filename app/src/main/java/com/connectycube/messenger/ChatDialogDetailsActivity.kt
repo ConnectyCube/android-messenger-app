@@ -4,8 +4,6 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.ImageView
-import android.widget.ImageView.ScaleType.CENTER_CROP
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.lifecycle.Observer
@@ -327,10 +325,5 @@ class ChatDialogDetailsActivity : BaseChatActivity(),
     override fun onBackPressed() {
         super.onBackPressed()
         setResult(REQUEST_CODE_DETAILS)
-    }
-
-    override fun finish() {
-        super.finish()
-        overridePendingTransition(0, R.anim.slide_out_right)
     }
 }

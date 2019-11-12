@@ -50,15 +50,15 @@ class ChatDialogDetailsViewModel internal constructor(
         result.value = Resource.loading(null)
 
         val source = chatRepository.getChat(dialogId)
-        result.addSource(source) { charDialog ->
+        result.addSource(source) { chatDialog ->
 
-            if (charDialog == null) {
+            if (chatDialog == null) {
                 result.value = Resource.error(
                     getApplication<Application>().getString(R.string.something_went_wrong_try_again_later),
                     null
                 )
             } else {
-                result.value = Resource.success(charDialog.cubeChat)
+                result.value = Resource.success(chatDialog)
             }
         }
 
@@ -78,44 +78,44 @@ class ChatDialogDetailsViewModel internal constructor(
     fun updateGroupPhoto(dialogId: String, newPhoto: String) {
         liveDialog().postValue(Resource.loading(null))
         chatRepository.updateChatPhoto(dialogId, newPhoto, { error, chat ->
-            liveDialog().postValue(Resource.error(error, chat.cubeChat))
+            liveDialog().postValue(Resource.error(error, chat))
         }, { progress -> liveDialog().postValue(Resource.loadingProgress(null, progress)) })
     }
 
     fun updateGroupDescription(dialogId: String, newDescription: String) {
         chatRepository.updateChatDescription(dialogId, newDescription) { error, chat ->
-            liveDialog().postValue(Resource.error(error, chat.cubeChat))
+            liveDialog().postValue(Resource.error(error, chat))
         }
     }
 
     fun updateGroupName(dialogId: String, newName: String) {
         chatRepository.updateChatName(dialogId, newName) { error, chat ->
-            liveDialog().postValue(Resource.error(error, chat.cubeChat))
+            liveDialog().postValue(Resource.error(error, chat))
         }
     }
 
     fun addUserToAdmins(dialogId: String, userId: Int) {
         chatRepository.addChatAdmins(dialogId, userId) { error, chat ->
-            liveDialog().postValue(Resource.error(error, chat.cubeChat))
+            liveDialog().postValue(Resource.error(error, chat))
         }
     }
 
     fun removeUserFromAdmins(dialogId: String, userId: Int) {
         chatRepository.removeChatAdmins(dialogId, userId) { error, chat ->
-            liveDialog().postValue(Resource.error(error, chat.cubeChat))
+            liveDialog().postValue(Resource.error(error, chat))
         }
     }
 
 
     fun addOccupants(dialogId: String, vararg usersIds: Int) {
         chatRepository.addChatOccupants(dialogId, *usersIds) { error, chat ->
-            liveDialog().postValue(Resource.error(error, chat.cubeChat))
+            liveDialog().postValue(Resource.error(error, chat))
         }
     }
 
     fun removeOccupants(dialogId: String, vararg usersIds: Int) {
         chatRepository.removeChatOccupants(dialogId, *usersIds) { error, chat ->
-            liveDialog().postValue(Resource.error(error, chat.cubeChat))
+            liveDialog().postValue(Resource.error(error, chat))
         }
     }
 

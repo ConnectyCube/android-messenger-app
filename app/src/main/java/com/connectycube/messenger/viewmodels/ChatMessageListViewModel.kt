@@ -44,8 +44,8 @@ class ChatMessageListViewModel internal constructor(
     val messages = Transformations.switchMap(repoResult, { it.pagedList })
     val refreshState = Transformations.switchMap(repoResult, { it.refreshState })
 
-    private fun createShowDialog(): LiveData<ConnectycubeChatDialog> {
-        return map(chatRepository.getChat(dialogId)) { it.cubeChat }
+    private fun createShowDialog(): LiveData<out ConnectycubeChatDialog> {
+        return chatRepository.getChat(dialogId)
     }
 
     fun getOccupants(chatDialog: ConnectycubeChatDialog): LiveData<Resource<List<ConnectycubeUser>>> {
@@ -82,7 +82,7 @@ class ChatMessageListViewModel internal constructor(
                     null
                 )
             } else {
-                result.value = Resource.success(chatDialog.cubeChat)
+                result.value = Resource.success(chatDialog)
             }
             result.removeSource(source)
         }

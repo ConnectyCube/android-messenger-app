@@ -34,10 +34,13 @@ class ChatRepository private constructor(private val chatDao: ChatDao, private v
 
                 override fun saveCallResult(item: Chat) {
                     val chat = chatDao.getChatSync(chatId)
-                    val shouldUpdate = chat != item
-                    Timber.d("shouldUpdate= $shouldUpdate")
+                    val shouldUpdate = chat != null && chat != item
+                    val shouldInsert = chat == null
+                    Timber.d("shouldUpdate= $shouldUpdate, shouldInsert= $shouldInsert")
                     if (shouldUpdate) {
                         chatDao.update(item)
+                    } else if (shouldInsert) {
+                        chatDao.insert(item)
                     }
                 }
             }
@@ -76,9 +79,8 @@ class ChatRepository private constructor(private val chatDao: ChatDao, private v
             override fun saveCallResult(item: Chat) {
                 newChatDialogId = item.chatId
                 //TODO VT to save correct name for private dialog (delete TODO code after server fix and uncomment stable code)
-                item.cubeChat.name = chat.name
-                val createdDialog = item.copy(name = chat.name)
-                chatDao.insert(createdDialog)
+                item.name = chat.name
+                chatDao.insert(item)
                 //TODO end
 
 //                chatDao.insert(item)
@@ -193,7 +195,7 @@ class ChatRepository private constructor(private val chatDao: ChatDao, private v
     private fun getRequestProcessor(chatId: String, errorAction: Function2<String, Chat, Unit>): UpdateResourceProcessor<Chat> {
         return object : UpdateResourceProcessor<Chat>(appExecutors){
             override fun processError(errorMessage: String) {
-                errorAction.invoke(errorMessage, chatDao.getChatSync(chatId))
+                chatDao.getChatSync(chatId)?.let { errorAction.invoke(errorMessage, it) }
             }
 
             override fun saveCallResult(item: Chat) {
@@ -208,7 +210,7 @@ class ChatRepository private constructor(private val chatDao: ChatDao, private v
     ): UpdateResourceProgressProcessor<Chat> {
         return object : UpdateResourceProgressProcessor<Chat>(appExecutors) {
             override fun processError(errorMessage: String) {
-                errorAction.invoke(errorMessage, chatDao.getChatSync(chatId))
+                chatDao.getChatSync(chatId)?.let{ errorAction.invoke(errorMessage, it)}
             }
 
             override fun saveCallResult(item: Chat) {

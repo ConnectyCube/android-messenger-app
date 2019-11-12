@@ -25,8 +25,9 @@ object InjectorUtils {
     }
 
     fun provideChatDialogListViewModelFactory(context: Context): ChatDialogListViewModelFactory {
-        val repository = getChatRepository(context)
-        return ChatDialogListViewModelFactory(repository)
+        val chatRepository = getChatRepository(context)
+        val messageRepository = getChatMessageRepository(context)
+        return ChatDialogListViewModelFactory(chatRepository, messageRepository)
     }
 
     private fun getChatRepository(context: Context): ChatRepository {
@@ -110,7 +111,10 @@ object InjectorUtils {
     }
 
     private fun getMessageSenderViewRepository(context: Context): MessageSenderRepository {
-        return MessageSenderRepository.getInstance(AppDatabase.getInstance(context.applicationContext).messageDao())
+        return MessageSenderRepository.getInstance(
+            AppDatabase.getInstance(context.applicationContext).messageDao(),
+            AppDatabase.getInstance(context.applicationContext).attachmentDao()
+        )
     }
 
     fun provideMessageSenderViewModelFactory(application: Application,

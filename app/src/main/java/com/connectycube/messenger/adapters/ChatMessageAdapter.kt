@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.annotation.LayoutRes
@@ -13,7 +14,6 @@ import androidx.annotation.NonNull
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.connectycube.auth.session.ConnectycubeSessionManager
 import com.connectycube.chat.model.ConnectycubeAttachment
 import com.connectycube.chat.model.ConnectycubeChatDialog
 import com.connectycube.chat.model.ConnectycubeChatMessage
@@ -27,12 +27,15 @@ import com.timehop.stickyheadersrecyclerview.StickyRecyclerHeadersAdapter
 import timber.log.Timber
 
 
+typealias AttachmentClickListener = (ConnectycubeAttachment, View) -> Unit
+typealias MarkAsReadListener = (ConnectycubeChatMessage) -> Unit
 private typealias PAYLOAD_PROGRESS = ChatMessageAdapter.ProgressMessage
 
 class ChatMessageAdapter(
     val context: Context,
     var chatDialog: ConnectycubeChatDialog,
-    private val attachmentClickListener: ImageAttachClickListener
+    private val attachmentClickListener: AttachmentClickListener,
+    private val markAsReadListener: MarkAsReadListener
 ) : PagedListAdapter<ConnectycubeChatMessage, RecyclerView.ViewHolder>(diffCallback),
     StickyRecyclerHeadersAdapter<RecyclerView.ViewHolder> {
 
@@ -42,7 +45,7 @@ class ChatMessageAdapter(
     val ATTACH_IMAGE_OUTCOMING = 3
     val ATTACH_IMAGE_INCOMING = 4
 
-    val localUserId = ConnectycubeSessionManager.getInstance().sessionParameters.userId
+    val localUserId = SharedPreferencesManager.getInstance(context).getCurrentUser().id
     val occupantsIds: ArrayList<Int> =
         ArrayList<Int>(chatDialog.occupants).apply { remove(localUserId) }
     val occupants: MutableMap<Int, ConnectycubeUser> = mutableMapOf()
@@ -104,7 +107,7 @@ class ChatMessageAdapter(
         val chatMessage = getItem(position)
         chatMessage?.let {
             if (isIncoming(chatMessage) && !isRead(chatMessage)) {
-                markAsReadMessage(chatMessage)
+                markAsReadListener(chatMessage)
             }
         }
 
@@ -158,7 +161,7 @@ class ChatMessageAdapter(
                 bindTo(it)
                 message.let {
                     itemView.setOnClickListener {
-                        attachmentClickListener.onImageAttachClicked(message.attachments.first(), holder.attachmentView)
+                        attachmentClickListener(message.attachments.first(), holder.attachmentView)
                     }
                 }
             }
@@ -171,7 +174,7 @@ class ChatMessageAdapter(
             with(holder) {
                 bindTo(it, showAvatar(position, message), showName(position, message))
                 itemView.setOnClickListener {
-                    attachmentClickListener.onImageAttachClicked(message.attachments.first(), holder.attachmentView)
+                    attachmentClickListener(message.attachments.first(), holder.attachmentView)
                 }
             }
         }
@@ -331,14 +334,6 @@ class ChatMessageAdapter(
         return DateUtils.formatDateTime(context, seconds * 1000L, DateUtils.FORMAT_SHOW_TIME)
     }
 
-    private fun markAsReadMessage(chatMessage: ConnectycubeChatMessage) {
-        try {
-            chatDialog.readMessage(chatMessage)
-        } catch (ex: Exception) {
-            Timber.d(ex)
-        }
-    }
-
     private fun isRead(chatMessage: ConnectycubeChatMessage): Boolean {
         return !CollectionsUtil.isEmpty(chatMessage.readIds) && chatMessage.readIds.contains(
             localUserId
@@ -360,8 +355,15 @@ class ChatMessageAdapter(
             override fun areContentsTheSame(
                 oldItem: ConnectycubeChatMessage,
                 newItem: ConnectycubeChatMessage
-            ): Boolean =
-                oldItem.id == newItem.id && oldItem.readIds == newItem.readIds && oldItem.deliveredIds == newItem.deliveredIds
+            ): Boolean {
+                val resultMessage =
+                    oldItem.id == newItem.id && oldItem.readIds == newItem.readIds && oldItem.deliveredIds == newItem.deliveredIds
+                var resultAttachment = true
+                if (!(oldItem.attachments.isNullOrEmpty() && newItem.attachments.isNullOrEmpty())) {
+                    resultAttachment = oldItem.attachments?.first() == newItem.attachments?.first()
+                }
+                return resultMessage && resultAttachment
+            }
 
             override fun getChangePayload(oldItem: ConnectycubeChatMessage,
                                           newItem: ConnectycubeChatMessage
@@ -483,7 +485,18 @@ class ChatMessageAdapter(
         }
 
         private fun showImageAttachment(message: ConnectycubeChatMessage) {
-            val validUrl = getAttachImageUrl(message.attachments.iterator().next())
+            val attachment = message.attachments.iterator().next()
+            val validUrl = getAttachImageUrl(attachment)
+            attachmentView.layoutParams.apply {
+                if (attachment.height != 0 && attachment.width != 0) {
+                    height = attachment.height
+                    width = attachment.width
+                    Timber.d("height= $height, width= $width")
+                } else {
+                    height = LinearLayout.LayoutParams.WRAP_CONTENT
+                    width = LinearLayout.LayoutParams.WRAP_CONTENT
+                }
+            }
             loadAttachImage(validUrl, attachmentView, context)
         }
     }
@@ -533,8 +546,4 @@ class ChatMessageAdapter(
     }
 
     data class ProgressMessage(val progress: Int = 0)
-
-    interface ImageAttachClickListener {
-        fun onImageAttachClicked(connectycubeAttachment: ConnectycubeAttachment, attachImageContainer: View)
-    }
 }

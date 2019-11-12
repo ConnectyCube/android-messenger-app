@@ -70,7 +70,7 @@ class RTCSessionManager {
         initRTCMediaConfig()
         startCallActivity(false)
 
-        sendCallPushNotification(rtcSession.opponents, rtcSession.sessionID)
+        sendCallPushNotification(rtcSession.opponents, rtcSession.sessionID, RTCConfig.getAnswerTimeInterval())
     }
 
     private fun initRTCMediaConfig() {
@@ -85,7 +85,11 @@ class RTCSessionManager {
         }
     }
 
-    private fun sendCallPushNotification(opponents: List<Int>, sessionId: String) {
+    private fun sendCallPushNotification(
+        opponents: List<Int>,
+        sessionId: String,
+        answerTimeInterval: Long
+    ) {
         val event = ConnectycubeEvent()
         event.userIds = StringifyArrayList(opponents)
         event.environment = ConnectycubeEnvironment.DEVELOPMENT
@@ -100,6 +104,7 @@ class RTCSessionManager {
             // custom parameters
             json.put(PARAM_NOTIFICATION_TYPE, NOTIFICATION_TYPE_CALL)
             json.put(PARAM_CALL_ID, sessionId)
+            json.put(PARAM_ANSWER_TIMEOUT, answerTimeInterval)
         } catch (e: Exception) {
             e.printStackTrace()
         }

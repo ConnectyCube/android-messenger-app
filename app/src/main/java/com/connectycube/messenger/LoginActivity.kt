@@ -56,15 +56,31 @@ class LoginActivity : BaseActivity() {
         val userListViewModel: UserListViewModel by viewModels {
             InjectorUtils.provideUserListViewModelFactory(this, usersLogins)
         }
+        fun errorProcessing(msg: String) {
+            hideProgress(progressbar)
+            Toast.makeText(
+                applicationContext,
+                msg,
+                Toast.LENGTH_SHORT
+            ).show()
+        }
         userListViewModel.getUsers().observe(this) { resource ->
-            if (resource.status == Status.SUCCESS) {
-                val listUser = resource.data
+            when (resource.status) {
+                Status.SUCCESS -> {
+                    val listUser = resource.data
 
-                val userRaw: User? = listUser?.find { it.login == user.login }
-                userRaw?.let {
-                    Timber.d("proceed loginTo user= $it, conUser= ${it.conUser}")
-                    val userToLogin = it.conUser.also { it.password = user.password }
-                    signInRestIdNeed(userToLogin)
+                    val userRaw: User? = listUser?.find { it.login == user.login }
+                    if (userRaw != null) {
+                        Timber.d("proceed loginTo user= $userRaw, conUser= ${userRaw.conUser}")
+                        val userToLogin = userRaw.conUser.also { it.password = user.password }
+                        signInRestIdNeed(userToLogin)
+                    } else {
+                        errorProcessing(getString(R.string.loading_users_empty))
+                    }
+                }
+                Status.ERROR ->
+                    errorProcessing(getString(R.string.loading_users_error, resource.message))
+                Status.LOADING -> {
                 }
             }
         }

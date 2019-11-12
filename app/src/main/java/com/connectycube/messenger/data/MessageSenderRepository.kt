@@ -6,13 +6,16 @@ import com.connectycube.chat.model.ConnectycubeAttachment
 import com.connectycube.chat.model.ConnectycubeChatDialog
 import com.connectycube.chat.model.ConnectycubeChatMessage
 import com.connectycube.messenger.api.*
+import com.connectycube.messenger.utilities.convertToListAttachment
 import com.connectycube.messenger.utilities.convertToMessage
+import com.connectycube.messenger.utilities.getImageSize
 import com.connectycube.messenger.vo.AppExecutors
 import com.connectycube.messenger.vo.Resource
 import org.jivesoftware.smack.SmackException
 import timber.log.Timber
 
 class MessageSenderRepository private constructor(private val messageDao: MessageDao,
+                                                  private val attachmentDao: AttachmentDao,
                                                   private val appExecutors: AppExecutors
 ) {
     private val service: ConnectycubeService = ConnectycubeService()
@@ -23,7 +26,8 @@ class MessageSenderRepository private constructor(private val messageDao: Messag
                               dialog: ConnectycubeChatDialog
     ): LiveData<Resource<ConnectycubeChatMessage>> {
         val messageToTempSave = createMessage(dialog, text)
-        messageToTempSave.addAttachment(createAttachment(path, type))
+        val attachmentToTempSave = createAttachment(path, type)
+        messageToTempSave.addAttachment(attachmentToTempSave)
         saveMediatorResult(messageToTempSave)
 
         val result = MediatorLiveData<Resource<ConnectycubeChatMessage>>()
@@ -39,11 +43,13 @@ class MessageSenderRepository private constructor(private val messageDao: Messag
                     result.value = Resource.loadingProgress(messageToTempSave, response.progress)
                 }
                 is ApiErrorResponse -> {
+                    deleteTempMessage(messageToTempSave.id, path.hashCode().toString())
                     result.value = Resource.error(response.errorMessage, null)
                     result.removeSource(apiResponse)
                 }
                 is ApiSuccessResponse -> {
                     val attachment = response.body
+                    updateAttachmentSize(attachmentToTempSave, attachment)
 
                     val messageUpdated = buildMessage(messageToTempSave, attachment, dialog)
                     result.removeSource(apiResponse)
@@ -58,6 +64,13 @@ class MessageSenderRepository private constructor(private val messageDao: Messag
             }
         }
         return result
+    }
+
+    private fun deleteTempMessage(messageId: String, attachId: String? = null) {
+        appExecutors.diskIO().execute {
+            attachId?.let { attachmentDao.deleteById(attachId) }
+            messageDao.deleteByMessageId(messageId)
+        }
     }
 
     fun sendMessageText(text: String,
@@ -77,7 +90,12 @@ class MessageSenderRepository private constructor(private val messageDao: Messag
     }
 
     private fun saveMediatorResult(chatMessage: ConnectycubeChatMessage) {
-        appExecutors.diskIO().execute { messageDao.insert(convertToMessage(chatMessage)) }
+        appExecutors.diskIO().execute {
+            chatMessage.attachments?.let {
+                attachmentDao.insert(convertToListAttachment(chatMessage)!!)
+            }
+            messageDao.insert(convertToMessage(chatMessage))
+        }
     }
 
     private fun sendMessage(chatMessage: ConnectycubeChatMessage,
@@ -89,6 +107,7 @@ class MessageSenderRepository private constructor(private val messageDao: Messag
                 dialog.sendMessage(chatMessage)
                 result.postValue(Resource.success(chatMessage))
             } catch (e: SmackException.NotConnectedException) {
+                deleteTempMessage(chatMessage.id)
                 result.postValue(
                     Resource.error(
                         e.message ?: "SmackException.NotConnectedException",
@@ -97,6 +116,7 @@ class MessageSenderRepository private constructor(private val messageDao: Messag
                 )
                 Timber.d(e)
             } catch (e: InterruptedException) {
+                deleteTempMessage(chatMessage.id)
                 result.postValue(Resource.error(e.message ?: "InterruptedException", chatMessage))
                 Timber.d(e)
             }
@@ -105,8 +125,14 @@ class MessageSenderRepository private constructor(private val messageDao: Messag
     }
 
     private fun createAttachment(path: String, type: String): ConnectycubeAttachment {
+        val size = getImageSize(path)
+
         val attachment = ConnectycubeAttachment(type)
+        attachment.id = path.hashCode().toString()
         attachment.url = path
+        attachment.height = size.height
+        attachment.width = size.width
+
         return attachment
     }
 
@@ -127,6 +153,13 @@ class MessageSenderRepository private constructor(private val messageDao: Messag
         return chatMessage
     }
 
+    private fun updateAttachmentSize(attachmentToTempSave: ConnectycubeAttachment,
+                                     attachmentResult: ConnectycubeAttachment
+    ) {
+        attachmentResult.height = attachmentToTempSave.height
+        attachmentResult.width = attachmentToTempSave.width
+    }
+
     private fun buildMessage(messageToTempSave: ConnectycubeChatMessage,
                              attachment: ConnectycubeAttachment? = null,
                              dialog: ConnectycubeChatDialog
@@ -139,10 +172,8 @@ class MessageSenderRepository private constructor(private val messageDao: Messag
         if (dialog.isPrivate) chatMessage.recipientId = dialog.recipientId
         if (attachment != null) {
             chatMessage.addAttachment(attachment)
-            chatMessage.body = messageToTempSave.body
-        } else {
-            chatMessage.body = messageToTempSave.body
         }
+        chatMessage.body = messageToTempSave.body
         return chatMessage
     }
 
@@ -152,9 +183,13 @@ class MessageSenderRepository private constructor(private val messageDao: Messag
         @Volatile
         private var instance: MessageSenderRepository? = null
 
-        fun getInstance(messageDao: MessageDao) =
+        fun getInstance(messageDao: MessageDao, attachmentDao: AttachmentDao) =
             instance ?: synchronized(this) {
-                instance ?: MessageSenderRepository(messageDao, AppExecutors()).also {
+                instance ?: MessageSenderRepository(
+                    messageDao,
+                    attachmentDao,
+                    AppExecutors()
+                ).also {
                     instance = it
                 }
             }
