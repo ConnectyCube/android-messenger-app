@@ -27,6 +27,7 @@ import com.connectycube.messenger.helpers.RTCSessionManager
 import com.connectycube.messenger.utilities.InjectorUtils
 import com.connectycube.messenger.utilities.SharedPreferencesManager
 import com.connectycube.messenger.utilities.loadUserAvatar
+import com.connectycube.messenger.utilities.setSingleOnClickListener
 import com.connectycube.messenger.viewmodels.ChatDialogListViewModel
 import com.connectycube.messenger.vo.Status
 import com.connectycube.users.model.ConnectycubeUser
@@ -68,7 +69,7 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
     }
 
     private fun initActionbar() {
-        action_bar_view.setOnClickListener { startSettingsActivity() }
+        action_bar_view.setSingleOnClickListener { startSettingsActivity() }
         setCurrentUser()
     }
 

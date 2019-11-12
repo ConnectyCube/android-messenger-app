@@ -49,11 +49,11 @@ class ChatDialogDetailsActivity : BaseChatActivity(),
     private fun initToolbar() {
         setSupportActionBar(toolbar)
         back_btn.setOnClickListener { onBackPressed() }
-        edit_group_name_btn.setOnClickListener { editGroupName() }
-        edit_grop_description_btn.setOnClickListener { editGroupDescription() }
-        edit_avatar_btn.setOnClickListener { editGroupPhoto() }
-        add_occupants_img.setOnClickListener { addOccupants() }
-        remove_occupants_img.setOnClickListener { removeOccupants() }
+        edit_group_name_btn.setSingleOnClickListener { editGroupName() }
+        edit_grop_description_btn.setSingleOnClickListener { editGroupDescription() }
+        edit_avatar_btn.setSingleOnClickListener { editGroupPhoto() }
+        add_occupants_img.setSingleOnClickListener { addOccupants() }
+        remove_occupants_img.setSingleOnClickListener { removeOccupants() }
     }
 
     private fun editGroupPhoto() {
