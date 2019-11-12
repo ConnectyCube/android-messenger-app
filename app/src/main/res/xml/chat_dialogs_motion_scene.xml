@@ -9,7 +9,7 @@
         <OnSwipe
                 app:dragDirection="dragUp"
                 app:touchAnchorId="@+id/chats_recycler_view"
-                app:touchAnchorSide="bottom" />
+                app:touchAnchorSide="top" />
     </Transition>
 
     <ConstraintSet android:id="@+id/start_state">
