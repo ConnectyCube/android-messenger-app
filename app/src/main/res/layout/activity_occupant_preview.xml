@@ -5,7 +5,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-    <com.connectycube.messenger.utilities.CircleRectPhotoView
+    <ImageView
             android:id="@+id/avatar_img"
             android:layout_width="150dp"
             android:layout_height="150dp"
@@ -15,7 +15,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.2"
-            app:circleRadius="75dp"
             tools:ignore="ContentDescription"
             tools:src="@drawable/ic_launcher_background" />
 

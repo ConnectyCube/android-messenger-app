@@ -24,7 +24,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <com.connectycube.messenger.utilities.CircleRectPhotoView
+            <ImageView
                 android:id="@+id/avatar_img"
                 android:layout_width="96dp"
                 android:layout_height="96dp"
@@ -33,7 +33,6 @@
                 android:layout_marginTop="8dp"
                 android:scaleType="centerCrop"
                 tools:ignore="ContentDescription"
-                app:circleRadius="48dp"
                 tools:src="@drawable/ic_launcher_background" />
 
             <androidx.appcompat.widget.AppCompatImageButton
