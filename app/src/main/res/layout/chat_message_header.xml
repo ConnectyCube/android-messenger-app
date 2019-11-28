@@ -13,6 +13,6 @@
             android:background="@drawable/chat_message_header_background"
             android:layout_margin="@dimen/margin_small"
             android:padding="@dimen/margin_small"
-            android:textColor="@color/grey_60"
+            android:textColor="?android:attr/textColorTertiary"
             tools:text="23.09.19" />
 </LinearLayout>

@@ -14,6 +14,7 @@ import com.connectycube.chat.model.ConnectycubeDialogType
 import com.connectycube.messenger.R
 import com.connectycube.messenger.utilities.getPrettyDate
 import com.connectycube.messenger.utilities.loadChatDialogPhoto
+import com.connectycube.messenger.utilities.setSingleOnClickListener
 
 const val MENU_ITEM_DELETE: Int = 1
 
@@ -96,7 +97,7 @@ internal class ChatDialogAdapter(private val context: Context) :
                 setTextColor(activityContext, txtLastMessageDate, R.color.dark_grey)
             }
 
-            itemView.setOnClickListener { notifyItemSelected() }
+            itemView.setSingleOnClickListener { notifyItemSelected() }
             itemView.setOnCreateContextMenuListener(this)
         }
 
