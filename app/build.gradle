@@ -26,11 +26,14 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'),
+                    'proguard-connectycube-sdk.pro',
+                    'proguard-gson.pro',
                     'proguard-rules.pro',
+                    'proguard-matisse.pro',
                     'proguard-glide.pro'
-
         }
     }
+
     // work-runtime-ktx 2.1.0 and above now requires Java 8
     kotlinOptions {
         jvmTarget = "1.8"
