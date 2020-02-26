@@ -104,21 +104,32 @@ class ChatMessageActivity : BaseChatActivity() {
         Timber.d("onCreate")
         setContentView(R.layout.activity_chatmessages)
         setSupportActionBar(toolbar)
-        initWithData(intent)
+        initWithData()
     }
 
-    private fun initWithData(intent: Intent) {
+    override fun onResume() {
+        super.onResume()
+        handleNotifications()
+    }
+
+    private fun initWithData() {
         if (intent.hasExtra(EXTRA_CHAT)) {
             val chatDialog = intent.getSerializableExtra(EXTRA_CHAT) as ConnectycubeChatDialog
             modelChatMessageList = getChatMessageListViewModel(chatDialog.dialogId)
-            AppNotificationManager.getInstance().clearNotificationData(this, chatDialog.dialogId)
         } else if (intent.hasExtra(EXTRA_CHAT_ID)) {
             val dialogId = intent.getStringExtra(EXTRA_CHAT_ID)
             modelChatMessageList = getChatMessageListViewModel(dialogId)
-            AppNotificationManager.getInstance().clearNotificationData(this, dialogId)
         }
-
         subscribeToDialog()
+    }
+
+    private fun handleNotifications() {
+        if (intent.hasExtra(EXTRA_CHAT)) AppNotificationManager.getInstance().clearNotificationData(
+            this, (intent.getSerializableExtra(EXTRA_CHAT) as ConnectycubeChatDialog).dialogId
+        )
+        if (intent.hasExtra(EXTRA_CHAT_ID)) AppNotificationManager.getInstance().clearNotificationData(
+            this, intent.getStringExtra(EXTRA_CHAT_ID)
+        )
     }
 
     private fun subscribeToDialog() {
