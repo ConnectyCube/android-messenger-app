@@ -46,7 +46,7 @@ android {
 }
 
 ext {
-    sdkVersion = '1.8.1'
+    sdkVersion = '1.8.2'
     roomVersion = '2.2.0-beta01'
     lifecycleVersion = '2.2.0-alpha02'
     workVersion = '2.1.0'
@@ -85,6 +85,7 @@ private static void androidJetPackComponents(configuration, roomVersion, lifecyc
     configuration.implementation "androidx.lifecycle:lifecycle-extensions:$lifecycleVersion"
     configuration.implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion"
     configuration.implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion"
+    configuration.implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycleVersion"
     configuration.implementation "androidx.paging:paging-runtime-ktx:$paging_version"
     configuration.implementation "androidx.work:work-runtime-ktx:$workVersion"
 }

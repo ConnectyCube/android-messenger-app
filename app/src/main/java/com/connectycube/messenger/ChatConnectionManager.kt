@@ -30,6 +30,7 @@ class ChatConnectionManager {
 
     private val isPending = AtomicBoolean(false)
     private val isInitialized = AtomicBoolean(false)
+    private val chatAppObserver = ChatAppLifecycleObserver()
 
     fun initWith(context: Context) {
         Timber.d("initWith, isPending ${isPending.get()}")
@@ -47,6 +48,7 @@ class ChatConnectionManager {
                     override fun onSuccess(void: Void?, bundle: Bundle?) {
                         isPending.set(false)
                         isInitialized.set(true)
+                        registerAppLifeCycleObserver()
                         initCallManager(context)
                     }
 
@@ -74,6 +76,14 @@ class ChatConnectionManager {
         })
     }
 
+    private fun registerAppLifeCycleObserver() {
+        chatAppObserver.registeredObserver()
+    }
+
+    private fun unregisterAppLifeCycleObserver() {
+        chatAppObserver.unregisteredObserver()
+    }
+
     private fun notifyErrorLoginToChat(exception: Exception) {
         LiveDataBus.publish(EVENT_CHAT_LOGIN, EventChatConnection.error(exception))
     }
@@ -91,6 +101,7 @@ class ChatConnectionManager {
 
     fun terminate() {
         ConnectycubeChatService.getInstance().destroy()
+        unregisterAppLifeCycleObserver()
         isPending.set(false)
         isInitialized.set(false)
         instance = null

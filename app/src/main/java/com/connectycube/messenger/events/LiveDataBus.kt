@@ -44,6 +44,13 @@ object LiveDataBus {
     }
 
     /**
+     * Removes all observers that are tied to the given LifecycleOwner.
+     */
+    fun <T>unsubscribe(@EventIdentifier eventId: Int, lifecycle: LifecycleOwner) {
+        getLiveData<T>(eventId).removeObservers(lifecycle)
+    }
+
+    /**
      * Publish an object to the specified eventId for all subscribers of that eventId.
      */
     fun <T> publish(@EventIdentifier eventId: Int, event: T) {
