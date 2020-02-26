@@ -261,7 +261,6 @@ class ChatMessageActivity : BaseChatActivity() {
     }
 
     private fun bindToChatConnection() {
-        chatDialog.initForChat(ConnectycubeChatService.getInstance())
         initChat(chatDialog)
 
         subscribeMessageSenderAttachment()
