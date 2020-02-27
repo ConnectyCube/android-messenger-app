@@ -50,6 +50,7 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
     private lateinit var chatDialogAdapter: ChatDialogAdapter
     private var incomingMessagesManager: IncomingMessagesManager? = null
     private val messageStatusListener: MessageStatusListener = ChatMessagesStatusListener()
+    private val allMessageListener: AllMessageListener = AllMessageListener()
 
     private var currentDialogId: String? = null
 
@@ -106,6 +107,11 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
     private fun subscribeUi() {
         Timber.d("subscribeUi")
         showProgress(progressbar)
+
+        if(ConnectycubeChatService.getInstance().isLoggedIn) {
+            initManagers()
+        }
+
         LiveDataBus.subscribe(EVENT_CHAT_LOGIN, this, Observer<EventChatConnection> {
             if (it.error != null) {
                 val errMsg =
@@ -144,14 +150,12 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
     private fun initManagers() {
         ConnectycubeChatService.getInstance().messageStatusesManager?.addMessageStatusListener(messageStatusListener)
         incomingMessagesManager = ConnectycubeChatService.getInstance().incomingMessagesManager
-        incomingMessagesManager?.addDialogMessageListener(AllMessageListener())
+        incomingMessagesManager?.addDialogMessageListener(allMessageListener)
     }
 
     private fun unregisterChatManagers() {
         ConnectycubeChatService.getInstance().messageStatusesManager?.removeMessageStatusListener(messageStatusListener)
-        incomingMessagesManager?.dialogMessageListeners?.forEach {
-            incomingMessagesManager?.removeDialogMessageListrener(it)
-        }
+        incomingMessagesManager?.removeDialogMessageListrener(allMessageListener)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
