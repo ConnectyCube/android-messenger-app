@@ -62,8 +62,9 @@ object SettingsProvider {
         val builder = TcpConfigurationBuilder()
             .setAllowListenNetwork(true)
             .setUseStreamManagement(true)
+            .setSocketTimeout(0)
 
-        ConnectycubeChatService.setConnectionFabric(TcpChatConnectionFabric(builder.apply { socketTimeout = 0 }))
+        ConnectycubeChatService.setConnectionFabric(TcpChatConnectionFabric(builder))
 
     }
 }

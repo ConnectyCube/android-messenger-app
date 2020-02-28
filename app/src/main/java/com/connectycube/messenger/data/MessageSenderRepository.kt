@@ -166,6 +166,7 @@ class MessageSenderRepository private constructor(private val messageDao: Messag
     ): ConnectycubeChatMessage {
         val chatMessage = ConnectycubeChatMessage()
         chatMessage.id = messageToTempSave.id
+        chatMessage.dialogId = messageToTempSave.dialogId
         chatMessage.setSaveToHistory(true)
         chatMessage.dateSent = System.currentTimeMillis() / 1000
         chatMessage.isMarkable = true

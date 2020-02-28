@@ -27,7 +27,7 @@ interface MessageDao {
     @Query("SELECT * FROM messages WHERE dialogId = :dialogId ORDER BY dateSent DESC")
     fun postsByDialogId(dialogId: String): DataSource.Factory<Int, Message>
 
-    @Query("DELETE FROM messages WHERE id = :dialogId")
+    @Query("DELETE FROM messages WHERE dialogId = :dialogId")
     fun deleteByDialogId(dialogId: String)
 
     @Query("DELETE FROM messages WHERE id = :messageId")
