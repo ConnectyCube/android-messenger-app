@@ -14,6 +14,7 @@
 #-keep class com.connectycube.extensions.** { *; }
 
 -keep class com.connectycube.pushnotifications.model.** { !transient <fields>; }
+-keep class com.connectycube.pushnotifications.ConnectycubePushNotifications
 
 -keep class com.connectycube.storage.model.** { !transient <fields>; }
 
