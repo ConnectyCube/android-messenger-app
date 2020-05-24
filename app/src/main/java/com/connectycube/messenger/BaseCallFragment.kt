@@ -84,7 +84,10 @@ abstract class BaseCallFragment(
 
     private fun initOpponents() {
         currentSession?.let { session ->
-            val ids = ArrayList<Int>(session.opponents.apply { add(session.callerID) }).toIntArray()
+            val allMembers = ArrayList<Int>(session.opponents)
+            allMembers.add(session.callerID)
+            val ids = allMembers.toIntArray()
+
             callViewModel.getOpponents(*ids).observe(this, Observer { resource ->
                 if (resource.status == Status.SUCCESS) {
                     if (!isIncomingCall) {
