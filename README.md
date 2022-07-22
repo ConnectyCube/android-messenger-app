@@ -1,3 +1,5 @@
+[![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner2-direct.svg)](https://stand-with-ukraine.pp.ua)
+
 # A chat messenger and video calling demo app for Android using ConnectyCube platform
 
 This project contains a chat messenger & video calling open source demo app for Android written on Kotlin and based on [ConnectyCube](https://connectycube.com/) communication platform.
