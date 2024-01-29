@@ -3,17 +3,17 @@ package com.connectycube.messenger.data
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.connectycube.chat.model.ConnectycubeChatMessage
+import com.connectycube.chat.models.ConnectycubeMessage
 
 @Entity(
     tableName = "messages",
-    ignoredColumns = ["properties", "packetExtension", "complexProperties", "saveToHistory", "delayed", "attachments"]
+    ignoredColumns = ["properties", "isRead", "saveToHistory", "delayed", "attachments", "reactions"]
 )
 data class Message(
     @PrimaryKey
-    @ColumnInfo(name = "id") val messageId: String
+    @ColumnInfo(name = "message_id") val messageID: String
 ) :
-    ConnectycubeChatMessage() {
+    ConnectycubeMessage() {
 
-    override fun toString() = "messageId= $messageId, body= $body, dateSent= $dateSent"
+    override fun toString() = "messageId= $messageID, body= $body, dateSent= $dateSent " + super.toString()
 }

@@ -5,7 +5,7 @@ import android.view.MenuItem
 import android.widget.Toast
 import com.connectycube.messenger.helpers.EXTRA_CALL_TYPE
 import com.connectycube.messenger.helpers.startCall
-import com.connectycube.users.model.ConnectycubeUser
+import com.connectycube.users.models.ConnectycubeUser
 import java.util.*
 
 const val MAX_OPPONENTS_LIMIT = 3

@@ -1,9 +1,9 @@
 package com.connectycube.messenger.utilities
 
 import android.content.Context
-import com.connectycube.users.model.ConnectycubeUser
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.connectycube.users.models.ConnectycubeUser
 import java.io.BufferedReader
 
 fun getAllUsersFromFile(filename: String, context: Context): ArrayList<ConnectycubeUser> {
@@ -15,6 +15,6 @@ fun getAllUsersFromFile(filename: String, context: Context): ArrayList<Connectyc
     val userMap: Map<String, Map<String, Int>> = Gson().fromJson(jsonUsers, userType)
 
     val users = ArrayList<ConnectycubeUser>()
-    userMap.forEach { (login, mapPassword) -> users.add(ConnectycubeUser(login, mapPassword.keys.elementAt(0))) }
+    userMap.forEach { (login, mapPassword) -> users.add(ConnectycubeUser(login = login, password = mapPassword.keys.elementAt(0))) }
     return users
 }

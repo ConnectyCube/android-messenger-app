@@ -10,16 +10,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import com.connectycube.chat.ConnectycubeChatService
 import com.connectycube.messenger.helpers.RTCSessionManager
 import com.connectycube.messenger.utilities.InjectorUtils
 import com.connectycube.messenger.viewmodels.CallViewModel
 import com.connectycube.messenger.vo.Status
-import com.connectycube.users.model.ConnectycubeUser
-import com.connectycube.videochat.BaseSession
-import com.connectycube.videochat.RTCSession
 import kotlinx.android.synthetic.main.call_hang_up.*
 import kotlinx.android.synthetic.main.outgoing_view.*
+import com.connectycube.ConnectyCube
+import com.connectycube.users.models.ConnectycubeUser
+import com.connectycube.webrtc.BaseSession
+import com.connectycube.webrtc.P2PSession
 import timber.log.Timber
 
 abstract class BaseCallFragment(
@@ -28,11 +28,11 @@ abstract class BaseCallFragment(
 ) : Fragment(contentLayoutId) {
 
     lateinit var callViewModel: CallViewModel
-    protected var currentSession: RTCSession? = null
+    protected var currentSession: P2PSession? = null
     protected var isIncomingCall: Boolean = false
     protected var chronometerInCall: Chronometer? = null
     private var chronometerStarted: Boolean = false
-    protected var currentUser: ConnectycubeUser = ConnectycubeChatService.getInstance().user
+    protected var currentUser: ConnectycubeUser = ConnectyCube.chat.userForLogin!!
 
     companion object {
         fun createInstance(fragment: BaseCallFragment, isIncomingCall: Boolean): BaseCallFragment {
@@ -84,21 +84,21 @@ abstract class BaseCallFragment(
 
     private fun initOpponents() {
         currentSession?.let { session ->
-            val allMembers = ArrayList<Int>(session.opponents)
-            allMembers.add(session.callerID)
+            val allMembers = ArrayList<Int>(session.getOpponents())
+            allMembers.add(session.getCallerId())
             val ids = allMembers.toIntArray()
 
             callViewModel.getOpponents(*ids).observe(this, Observer { resource ->
                 if (resource.status == Status.SUCCESS) {
                     if (!isIncomingCall) {
                         val opponentsFiltered =
-                            resource.data?.filterNot { it.id == ConnectycubeChatService.getInstance().user.id }
-                        val names = opponentsFiltered?.joinToString { it.fullName ?: it.login }
+                            resource.data?.filterNot { it.id ==  ConnectyCube.chat.userForLogin!!.id }
+                        val names = opponentsFiltered?.joinToString { it.fullName ?: it.login.toString() }
                         text_opponents_names.text = names
                     }
                     resource.data?.let { list ->
                         currentUser =
-                            list.first { it.id == ConnectycubeChatService.getInstance().user.id }
+                            list.first { it.id ==  ConnectyCube.chat.userForLogin!!.id }
                     }
                     initWithOpponents(resource.data)
                 }

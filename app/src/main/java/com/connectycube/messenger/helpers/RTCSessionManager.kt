@@ -3,23 +3,20 @@ package com.connectycube.messenger.helpers
 import android.content.Context
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
-import com.connectycube.chat.ConnectycubeChatService
-import com.connectycube.chat.WebRTCSignaling
-import com.connectycube.core.helper.StringifyArrayList
 import com.connectycube.messenger.CallActivity
 import com.connectycube.messenger.EXTRA_IS_INCOMING_CALL
 import com.connectycube.messenger.R
 import com.connectycube.messenger.api.ConnectycubePushSender
-import com.connectycube.pushnotifications.model.ConnectycubeEnvironment
-import com.connectycube.pushnotifications.model.ConnectycubeEvent
-import com.connectycube.pushnotifications.model.ConnectycubeNotificationType
-import com.connectycube.videochat.RTCClient
-import com.connectycube.videochat.RTCConfig
-import com.connectycube.videochat.RTCMediaConfig
-import com.connectycube.videochat.RTCSession
-import com.connectycube.videochat.callbacks.RTCClientSessionCallbacks
-import com.connectycube.videochat.callbacks.RTCClientSessionCallbacksImpl
 import org.json.JSONObject
+import com.connectycube.ConnectyCube
+import com.connectycube.core.utils.ConnectycubeEnvironment.DEVELOPMENT
+import com.connectycube.core.utils.NotificationType.PUSH
+import com.connectycube.pushnotifications.queries.CreateEventParams
+import com.connectycube.webrtc.P2PCalls
+import com.connectycube.webrtc.P2PSession
+import com.connectycube.webrtc.WebRTCConfig
+import com.connectycube.webrtc.WebRTCMediaConfig
+import com.connectycube.webrtc.callbacks.RTCCallSessionCallback
 import timber.log.Timber
 
 const val MAX_OPPONENTS = 4
@@ -39,30 +36,19 @@ class RTCSessionManager {
     }
 
     private var applicationContext: Context? = null
-    private var sessionCallbackListener: RTCClientSessionCallbacks? = null
-    var currentCall: RTCSession? = null
+    private var sessionCallbackListener: RTCCallSessionCallback? = null
+    var currentCall: P2PSession? = null
 
     fun init(applicationContext: Context) {
         this.applicationContext = applicationContext
         this.sessionCallbackListener = RTCSessionCallbackListenerSimple()
 
-        RTCConfig.setMaxOpponentsCount(MAX_OPPONENTS)
-        RTCConfig.setDebugEnabled(true)
+        WebRTCConfig.maxOpponentsCount = MAX_OPPONENTS
 
-        ConnectycubeChatService.getInstance()
-            .videoChatWebRTCSignalingManager?.addSignalingManagerListener { signaling, createdLocally ->
-            if (!createdLocally) {
-                RTCClient.getInstance(applicationContext).addSignaling(signaling as WebRTCSignaling)
-            }
-        }
-
-        RTCClient.getInstance(applicationContext).addSessionCallbacksListener(
-            sessionCallbackListener
-        )
-        RTCClient.getInstance(applicationContext).prepareToProcessCalls()
+        ConnectyCube.p2pCalls.addSessionCallbacksListener(sessionCallbackListener!!)
     }
 
-    fun startCall(rtcSession: RTCSession) {
+    fun startCall(rtcSession: P2PSession) {
         checkNotNull(applicationContext) { "RTCSessionManager should be initialized before start call" }
 
         currentCall = rtcSession
@@ -70,17 +56,17 @@ class RTCSessionManager {
         initRTCMediaConfig()
         startCallActivity(false)
 
-        sendCallPushNotification(rtcSession.opponents, rtcSession.sessionID, RTCConfig.getAnswerTimeInterval())
+        sendCallPushNotification(rtcSession.getOpponents(), rtcSession.getSessionId(), WebRTCConfig.answerTimeInterval)
     }
 
     private fun initRTCMediaConfig() {
-        currentCall?.let {
-            if (it.opponents.size < 2) {
-                RTCMediaConfig.setVideoWidth(RTCMediaConfig.VideoQuality.HD_VIDEO.width)
-                RTCMediaConfig.setVideoHeight(RTCMediaConfig.VideoQuality.HD_VIDEO.height)
+        if (currentCall != null) {
+            if (currentCall!!.getOpponents().size < 2) {
+                WebRTCMediaConfig.videoWidth = WebRTCMediaConfig.VideoQuality.HD_VIDEO.width
+                WebRTCMediaConfig.videoHeight = WebRTCMediaConfig.VideoQuality.HD_VIDEO.height
             } else {
-                RTCMediaConfig.setVideoWidth(RTCMediaConfig.VideoQuality.QVGA_VIDEO.width)
-                RTCMediaConfig.setVideoHeight(RTCMediaConfig.VideoQuality.QVGA_VIDEO.height)
+                WebRTCMediaConfig.videoWidth = WebRTCMediaConfig.VideoQuality.QVGA_VIDEO.width
+                WebRTCMediaConfig.videoHeight = WebRTCMediaConfig.VideoQuality.QVGA_VIDEO.height
             }
         }
     }
@@ -90,10 +76,12 @@ class RTCSessionManager {
         sessionId: String,
         answerTimeInterval: Long
     ) {
-        val event = ConnectycubeEvent()
-        event.userIds = StringifyArrayList(opponents)
-        event.environment = ConnectycubeEnvironment.DEVELOPMENT
-        event.notificationType = ConnectycubeNotificationType.PUSH
+        val cubeEventParams = CreateEventParams()
+        cubeEventParams.usersIds.addAll(opponents)
+        cubeEventParams.environment = DEVELOPMENT
+        cubeEventParams.notificationType = PUSH
+
+
 
         val json = JSONObject()
         try {
@@ -108,15 +96,15 @@ class RTCSessionManager {
         } catch (e: Exception) {
             e.printStackTrace()
         }
-
-        event.message = json.toString()
+        cubeEventParams.parameters["message"] = json.toString()
+        val event = cubeEventParams.getEventForRequest()
 
         ConnectycubePushSender().sendCallPushEvent(event)
     }
 
-    fun receiveCall(rtcSession: RTCSession) {
+    fun receiveCall(rtcSession: P2PSession) {
         if (currentCall != null) {
-            if (currentCall!!.sessionID != rtcSession.sessionID) {
+            if (currentCall!!.getSessionId() != rtcSession.getSessionId()) {
                 rtcSession.rejectCall(hashMapOf())
             }
             return
@@ -143,27 +131,35 @@ class RTCSessionManager {
     }
 
     fun destroy() {
-        RTCClient.getInstance(applicationContext)
-            .removeSessionsCallbacksListener(sessionCallbackListener)
-        RTCClient.getInstance(applicationContext).destroy()
+        P2PCalls.removeSessionCallbacksListener(sessionCallbackListener!!)
 
         applicationContext = null
         sessionCallbackListener = null
     }
 
-    private inner class RTCSessionCallbackListenerSimple : RTCClientSessionCallbacksImpl() {
-        override fun onReceiveNewSession(session: RTCSession?) {
-            super.onReceiveNewSession(session)
-            session?.let { receiveCall(session) }
+    private inner class RTCSessionCallbackListenerSimple : RTCCallSessionCallback {
+        override fun onCallAcceptByUser(session: P2PSession, opponentId: Int, userInfo: Map<String, String?>?) {}
+
+        override fun onCallRejectByUser(session: P2PSession, opponentId: Int, userInfo: Map<String, String?>?) {}
+
+        override fun onReceiveHangUpFromUser(session: P2PSession, opponentId: Int, userInfo: Map<String, String?>?) {}
+
+        override fun onReceiveNewSession(session: P2PSession) {
+            receiveCall(session)
         }
 
-        override fun onSessionClosed(session: RTCSession?) {
-            super.onSessionClosed(session)
-            if (session == null || currentCall == null) return
+        override fun onSessionClosed(session: P2PSession) {
+            if (currentCall == null) return
 
-            if (currentCall!!.sessionID == session.sessionID) {
+            if (currentCall!!.getSessionId() == session.getSessionId()) {
                 endCall()
             }
         }
+
+        override fun onSessionStartClose(session: P2PSession) {}
+
+        override fun onUserNoActions(session: P2PSession, userId: Int?) {}
+
+        override fun onUserNotAnswer(session: P2PSession, opponentId: Int) {}
     }
 }

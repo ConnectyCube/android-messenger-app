@@ -1,52 +1,53 @@
 package com.connectycube.messenger.utilities
 
-import android.os.Bundle
 import androidx.lifecycle.MutableLiveData
-import com.connectycube.core.EntityCallback
-import com.connectycube.core.exception.ResponseException
-import com.connectycube.core.server.Performer
 import com.connectycube.messenger.api.ApiResponse
-import com.connectycube.messenger.vo.AppExecutors
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import com.connectycube.core.utils.coroutineDispatcher
+import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
 
 open class LiveDataResponsePerformer<T, R> {
 
-    open fun perform(performer: Performer<T>, converter: Converter<R, T>): MutableLiveData<ApiResponse<R>> {
+    open fun perform(performer: suspend () -> T, converter: Converter<R, T>): MutableLiveData<ApiResponse<R>> {
         return object : MutableLiveData<ApiResponse<R>>() {
             private var started = AtomicBoolean(false)
             override fun onActive() {
                 super.onActive()
                 if (started.compareAndSet(false, true)) {
-                    performer.performAsync(object : EntityCallback<T> {
-                        override fun onSuccess(response: T, bundle: Bundle?) {
-                            val wrapped = converter.convertTo(response)
-                            postValue(ApiResponse.create(wrapped, bundle))
+                    GlobalScope.apply {
+                        launch(coroutineDispatcher) {
+                            try {
+                                val wrapped = converter.convertTo(performer.invoke())
+                                postValue(ApiResponse.create(wrapped, null))
+                            } catch (ex: Exception) {
+                                Timber.d("loadFileAsAttachment Exception= $ex")
+                                postValue(ApiResponse.create(ex))
+                            }
                         }
-
-                        override fun onError(ex: ResponseException) {
-                            postValue(ApiResponse.create(ex))
-                        }
-                    })
+                    }
                 }
             }
         }
     }
 
-    open fun perform(performer: Performer<T>): MutableLiveData<ApiResponse<T>> {
+    open fun perform(performer: suspend () -> T): MutableLiveData<ApiResponse<T>> {
         return object : MutableLiveData<ApiResponse<T>>() {
             private var started = AtomicBoolean(false)
             override fun onActive() {
                 super.onActive()
                 if (started.compareAndSet(false, true)) {
-                    performer.performAsync(object : EntityCallback<T> {
-                        override fun onSuccess(response: T, bundle: Bundle?) {
-                            postValue(ApiResponse.create(response, bundle))
+                    GlobalScope.apply {
+                        launch(coroutineDispatcher) {
+                            try {
+                                val wrapped = performer.invoke()
+                                postValue(ApiResponse.create(wrapped, null))
+                            } catch (ex: Exception) {
+                                postValue(ApiResponse.create(ex))
+                            }
                         }
-
-                        override fun onError(ex: ResponseException) {
-                            postValue(ApiResponse.create(ex))
-                        }
-                    })
+                    }
                 }
             }
         }

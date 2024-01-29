@@ -18,10 +18,10 @@ interface MessageDao {
     @Update(onConflict = OnConflictStrategy.REPLACE)
     fun update(item: Message): Int
 
-    @Query("SELECT * FROM messages WHERE id = :id ")
+    @Query("SELECT * FROM messages WHERE message_id = :id")
     fun loadItem(id: String): Message
 
-    @Query("UPDATE messages SET deliveredIds = :userId WHERE id = :id")
+    @Query("UPDATE messages SET deliveredIds = :userId WHERE message_id = :id")
     fun updateDeliveredIds(id: String, userId: String): Int
 
     @Query("SELECT * FROM messages WHERE dialogId = :dialogId ORDER BY dateSent DESC")
@@ -30,7 +30,7 @@ interface MessageDao {
     @Query("DELETE FROM messages WHERE dialogId = :dialogId")
     fun deleteByDialogId(dialogId: String)
 
-    @Query("DELETE FROM messages WHERE id = :messageId")
+    @Query("DELETE FROM messages WHERE message_id = :messageId")
     fun deleteByMessageId(messageId: String)
 
     @Query("DELETE FROM messages")

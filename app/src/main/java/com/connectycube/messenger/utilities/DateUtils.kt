@@ -7,6 +7,8 @@ import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
+const val CREATED_AT_SIMPLE_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'"
+
 fun getPrettyDate(context: Context, date: Long): String {
     val messageDate = Calendar.getInstance().apply { time = Date(date) }
     val currentDate = Calendar.getInstance().apply { time = Date() }

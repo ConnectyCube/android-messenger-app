@@ -1,7 +1,6 @@
 package com.connectycube.messenger.data
 
 import android.content.Context
-import android.os.Bundle
 import androidx.annotation.MainThread
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -9,17 +8,17 @@ import androidx.lifecycle.Transformations
 import androidx.paging.DataSource
 import androidx.paging.PagedList
 import androidx.paging.toLiveData
-import com.connectycube.chat.model.ConnectycubeChatMessage
-import com.connectycube.core.EntityCallback
-import com.connectycube.core.exception.ResponseException
 import com.connectycube.messenger.api.ChatMessageApi
 import com.connectycube.messenger.paging.Listing
 import com.connectycube.messenger.paging.MessageBoundaryCallback
 import com.connectycube.messenger.paging.NetworkState
 import com.connectycube.messenger.utilities.*
 import com.connectycube.messenger.vo.AppExecutors
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import com.connectycube.chat.models.ConnectycubeMessage
+import com.connectycube.core.utils.coroutineDispatcher
 import timber.log.Timber
-import java.util.*
 
 
 class ChatMessageRepository(
@@ -36,7 +35,7 @@ class ChatMessageRepository(
                     Timber.d("insertResultIntoDb items= $item")
                     val attachments = convertToListAttachment(item)
                     attachments?.let {
-                        db.attachmentDao().insertAndDeleteInTransaction(item.messageId, it)
+                        db.attachmentDao().insertAndDeleteInTransaction(item.messageID, it)
                     }
                     db.messageDao().insert(item)
                 }
@@ -50,8 +49,8 @@ class ChatMessageRepository(
                 Timber.d("updateItemDeliveredStatus itemId= $itemId, userId= $userId")
                 val message: Message? = db.messageDao().loadItem(itemId)
                 message?.let {
-                    if (message.deliveredIds != null) message.deliveredIds.add(userId)
-                    else message.deliveredIds = mutableListOf(userId)
+                    if (message.deliveredIds != null) message.deliveredIds!!.add(userId)
+                    else message.deliveredIds = arrayListOf(userId)
 
                     db.messageDao().update(message)
                 }
@@ -66,11 +65,11 @@ class ChatMessageRepository(
                 val message: Message? = db.messageDao().loadItem(itemId)
                 message?.let {
                     val needUpdate = message.readIds == null &&
-                            (message.deliveredIds == null || !message.deliveredIds.contains(userId))
+                            (message.deliveredIds == null || !message.deliveredIds!!.contains(userId))
                     Timber.d("updateItemSentStatus needUpdate= $needUpdate")
                     if (needUpdate) {
-                        if (message.deliveredIds != null) message.deliveredIds.add(userId)
-                        else message.deliveredIds = mutableListOf(userId)
+                        if (message.deliveredIds != null) message.deliveredIds!!.add(userId)
+                        else message.deliveredIds = arrayListOf(userId)
                         db.messageDao().update(message)
                     }
                 }
@@ -84,9 +83,9 @@ class ChatMessageRepository(
                 Timber.d("updateItemReadStatus itemId= $itemId, userId= $userId")
                 val message: Message? = db.messageDao().loadItem(itemId)
                 message?.let {
-                    if (message.readIds != null && message.readIds.contains(userId)) return@runInTransaction
-                    if (message.readIds == null) message.readIds = mutableListOf(userId)
-                    else message.readIds.add(userId)
+                    if (message.readIds != null && message.readIds!!.contains(userId)) return@runInTransaction
+                    if (message.readIds == null) message.readIds = arrayListOf(userId)
+                    else message.readIds!!.add(userId)
                     db.messageDao().update(message)
                 }
             }
@@ -121,9 +120,10 @@ class ChatMessageRepository(
         Timber.d("refresh")
         val networkState = MutableLiveData<NetworkState>()
         networkState.value = NetworkState.LOADING
-        chatMessageApi.getTop(dialogId, networkPageSize).performAsync(
-            object : EntityCallback<ArrayList<ConnectycubeChatMessage>> {
-                override fun onSuccess(list: ArrayList<ConnectycubeChatMessage>, bundle: Bundle) {
+        GlobalScope.apply {
+            launch(coroutineDispatcher) {
+                try {
+                   val list: List<ConnectycubeMessage> = chatMessageApi.getTop(dialogId, networkPageSize)
                     appExecutors.networkIO().execute {
                         db.runInTransaction {
                             db.messageDao().deleteByDialogId(dialogId)
@@ -132,18 +132,16 @@ class ChatMessageRepository(
                         // since we are in bg thread now, post the result.
                         networkState.postValue(NetworkState.LOADED)
                     }
-                }
-
-                override fun onError(ex: ResponseException) {
+                } catch (ex: Exception) {
                     networkState.value = NetworkState.error(ex.message)
                 }
             }
-        )
+        }
         return networkState
     }
 
     @MainThread
-    fun postsOfDialogId(dialogId: String, pageSize: Int): Listing<ConnectycubeChatMessage> {
+    fun postsOfDialogId(dialogId: String, pageSize: Int): Listing<ConnectycubeMessage> {
         // create a boundary callback which will observe when the user reaches to the edges of
         // the list and update the database with extra data.
         val boundaryCallback = MessageBoundaryCallback(
@@ -166,7 +164,7 @@ class ChatMessageRepository(
             .setPageSize(pageSize)
             .build()
 
-        val dataSourceConnectycubeChatMessage: DataSource.Factory<Int, ConnectycubeChatMessage> =
+        val dataSourceConnectycubeChatMessage: DataSource.Factory<Int, ConnectycubeMessage> =
             db.messageWithAttachmentDao().postsByDialogId(dialogId).map { it.message }
 
 //        val livePagedList: LiveData<PagedList<ConnectycubeChatMessage>>

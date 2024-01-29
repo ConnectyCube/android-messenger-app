@@ -3,9 +3,7 @@ package com.connectycube.messenger.vo
 import android.os.Bundle
 import androidx.annotation.MainThread
 import androidx.annotation.WorkerThread
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
-import com.connectycube.messenger.api.ApiEmptyResponse
 import com.connectycube.messenger.api.ApiErrorResponse
 import com.connectycube.messenger.api.ApiSuccessResponse
 
@@ -40,6 +38,7 @@ abstract class DeleteNetworkBoundResource<ResultType, RequestType>
                     onRequestFailed()
                     setValue(Resource.error(response.errorMessage, null))
                 }
+                else -> {}
             }
         })
     }

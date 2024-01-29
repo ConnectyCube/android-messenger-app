@@ -23,7 +23,7 @@ open class SelectUsersFromExistActivity : SelectUsersBaseActivity<SelectFromExis
     override fun loadData() {
         super.loadData()
 
-        getViewMode().getUsers(intent.extras.getIntegerArrayList(EXTRA_USERS_TO_LOAD))
+        getViewMode().getUsers(intent.extras!!.getIntegerArrayList(EXTRA_USERS_TO_LOAD)!!)
             .observe(this) { result ->
                 when (result.status) {
                     Status.LOADING -> showProgress(progressbar)

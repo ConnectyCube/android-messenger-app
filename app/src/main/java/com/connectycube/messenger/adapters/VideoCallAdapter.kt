@@ -6,8 +6,8 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.connectycube.messenger.R
-import com.connectycube.users.model.ConnectycubeUser
-import com.connectycube.videochat.view.RTCSurfaceView
+import com.connectycube.users.models.ConnectycubeUser
+import com.connectycube.webrtc.RTCSurfaceView
 
 class VideoCallAdapter(private val users: ArrayList<ConnectycubeUser>, var itemHeight: Int) :
     RecyclerView.Adapter<VideoCallAdapter.ViewHolder>() {

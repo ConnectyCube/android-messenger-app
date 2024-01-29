@@ -7,7 +7,7 @@ import com.connectycube.messenger.R
 import com.connectycube.messenger.data.UserRepository
 import com.connectycube.messenger.utilities.SharedPreferencesManager
 import com.connectycube.messenger.vo.Resource
-import com.connectycube.users.model.ConnectycubeUser
+import com.connectycube.users.models.ConnectycubeUser
 
 class SelectFromExistUsersViewModel internal constructor(
     applicationContext: Application,

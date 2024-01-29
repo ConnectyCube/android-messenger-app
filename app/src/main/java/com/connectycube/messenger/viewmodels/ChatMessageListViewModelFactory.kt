@@ -3,7 +3,6 @@ package com.connectycube.messenger.viewmodels
 import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.connectycube.chat.model.ConnectycubeChatDialog
 import com.connectycube.messenger.data.ChatMessageRepository
 import com.connectycube.messenger.data.ChatRepository
 import com.connectycube.messenger.data.UserRepository

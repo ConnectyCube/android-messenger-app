@@ -11,10 +11,10 @@ import androidx.lifecycle.observe
 import com.connectycube.messenger.utilities.*
 import com.connectycube.messenger.viewmodels.UserDetailsViewModel
 import com.connectycube.messenger.vo.Status
-import com.connectycube.users.model.ConnectycubeUser
 import com.yalantis.ucrop.UCrop
 import com.zhihu.matisse.Matisse
 import kotlinx.android.synthetic.main.activity_settings.*
+import com.connectycube.users.models.ConnectycubeUser
 import timber.log.Timber
 
 const val MAX_USER_NAME_LENGTH = 60

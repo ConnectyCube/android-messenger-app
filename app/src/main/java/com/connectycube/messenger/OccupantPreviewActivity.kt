@@ -3,11 +3,13 @@ package com.connectycube.messenger
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
+import com.connectycube.messenger.utilities.CREATED_AT_SIMPLE_DATE_FORMAT
 import com.connectycube.messenger.utilities.SharedPreferencesManager
 import com.connectycube.messenger.utilities.getPrettyLastActivityDate
 import com.connectycube.messenger.utilities.loadUserAvatar
-import com.connectycube.users.model.ConnectycubeUser
 import kotlinx.android.synthetic.main.activity_occupant_preview.*
+import com.connectycube.users.models.ConnectycubeUser
+import java.text.SimpleDateFormat
 import java.util.*
 
 const val EXTRA_USER = "extra_user"
@@ -35,7 +37,8 @@ class OccupantPreviewActivity : BaseChatActivity() {
         if (!isCurrentUser) {
             last_activity_title_txt.visibility = View.VISIBLE
             last_activity_text_view.text =
-                getPrettyLastActivityDate(this, user.lastRequestAt ?: Date())
+                getPrettyLastActivityDate(this, SimpleDateFormat(
+                    CREATED_AT_SIMPLE_DATE_FORMAT, Locale.getDefault()).parse(user.lastRequestAt))
         }
     }
 

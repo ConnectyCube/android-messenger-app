@@ -16,7 +16,9 @@ class PermissionsHelper(val context: Activity) {
         arrayListOf(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA)
 
     private val callPermissions: ArrayList<String> =
-        arrayListOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)
+        arrayListOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO).also {
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) it.add(Manifest.permission.BLUETOOTH_CONNECT)
+        }
 
 
     fun areAllImageGranted(): Boolean {

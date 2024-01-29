@@ -1,19 +1,16 @@
 package com.connectycube.messenger.utilities
 
 import android.content.Context
-import com.connectycube.auth.session.ConnectycubeSettings
-import com.connectycube.chat.ConnectycubeChatService
-import com.connectycube.chat.connections.tcp.TcpChatConnectionFabric
-import com.connectycube.chat.connections.tcp.TcpConfigurationBuilder
-import com.connectycube.core.LogLevel
 import com.connectycube.messenger.R
-import com.connectycube.users.model.ConnectycubeUser
+import com.connectycube.ConnectyCubeAndroid
+import com.connectycube.core.models.ConnectycubeSettings
+import com.connectycube.users.models.ConnectycubeUser
 
 object SettingsProvider {
 
     // ConnectyCube Application credentials
     //
-    private val applicationID = ""
+    private val applicationId = ""
     private val authKey = ""
     private val authSecret = ""
     private val accountKey = ""
@@ -25,18 +22,17 @@ object SettingsProvider {
     }
 
     private fun initCredentials(applicationContext: Context) {
-        ConnectycubeSettings.getInstance().init(applicationContext, applicationID, authKey, authSecret)
-        ConnectycubeSettings.getInstance().accountKey = accountKey
+        ConnectyCubeAndroid.init(applicationId, authKey, authSecret, context = applicationContext)
+        ConnectycubeSettings.isDebugEnabled = true
 
         // Uncomment and put your Api and Chat servers endpoints if you want to point the sample
         // against your own server.
-        //
-//        ConnectycubeSettings.getInstance().setEndpoints("https://your_api_endpoint.com", "your_chat_endpoint", ServiceZone.PRODUCTION);
-//        ConnectycubeSettings.getInstance().setZone(ServiceZone.PRODUCTION)
+//        val connectycubeConfig: ConnectycubeConfig = ConnectycubeConfig("https://your_api_endpoint.com", "your_chat_endpoint")
+//        ConnectyCubeAndroid.init(applicationId, authKey, authSecret, connectycubeConfig, context = applicationContext)
     }
 
     private fun checkConfigJson(applicationContext: Context) {
-        if (applicationID.isEmpty() || authKey.isEmpty() || authSecret.isEmpty()) {
+        if (applicationId.isEmpty() || authKey.isEmpty() || authSecret.isEmpty()) {
             throw AssertionError(applicationContext.getString(R.string.error_credentials_empty))
         }
     }
@@ -48,23 +44,11 @@ object SettingsProvider {
     }
 
     private fun isUsersEmpty(users: ArrayList<ConnectycubeUser>): Boolean {
-        users.forEach { user -> if (user.login.isBlank() || user.password.isBlank()) return true }
+        users.forEach { user -> if (user.login!!.isBlank() || user.password!!.isBlank()) return true }
         return false
     }
 
     fun initChatConfiguration() {
-        ConnectycubeSettings.getInstance().logLevel = LogLevel.DEBUG
-        ConnectycubeChatService.setDebugEnabled(true)
-        ConnectycubeChatService.setDefaultPacketReplyTimeout(30000)
-        ConnectycubeChatService.setDefaultConnectionTimeout(30000)
-        ConnectycubeChatService.getInstance().setUseStreamManagement(true)
-
-        val builder = TcpConfigurationBuilder()
-            .setAllowListenNetwork(true)
-            .setUseStreamManagement(true)
-            .setSocketTimeout(0)
-
-        ConnectycubeChatService.setConnectionFabric(TcpChatConnectionFabric(builder))
-
+//        ConnectyCube.chat.enableLogging()
     }
 }

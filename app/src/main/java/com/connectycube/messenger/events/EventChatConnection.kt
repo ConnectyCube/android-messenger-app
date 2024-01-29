@@ -1,6 +1,7 @@
 package com.connectycube.messenger.events
 
-import com.connectycube.users.model.ConnectycubeUser
+import com.connectycube.users.models.ConnectycubeUser
+
 
 data class EventChatConnection (
     val connected: Boolean,

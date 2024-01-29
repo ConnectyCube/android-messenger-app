@@ -14,17 +14,6 @@ import androidx.activity.viewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.connectycube.chat.ConnectycubeChatService
-import com.connectycube.chat.exception.ChatException
-import com.connectycube.chat.listeners.ChatDialogMessageListener
-import com.connectycube.chat.listeners.ChatDialogMessageSentListener
-import com.connectycube.chat.listeners.ChatDialogTypingListener
-import com.connectycube.chat.model.ConnectycubeAttachment
-import com.connectycube.chat.model.ConnectycubeChatDialog
-import com.connectycube.chat.model.ConnectycubeChatMessage
-import com.connectycube.chat.model.ConnectycubeDialogType
-import com.connectycube.core.EntityCallback
-import com.connectycube.core.exception.ResponseException
 import com.connectycube.messenger.adapters.AttachmentClickListener
 import com.connectycube.messenger.adapters.ChatMessageAdapter
 import com.connectycube.messenger.adapters.MarkAsReadListener
@@ -36,12 +25,20 @@ import com.connectycube.messenger.paging.Status
 import com.connectycube.messenger.utilities.*
 import com.connectycube.messenger.viewmodels.ChatMessageListViewModel
 import com.connectycube.messenger.viewmodels.MessageSenderViewModel
-import com.connectycube.users.model.ConnectycubeUser
 import com.google.android.material.button.MaterialButton.ICON_GRAVITY_START
 import com.google.android.material.button.MaterialButton.ICON_GRAVITY_TEXT_END
 import com.timehop.stickyheadersrecyclerview.StickyRecyclerHeadersDecoration
 import com.zhihu.matisse.Matisse
 import kotlinx.android.synthetic.main.activity_chatmessages.*
+import com.connectycube.ConnectyCube
+import com.connectycube.chat.models.ConnectycubeAttachment
+import com.connectycube.chat.models.ConnectycubeDialog
+import com.connectycube.chat.models.ConnectycubeDialogType
+import com.connectycube.chat.models.ConnectycubeMessage
+import com.connectycube.chat.realtime.ConnectycubeChatTypingListener
+import com.connectycube.chat.realtime.ConnectycubeMessageListener
+import com.connectycube.chat.realtime.ConnectycubeMessageSentListener
+import com.connectycube.users.models.ConnectycubeUser
 import timber.log.Timber
 import java.util.*
 import kotlin.collections.ArrayList
@@ -57,13 +54,13 @@ class ChatMessageActivity : BaseChatActivity() {
 
     private val attachmentClickListener: AttachmentClickListener = this::onMessageAttachmentClicked
     private val markAsReadListener: MarkAsReadListener = this::onMarkAsReadPerform
-    private val messageListener: ChatDialogMessageListener = ChatMessageListener()
-    private val messageSentListener: ChatDialogMessageSentListener = ChatMessagesSentListener()
-    private val messageTypingListener: ChatDialogTypingListener = ChatTypingListener()
+    private val messageListener: ChatMessageListener = ChatMessageListener()
+    private val messageSentListener: ConnectycubeMessageSentListener = ChatMessagesSentListener()
+    private val messageTypingListener: ConnectycubeChatTypingListener = ChatTypingListener()
     private val permissionsHelper = PermissionsHelper(this)
     private val layoutManager = LinearLayoutManager(this)
     private lateinit var chatAdapter: ChatMessageAdapter
-    private lateinit var chatDialog: ConnectycubeChatDialog
+    private lateinit var chatDialog: ConnectycubeDialog
     private lateinit var modelChatMessageList: ChatMessageListViewModel
     private lateinit var modelMessageSender: MessageSenderViewModel
     private val occupants: HashMap<Int, ConnectycubeUser> = HashMap()
@@ -74,28 +71,14 @@ class ChatMessageActivity : BaseChatActivity() {
 
     private val textTypingWatcher = object : TextWatcher {
         override fun afterTextChanged(s: Editable?) {
-            chatDialog.sendStopTypingNotification(object : EntityCallback<Void> {
-                override fun onSuccess(v: Void?, b: Bundle?) {
-                }
-
-                override fun onError(ex: ResponseException?) {
-                    Timber.e(ex)
-                }
-            })
+            ConnectyCube.chat.sendStopTypingStatus(chatDialog)
         }
 
         override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
         }
 
         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-            chatDialog.sendIsTypingNotification(object : EntityCallback<Void> {
-                override fun onSuccess(v: Void?, b: Bundle?) {
-                }
-
-                override fun onError(ex: ResponseException?) {
-                    Timber.e(ex)
-                }
-            })
+            ConnectyCube.chat.sendIsTypingStatus(chatDialog)
         }
     }
 
@@ -114,21 +97,21 @@ class ChatMessageActivity : BaseChatActivity() {
 
     private fun initWithData() {
         if (intent.hasExtra(EXTRA_CHAT)) {
-            val chatDialog = intent.getSerializableExtra(EXTRA_CHAT) as ConnectycubeChatDialog
-            modelChatMessageList = getChatMessageListViewModel(chatDialog.dialogId)
+            val chatDialog = intent.getSerializableExtra(EXTRA_CHAT) as ConnectycubeDialog
+            modelChatMessageList = getChatMessageListViewModel(chatDialog.dialogId!!)
         } else if (intent.hasExtra(EXTRA_CHAT_ID)) {
             val dialogId = intent.getStringExtra(EXTRA_CHAT_ID)
-            modelChatMessageList = getChatMessageListViewModel(dialogId)
+            modelChatMessageList = getChatMessageListViewModel(dialogId!!)
         }
         subscribeToDialog()
     }
 
     private fun handleNotifications() {
         if (intent.hasExtra(EXTRA_CHAT)) AppNotificationManager.getInstance().clearNotificationData(
-            this, (intent.getSerializableExtra(EXTRA_CHAT) as ConnectycubeChatDialog).dialogId
+            this, (intent.getSerializableExtra(EXTRA_CHAT) as ConnectycubeDialog).dialogId!!
         )
         if (intent.hasExtra(EXTRA_CHAT_ID)) AppNotificationManager.getInstance().clearNotificationData(
-            this, intent.getStringExtra(EXTRA_CHAT_ID)
+            this, intent.getStringExtra(EXTRA_CHAT_ID)!!
         )
     }
 
@@ -163,7 +146,7 @@ class ChatMessageActivity : BaseChatActivity() {
         })
     }
 
-    private fun bindChatDialog(chatDialog: ConnectycubeChatDialog) {
+    private fun bindChatDialog(chatDialog: ConnectycubeDialog) {
         this.chatDialog = chatDialog
 
         initChatAdapter()
@@ -172,7 +155,7 @@ class ChatMessageActivity : BaseChatActivity() {
 
         subscribeToOccupants()
 
-        if (ConnectycubeChatService.getInstance().isLoggedIn) {
+        if (ConnectyCube.chat.isLoggedIn()) {
             bindToChatConnection()
         } else {
             subscribeToChatConnectionChanges()
@@ -194,7 +177,7 @@ class ChatMessageActivity : BaseChatActivity() {
 
                         val range = firstPosition..lastPosition
                         range.forEach { position ->
-                            if (msg?.id == chatAdapter.getItemByPosition(position)?.id) {
+                            if (msg?.messageId == chatAdapter.getItemByPosition(position)?.messageId) {
                                 Timber.d("subscribeMessageSenderAttachment LOADING progress= $progress")
                                 chatAdapter.updateAttachmentProgress(position, progress)
                             }
@@ -245,7 +228,7 @@ class ChatMessageActivity : BaseChatActivity() {
                     resource.data?.let { chatDialog ->
                         loadChatDialogPhoto(
                             this,
-                            chatDialog.isPrivate,
+                            chatDialog.type == ConnectycubeDialogType.PRIVATE,
                             chatDialog.photo,
                             avatar_img
                         )
@@ -263,7 +246,7 @@ class ChatMessageActivity : BaseChatActivity() {
     private fun bindToChatConnection() {
         subscribeMessageSenderAttachment()
         subscribeMessageSenderText()
-        chatDialog.addMessageListener(messageListener)
+        ConnectyCube.chat.addMessageListener(messageListener)
 
         initManagers()
 
@@ -273,11 +256,11 @@ class ChatMessageActivity : BaseChatActivity() {
     private fun initToolbar() {
         back_btn.setOnClickListener { onBackPressed() }
         toolbar_layout.setSingleOnClickListener { startChatDetailsActivity() }
-        loadChatDialogPhoto(this, chatDialog.isPrivate, chatDialog.photo, avatar_img)
+        loadChatDialogPhoto(this, chatDialog.type == ConnectycubeDialogType.PRIVATE, chatDialog.photo, avatar_img)
         chat_message_name.text = chatDialog.name
     }
 
-    private fun subscribeToOccupants(chatDialog: ConnectycubeChatDialog = this.chatDialog) {
+    private fun subscribeToOccupants(chatDialog: ConnectycubeDialog = this.chatDialog) {
         modelChatMessageList.getOccupants(chatDialog).observe(this, Observer { resource ->
             when (resource.status) {
                 com.connectycube.messenger.vo.Status.LOADING -> {
@@ -294,10 +277,10 @@ class ChatMessageActivity : BaseChatActivity() {
 
                     membersNames.run {
                         clear()
-                        addAll(occupants.map { it.value.fullName ?: it.value.login })
+                        addAll(occupants.map { it.value.fullName ?: it.value.login!! })
                     }
 
-                    if (!chatDialog.isPrivate) chat_message_members_typing.text = membersNames.joinToString()
+                    if (chatDialog.type != ConnectycubeDialogType.PRIVATE) chat_message_members_typing.text = membersNames.joinToString()
                 }
             }
         })
@@ -413,14 +396,14 @@ class ChatMessageActivity : BaseChatActivity() {
     }
 
     private fun initManagers() {
-        chatDialog.addIsTypingListener(messageTypingListener)
-        chatDialog.addMessageSentListener(messageSentListener)
+        ConnectyCube.chat.addTypingStatusListener(messageTypingListener)
+        ConnectyCube.chat.addMessageSentListener(messageSentListener)
     }
 
     private fun unregisterChatManagers() {
-        chatDialog.removeMessageListrener(messageListener)
-        chatDialog.removeIsTypingListener(messageTypingListener)
-        chatDialog.removeMessageSentListener(messageSentListener)
+        ConnectyCube.chat.removeMessageListener(messageListener)
+        ConnectyCube.chat.removeTypingStatusListener(messageTypingListener)
+        ConnectyCube.chat.removeMessageSentListener(messageSentListener)
     }
 
     private fun unsubscribeModels() {
@@ -432,7 +415,7 @@ class ChatMessageActivity : BaseChatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         unsubscribeModels()
-        if (ConnectycubeChatService.getInstance().isLoggedIn) {
+        if (ConnectyCube.chat.isLoggedIn()) {
             unregisterChatManagers()
             input_chat_message.removeTextChangedListener(textTypingWatcher)
         }
@@ -455,24 +438,20 @@ class ChatMessageActivity : BaseChatActivity() {
         startAttachmentPreview(attachment, attachContainer)
     }
 
-    private fun onMarkAsReadPerform(chatMessage: ConnectycubeChatMessage) {
-        chatDialog.readMessage(chatMessage, object : EntityCallback<Void> {
-            override fun onSuccess(v: Void?, b: Bundle?) {
-                modelChatMessageList.updateItemReadStatus(chatMessage.id, localUserId)
-            }
-
-            override fun onError(ex: ResponseException) {
-                Timber.d("readMessage ex= $ex")
-            }
+    private fun onMarkAsReadPerform(chatMessage: ConnectycubeMessage) {
+        ConnectyCube.chat.sendReadStatus(chatMessage, successCallback = {
+            modelChatMessageList.updateItemReadStatus(chatMessage.messageId!!, localUserId)
+        }, errorCallback = { ex ->
+            Timber.d("readMessage ex= $ex")
         })
     }
 
     private fun startAttachmentPreview(attach: ConnectycubeAttachment, view: View) {
-        startImagePreview(this, attach.url, getText(R.string.attachment_preview_label), view)
+        startImagePreview(this, attach.url!!, getText(R.string.attachment_preview_label), view)
     }
 
     private fun sendChatMessage(text: String) {
-        if (!ConnectycubeChatService.getInstance().isLoggedIn) {
+        if (!ConnectyCube.chat.isLoggedIn()) {
             Toast.makeText(this, R.string.chat_connection_problem, Toast.LENGTH_LONG).show()
             return
         }
@@ -481,7 +460,7 @@ class ChatMessageActivity : BaseChatActivity() {
         input_chat_message.setText("")
     }
 
-    fun submitMessage(message: ConnectycubeChatMessage) {
+    fun submitMessage(message: ConnectycubeMessage) {
         Timber.d("submitMessage modelChatMessageList.messages.value")
         modelChatMessageList.postItem(message)
     }
@@ -523,17 +502,17 @@ class ChatMessageActivity : BaseChatActivity() {
     }
 
     private fun startCall(callType: Int) {
-        if (!ConnectycubeChatService.getInstance().isLoggedIn) {
+        if (!ConnectyCube.chat.isLoggedIn()) {
             Toast.makeText(this, R.string.chat_connection_problem, Toast.LENGTH_LONG).show()
         } else {
             when (callType) {
                 CALL_TYPE_VIDEO -> startVideoCall(
                     this,
-                    ArrayList(chatDialog.occupants.filter { it != ConnectycubeChatService.getInstance().user.id })
+                    ArrayList(chatDialog.occupantsIds!!.filter { it != ConnectyCube.chat.userForLogin!!.id })
                 )
                 CALL_TYPE_AUDIO -> startAudioCall(
                     this,
-                    ArrayList(chatDialog.occupants.filter { it != ConnectycubeChatService.getInstance().user.id })
+                    ArrayList(chatDialog.occupantsIds!!.filter { it != ConnectyCube.chat.userForLogin!!.id })
                 )
             }
         }
@@ -544,7 +523,7 @@ class ChatMessageActivity : BaseChatActivity() {
         if (requestCode == REQUEST_CODE_CHOOSE && resultCode == Activity.RESULT_OK) {
             if (data != null && Matisse.obtainPathResult(data) != null) {
                 val path = Matisse.obtainPathResult(data).iterator().next()
-                uploadAttachment(path, ConnectycubeAttachment.IMAGE_TYPE, getString(R.string.message_attachment))
+                uploadAttachment(path, "image", getString(R.string.message_attachment))
             }
         } else if(requestCode == REQUEST_CODE_DETAILS) {
             updateChatDialogData()
@@ -605,15 +584,22 @@ class ChatMessageActivity : BaseChatActivity() {
     inner class TimerTypingTask : TimerTask() {
         override fun run() {
             runOnUiThread {
-                if (!chatDialog.isPrivate) chat_message_members_typing.text = membersNames.joinToString()
+                if (chatDialog.type != ConnectycubeDialogType.PRIVATE) chat_message_members_typing.text = membersNames.joinToString()
                 else chat_message_members_typing.text = null
             }
         }
     }
 
-    inner class ChatTypingListener : ChatDialogTypingListener {
-        override fun processUserIsTyping(dialogId: String?, userId: Int?) {
-            if (userId == ConnectycubeChatService.getInstance().user.id) return
+    inner class ChatTypingListener : ConnectycubeChatTypingListener {
+
+        override fun onUserIsTyping(dialogId: String?, userId: Int) {
+            Timber.d("onUserIsTyping dialogId= $dialogId and chatDialog.dialogId= ${chatDialog.dialogId}")
+            val isNotNullAndNotCurrentDialog = dialogId != null && chatDialog.dialogId != dialogId
+            val isNotOpponentUserDialog = userId == ConnectyCube.chat.userForLogin!!.id
+            val isNullAndNotPrivateDialog =
+                dialogId == null && chatDialog.type != ConnectycubeDialogType.PRIVATE
+
+            if (isNotOpponentUserDialog || isNullAndNotPrivateDialog || isNotNullAndNotCurrentDialog) return
             var userStatus = occupants[userId]?.fullName ?: occupants[userId]?.login
             userStatus?.let {
                 userStatus = getString(R.string.chat_typing, userStatus)
@@ -622,22 +608,22 @@ class ChatMessageActivity : BaseChatActivity() {
             restartTypingTimer()
         }
 
-        override fun processUserStopTyping(dialogId: String?, userId: Int?) {
-
+        override fun onUserStopTyping(dialogId: String?, userId: Int) {
         }
     }
 
-    inner class ChatMessageListener : ChatDialogMessageListener {
-        override fun processMessage(dialogId: String, chatMessage: ConnectycubeChatMessage, senderId: Int) {
-            Timber.d("ChatMessageListener processMessage ${chatMessage.body}")
-            val isIncoming = senderId != ConnectycubeChatService.getInstance().user.id
+    inner class ChatMessageListener : ConnectycubeMessageListener {
+
+        override fun onMessage(message: ConnectycubeMessage) {
+            Timber.d("ChatMessageListener processMessage ${message.body}")
+            val isIncoming = message.senderId != ConnectyCube.chat.userForLogin!!.id
             if (isIncoming) {
                 scrollDownIfNextToBottomList()
-                submitMessage(chatMessage)
+                submitMessage(message)
             }
         }
 
-        override fun processError(s: String, e: ChatException, chatMessage: ConnectycubeChatMessage, integer: Int?) {
+        override fun onError(message: ConnectycubeMessage, ex: Throwable) {
 
         }
     }
@@ -659,13 +645,14 @@ class ChatMessageActivity : BaseChatActivity() {
         }
     }
 
-    inner class ChatMessagesSentListener : ChatDialogMessageSentListener {
-        override fun processMessageSent(dialogId: String, message: ConnectycubeChatMessage) {
-             Timber.d("processMessageSent $message")
-            modelChatMessageList.updateItemSentStatus(message.id, ConnectycubeChatService.getInstance().user.id)
+    inner class ChatMessagesSentListener : ConnectycubeMessageSentListener {
+
+        override fun onMessageSent(message: ConnectycubeMessage) {
+            Timber.d("processMessageSent $message")
+            modelChatMessageList.updateItemSentStatus(message.messageId!!, ConnectyCube.chat.userForLogin!!.id)
         }
 
-        override fun processMessageFailed(dialogId: String, message: ConnectycubeChatMessage) {
+        override fun onMessageSentFailed(message: ConnectycubeMessage) {
             Timber.d("processMessageFailed $message")
         }
 

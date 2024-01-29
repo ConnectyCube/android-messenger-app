@@ -5,13 +5,13 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
-import com.connectycube.chat.model.ConnectycubeChatDialog
 import com.connectycube.messenger.R
 import com.connectycube.messenger.data.ChatRepository
 import com.connectycube.messenger.data.UserRepository
 import com.connectycube.messenger.utilities.SharedPreferencesManager
 import com.connectycube.messenger.vo.Resource
-import com.connectycube.users.model.ConnectycubeUser
+import com.connectycube.chat.models.ConnectycubeDialog
+import com.connectycube.users.models.ConnectycubeUser
 
 class ChatDialogDetailsViewModel internal constructor(
     applicationContext: Application,
@@ -24,11 +24,11 @@ class ChatDialogDetailsViewModel internal constructor(
         return@lazy getChatDialog(dialogId)
     }
 
-    fun getUsers(chatDialog: ConnectycubeChatDialog): LiveData<Resource<List<ConnectycubeUser>>> {
+    fun getUsers(chatDialog: ConnectycubeDialog): LiveData<Resource<List<ConnectycubeUser>>> {
         val result = MediatorLiveData<Resource<List<ConnectycubeUser>>>()
         result.value = Resource.loading(null)
 
-        val source = usersRepository.getUsersByIds(*chatDialog.occupants.toIntArray())
+        val source = usersRepository.getUsersByIds(*chatDialog.occupantsIds!!.toIntArray())
         result.addSource(source) {
             if (it.isNullOrEmpty()) {
                 result.value = Resource.error(
@@ -45,8 +45,8 @@ class ChatDialogDetailsViewModel internal constructor(
         return result
     }
 
-    private fun getChatDialog(dialogId: String): LiveData<Resource<ConnectycubeChatDialog>> {
-        val result = MediatorLiveData<Resource<ConnectycubeChatDialog>>()
+    private fun getChatDialog(dialogId: String): LiveData<Resource<ConnectycubeDialog>> {
+        val result = MediatorLiveData<Resource<ConnectycubeDialog>>()
         result.value = Resource.loading(null)
 
         val source = chatRepository.getChat(dialogId)
@@ -119,7 +119,7 @@ class ChatDialogDetailsViewModel internal constructor(
         }
     }
 
-    private fun liveDialog(): MutableLiveData<Resource<ConnectycubeChatDialog>> {
-        return liveDialog as MutableLiveData<Resource<ConnectycubeChatDialog>>
+    private fun liveDialog(): MutableLiveData<Resource<ConnectycubeDialog>> {
+        return liveDialog as MutableLiveData<Resource<ConnectycubeDialog>>
     }
 }

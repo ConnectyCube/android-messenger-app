@@ -5,7 +5,6 @@ import androidx.lifecycle.MediatorLiveData
 import com.connectycube.messenger.api.*
 import com.connectycube.messenger.vo.AppExecutors
 import com.connectycube.messenger.vo.Resource
-import com.connectycube.storage.model.ConnectycubeFile
 
 class AvatarRepository private constructor(private val appExecutors: AppExecutors) {
     private val service: ConnectycubeService = ConnectycubeService()
