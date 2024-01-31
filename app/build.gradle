@@ -57,7 +57,7 @@ ext {
 }
 
 dependencies { configuration ->
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.0.1"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1"
 
     connectycubeComponents(configuration, "2.0.0-beta05")
     androidJetPackComponents(configuration, roomVersion, lifecycleVersion, paging_version, workVersion)
@@ -71,7 +71,7 @@ dependencies { configuration ->
     implementation "com.google.android.gms:play-services-gcm:17.0.0"
     implementation "com.google.firebase:firebase-messaging:20.0.0"
     implementation "com.google.firebase:firebase-core:17.2.0"
-    implementation "com.google.code.gson:gson:2.8.6"
+    implementation "com.google.code.gson:gson:2.8.9"
     implementation "com.timehop.stickyheadersrecyclerview:library:0.4.3"
 }
 
@@ -104,7 +104,6 @@ private static void androidXComponents(configuration) {
 
 private static void kotlinComponents(configuration, kotlin_version) {
     configuration.implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-//    configuration.implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.1.1'
 }
 
 private static void externalMediaComponents(configuration) {
@@ -113,5 +112,3 @@ private static void externalMediaComponents(configuration) {
     configuration.implementation "com.github.bumptech.glide:glide:4.9.0"
     configuration.implementation 'com.github.chrisbanes:PhotoView:2.2.0'
 }
-
-//apply plugin: 'com.google.gms.google-services'

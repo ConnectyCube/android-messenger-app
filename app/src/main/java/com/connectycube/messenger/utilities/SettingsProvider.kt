@@ -13,7 +13,6 @@ object SettingsProvider {
     private val applicationId = ""
     private val authKey = ""
     private val authSecret = ""
-    private val accountKey = ""
 
     fun initConnectycubeCredentials(applicationContext: Context) {
         checkConfigJson(applicationContext)
