@@ -6,24 +6,24 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import com.connectycube.chat.ConnectycubeChatService
 import com.connectycube.messenger.helpers.RTCSessionManager
 import com.connectycube.messenger.helpers.RingtoneManager
 import com.connectycube.messenger.utilities.loadUserAvatar
 import com.connectycube.messenger.viewmodels.CallViewModel
 import com.connectycube.messenger.vo.Status
-import com.connectycube.users.model.ConnectycubeUser
-import com.connectycube.videochat.RTCSession
-import com.connectycube.videochat.RTCTypes
 import kotlinx.android.synthetic.main.fragment_incoming_call.*
+import com.connectycube.ConnectyCube
+import com.connectycube.users.models.ConnectycubeUser
+import com.connectycube.webrtc.CallType
+import com.connectycube.webrtc.P2PSession
 import timber.log.Timber
 
 
 class IncomingCallFragment : Fragment(R.layout.fragment_incoming_call) {
-    private var currentSession: RTCSession? = null
+    private var currentSession: P2PSession? = null
     private lateinit var ringtoneManager: RingtoneManager
     private var opponentsIds: List<Int>? = null
-    private var conferenceType: RTCTypes.ConferenceType? = null
+    private var conferenceType: CallType? = null
 
     private lateinit var callViewModel: CallViewModel
 
@@ -66,23 +66,23 @@ class IncomingCallFragment : Fragment(R.layout.fragment_incoming_call) {
 
     private fun initArguments() {
         currentSession?.let {
-            opponentsIds = it.opponents
-            conferenceType = it.conferenceType
+            opponentsIds = it.getOpponents()
+            conferenceType = it.getCallType()
         }
     }
 
     private fun initFields() {
         currentSession?.let { session ->
-            val ids = ArrayList<Int>(session.opponents.apply { add(session.callerID) }).toIntArray()
+            val ids = ArrayList<Int>(session.getOpponents().toMutableList().apply { add(session.getCallerId())}).toIntArray()
             callViewModel.getOpponents(*ids).observe(this, Observer { result ->
                 if (result.status == Status.SUCCESS) {
                     val callerUser: ConnectycubeUser =
-                        result.data!!.first { it.id == session.callerID }
+                        result.data!!.first { it.id == session.getCallerId() }
                     loadUserAvatar(context!!, callerUser, image_avatar)
                     text_name.text = callerUser.fullName ?: callerUser.login
                     val opponentsFiltered =
-                        result.data.filterNot { it.id != session.callerID || it.id != ConnectycubeChatService.getInstance().user.id }
-                    val names = opponentsFiltered.joinToString { it.fullName ?: it.login }
+                        result.data.filterNot { it.id != session.getCallerId() || it.id != ConnectyCube.chat.userForLogin!!.id }
+                    val names = opponentsFiltered.joinToString { it.fullName ?: it.login?: "" }
                     if (names.isNotEmpty()) {
                         text_on_call.visibility = View.VISIBLE
                         text_other_name.text = names
@@ -96,7 +96,7 @@ class IncomingCallFragment : Fragment(R.layout.fragment_incoming_call) {
     }
 
     private fun setCallType() {
-        val isVideoCall = conferenceType == RTCTypes.ConferenceType.CONFERENCE_TYPE_VIDEO
+        val isVideoCall = conferenceType == CallType.VIDEO
         text_call_type.text =
             if (isVideoCall) getString(R.string.incoming_video_call_title) else getString(R.string.incoming_audio_call_title)
     }

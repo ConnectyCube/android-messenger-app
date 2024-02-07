@@ -11,9 +11,9 @@ import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.connectycube.messenger.adapters.CheckableUsersAdapter
 import com.connectycube.messenger.viewmodels.SelectUsersViewModel
-import com.connectycube.users.model.ConnectycubeUser
 import kotlinx.android.synthetic.main.activity_create_chat.users_recycler_view
 import kotlinx.android.synthetic.main.activity_select_users.*
+import com.connectycube.users.models.ConnectycubeUser
 import java.util.*
 
 const val EXTRA_SELECTED_USERS = "selected_users"

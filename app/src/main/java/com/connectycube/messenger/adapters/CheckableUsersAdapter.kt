@@ -5,14 +5,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
-import android.widget.CompoundButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.connectycube.messenger.R
+import com.connectycube.messenger.utilities.CREATED_AT_SIMPLE_DATE_FORMAT
 import com.connectycube.messenger.utilities.getPrettyLastActivityDate
 import com.connectycube.messenger.utilities.loadUserAvatar
-import com.connectycube.users.model.ConnectycubeUser
+import com.connectycube.users.models.ConnectycubeUser
+import java.text.SimpleDateFormat
 import java.util.*
 
 class CheckableUsersAdapter(
@@ -76,7 +77,8 @@ class CheckableUsersAdapter(
             )
 
             txtName.text = connectycubeUser.fullName
-            txtLastActivity.text = getPrettyLastActivityDate(activityContext, connectycubeUser.lastRequestAt ?: Date())
+            txtLastActivity.text = getPrettyLastActivityDate(activityContext, if(connectycubeUser.lastRequestAt != null ) SimpleDateFormat(
+                CREATED_AT_SIMPLE_DATE_FORMAT, Locale.getDefault()).parse(connectycubeUser.lastRequestAt) else null?: Date())
 
             checkBox.isChecked = isSelected
             itemView.setOnClickListener {

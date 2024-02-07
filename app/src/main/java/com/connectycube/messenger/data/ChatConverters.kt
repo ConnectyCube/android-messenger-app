@@ -1,10 +1,11 @@
 package com.connectycube.messenger.data
 
 import androidx.room.TypeConverter
-import com.connectycube.chat.model.ConnectycubeDialogCustomData
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.connectycube.chat.models.ConnectycubeDialogCustomData
 import java.util.*
+import kotlin.collections.ArrayList
 
 /**
  * Type converters to allow Room to reference complex data types.
@@ -21,18 +22,18 @@ class ChatConverters {
     }
 
     @TypeConverter
-    fun fromStringListString(value: String?): List<String>? {
-        return value?.split(", ")
+    fun fromStringListString(value: String?): ArrayList<String>? {
+        return value?.split(", ")?.toCollection(ArrayList())
     }
 
     @TypeConverter
-    fun toStringListString(list: List<String>?): String? {
+    fun toStringListString(list: ArrayList<String>?): String? {
         return list?.joinToString(", ")
     }
 
     @TypeConverter
-    fun fromIdsListString(value: String?): List<Int>? {
-        return value?.let { if (value.isNotEmpty()) value.split(", ").map { it.toInt() } else emptyList() }
+    fun fromIdsListString(value: String?): ArrayList<Int>? {
+        return value?.let { if (value.isNotEmpty()) value.split(", ").map { it.toInt() }.toCollection(ArrayList()) else arrayListOf() }
     }
 
     @TypeConverter

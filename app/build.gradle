@@ -3,20 +3,21 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
+apply plugin: 'kotlinx-serialization'
 
 android {
-    compileSdkVersion 28
+    compileSdk 31
     defaultConfig {
         applicationId "com.connectycube.messenger"
-        minSdkVersion 16
-        targetSdkVersion 28
+        minSdkVersion 18
+        targetSdkVersion 31
         versionCode 5
         versionName "1.2.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
         javaCompileOptions {
             annotationProcessorOptions {
-                arguments = [
+                arguments += [
                         "room.incremental": "true"]
             }
         }
@@ -47,16 +48,18 @@ android {
 
 ext {
     sdkVersion = '1.9.2'
-    roomVersion = '2.2.0-beta01'
+    roomVersion = '2.4.0'
     lifecycleVersion = '2.2.0-alpha02'
-    workVersion = '2.1.0'
+    workVersion = '2.7.0'
     materialVersion = '1.1.0-alpha09'
     paging_version = "2.1.0"
     recyclerViewVersion = '1.1.0-beta03'
 }
 
 dependencies { configuration ->
-    connectycubeComponents(configuration, sdkVersion)
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1"
+
+    connectycubeComponents(configuration, "2.0.0-beta05")
     androidJetPackComponents(configuration, roomVersion, lifecycleVersion, paging_version, workVersion)
     androidXComponents(configuration)
     kotlinComponents(configuration, kotlin_version)
@@ -68,20 +71,20 @@ dependencies { configuration ->
     implementation "com.google.android.gms:play-services-gcm:17.0.0"
     implementation "com.google.firebase:firebase-messaging:20.0.0"
     implementation "com.google.firebase:firebase-core:17.2.0"
+    implementation "com.google.code.gson:gson:2.8.9"
     implementation "com.timehop.stickyheadersrecyclerview:library:0.4.3"
 }
 
+
 private static void connectycubeComponents(configuration, version) {
-    configuration.implementation "com.connectycube:connectycube-android-sdk-chat:$version"
-    configuration.implementation "com.connectycube:connectycube-android-sdk-storage:$version"
-    configuration.implementation "com.connectycube:connectycube-android-sdk-videochat:$version"
-    configuration.implementation "com.connectycube:connectycube-android-sdk-pushnotifications:$version"
+    configuration.implementation "com.connectycube.sdk:connectycube-android:$version"
 }
 
 private static void androidJetPackComponents(configuration, roomVersion, lifecycleVersion,
                                              paging_version, workVersion) {
     configuration.kapt "androidx.room:room-compiler:$roomVersion"
     configuration.implementation "androidx.room:room-runtime:$roomVersion"
+    configuration.kapt "androidx.room:room-compiler:$roomVersion"
     configuration.implementation "androidx.lifecycle:lifecycle-extensions:$lifecycleVersion"
     configuration.implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion"
     configuration.implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion"
@@ -101,7 +104,6 @@ private static void androidXComponents(configuration) {
 
 private static void kotlinComponents(configuration, kotlin_version) {
     configuration.implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    configuration.implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.1.1'
 }
 
 private static void externalMediaComponents(configuration) {
@@ -110,5 +112,3 @@ private static void externalMediaComponents(configuration) {
     configuration.implementation "com.github.bumptech.glide:glide:4.9.0"
     configuration.implementation 'com.github.chrisbanes:PhotoView:2.2.0'
 }
-
-//apply plugin: 'com.google.gms.google-services'

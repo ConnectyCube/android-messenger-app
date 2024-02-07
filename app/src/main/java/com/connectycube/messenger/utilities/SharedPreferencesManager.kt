@@ -2,7 +2,7 @@ package com.connectycube.messenger.utilities
 
 import android.content.Context
 import android.content.SharedPreferences
-import com.connectycube.users.model.ConnectycubeUser
+import com.connectycube.users.models.ConnectycubeUser
 
 const val CUBE_SHARED_PREFERENCES_NAME = "connectycube_messenger"
 const val CUBE_USER_LOGIN = "cube_user_login"

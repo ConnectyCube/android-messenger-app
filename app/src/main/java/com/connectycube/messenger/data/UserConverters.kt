@@ -1,9 +1,9 @@
 package com.connectycube.messenger.data
 
 import androidx.room.TypeConverter
-import com.connectycube.users.model.ConnectycubeUser
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.connectycube.users.models.ConnectycubeUser
 
 /**
  * Type converters to allow Room to reference complex data types.

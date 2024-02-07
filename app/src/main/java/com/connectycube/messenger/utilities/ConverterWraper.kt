@@ -1,27 +1,27 @@
 package com.connectycube.messenger.utilities
 
-import com.connectycube.chat.model.ConnectycubeAttachment
-import com.connectycube.chat.model.ConnectycubeChatDialog
-import com.connectycube.chat.model.ConnectycubeChatMessage
 import com.connectycube.messenger.data.Attachment
 import com.connectycube.messenger.data.Chat
 import com.connectycube.messenger.data.Message
 import com.connectycube.messenger.data.User
-import com.connectycube.users.model.ConnectycubeUser
+import com.connectycube.chat.models.ConnectycubeAttachment
+import com.connectycube.chat.models.ConnectycubeDialog
+import com.connectycube.chat.models.ConnectycubeMessage
+import com.connectycube.users.models.ConnectycubeUser
 import java.util.*
 
 
-fun convertToUsers(list: ArrayList<ConnectycubeUser>): List<User> {
+fun convertToUsers(list: List<ConnectycubeUser>): List<User> {
     val users = ArrayList<User>()
     list.forEach { users.add(convertToUser(it)) }
     return users
 }
 
 fun convertToUser(user: ConnectycubeUser): User {
-    return User(user.id, user.login, user.fullName, user)
+    return User(user.id, user.login!!, user.fullName!!, user)
 }
 
-fun convertToChats(list: ArrayList<ConnectycubeChatDialog>): List<Chat> {
+fun convertToChats(list: List<ConnectycubeDialog>): List<Chat> {
     val chats = ArrayList<Chat>()
     list.forEach {
         chats.add(convertToChat(it))
@@ -29,8 +29,8 @@ fun convertToChats(list: ArrayList<ConnectycubeChatDialog>): List<Chat> {
     return chats
 }
 
-fun convertToChat(dialog: ConnectycubeChatDialog): Chat {
-    return Chat(dialog.dialogId, dialog.type.code).apply {
+fun convertToChat(dialog: ConnectycubeDialog): Chat {
+    return Chat(dialog.dialogId!!, dialog.type).apply {
         dialogId = dialog.dialogId
         lastMessage = dialog.lastMessage
         lastMessageDateSent = dialog.lastMessageDateSent
@@ -39,7 +39,7 @@ fun convertToChat(dialog: ConnectycubeChatDialog): Chat {
         userId = dialog.userId
         unreadMessageCount = dialog.unreadMessageCount ?: 0
         name = dialog.name
-        setOccupantsIds(dialog.occupants)
+        occupantsIds = dialog.occupantsIds
         pinnedMessagesIds = dialog.pinnedMessagesIds
         type = dialog.type
         adminsIds = dialog.adminsIds
@@ -51,7 +51,7 @@ fun convertToChat(dialog: ConnectycubeChatDialog): Chat {
     }
 }
 
-fun convertToMessages(items: ArrayList<ConnectycubeChatMessage>): List<Message> {
+fun convertToMessages(items: List<ConnectycubeMessage>): List<Message> {
     val result: ArrayList<Message> = ArrayList()
     items.forEach {
         result.add(convertToMessage(it))
@@ -59,9 +59,9 @@ fun convertToMessages(items: ArrayList<ConnectycubeChatMessage>): List<Message> 
     return result
 }
 
-fun convertToMessage(item: ConnectycubeChatMessage): Message {
-    return Message(item.id).apply {
-        id = item.id
+fun convertToMessage(item: ConnectycubeMessage): Message {
+    return Message(item.messageId!!).apply {
+        messageId = item.messageId
         body = item.body
         dialogId = item.dialogId
         dateSent = item.dateSent
@@ -74,7 +74,7 @@ fun convertToMessage(item: ConnectycubeChatMessage): Message {
 }
 
 fun convertToAttachment(item: ConnectycubeAttachment, messageId: String): Attachment {
-    return Attachment(item.id, messageId, item.type).apply {
+    return Attachment(item.id!!, messageId, item.type!!).apply {
         id = item.id
         contentType = item.contentType
         data = item.data
@@ -88,19 +88,19 @@ fun convertToAttachment(item: ConnectycubeAttachment, messageId: String): Attach
     }
 }
 
-fun convertToListAttachment(item: ConnectycubeChatMessage):
+fun convertToListAttachment(item: ConnectycubeMessage):
         List<Attachment>? {
     item.attachments?.let {
         val result = mutableListOf<Attachment>()
-        item.attachments.forEach {
-            result.add(convertToAttachment(it, item.id))
+        item.attachments!!.forEach {
+            result.add(convertToAttachment(it, item.messageId!!))
         }
         return result
     }
     return null
 }
 
-fun convertToListOfListMessages(items: List<ConnectycubeChatMessage>): List<Attachment> {
+fun convertToListOfListMessages(items: List<ConnectycubeMessage>): List<Attachment> {
     val attachments = mutableListOf<Attachment>()
     items.forEach { message ->
         val result = convertToListAttachment(message)

@@ -7,7 +7,7 @@ import com.connectycube.messenger.data.User
 import com.connectycube.messenger.data.UserRepository
 import com.connectycube.messenger.vo.Resource
 import com.connectycube.messenger.vo.Status
-import com.connectycube.users.model.ConnectycubeUser
+import com.connectycube.users.models.ConnectycubeUser
 
 class UserDetailsViewModel internal constructor(
     applicationContext: Application,

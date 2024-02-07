@@ -6,35 +6,29 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import com.connectycube.chat.ConnectycubeChatService
 import com.connectycube.messenger.helpers.RTCSessionManager
 import com.connectycube.messenger.helpers.RingtoneManager
-import com.connectycube.messenger.helpers.showSnackbar
 import com.connectycube.messenger.utilities.*
 import com.connectycube.messenger.viewmodels.CallViewModel
-import com.connectycube.videochat.*
-import com.connectycube.videochat.callbacks.RTCClientSessionCallbacks
-import com.connectycube.videochat.callbacks.RTCSessionEventsCallback
-import com.connectycube.videochat.callbacks.RTCSessionStateCallback
+import com.connectycube.webrtc.*
+import com.connectycube.webrtc.callbacks.RTCCallSessionCallback
 import kotlinx.android.synthetic.main.activity_call.*
-import org.jivesoftware.smack.AbstractConnectionListener
 import timber.log.Timber
-import com.google.android.material.snackbar.Snackbar
+import com.connectycube.webrtc.callbacks.RTCSessionStateCallback
 
 
 const val EXTRA_IS_INCOMING_CALL = "conversation_type"
 
-class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSessionCallbacks,
-    RTCSessionEventsCallback, RTCSessionStateCallback<RTCSession> {
+class CallActivity : AppCompatActivity(R.layout.activity_call), RTCCallSessionCallback,
+    RTCSessionStateCallback<P2PSession> {
 
     private val callViewModel: CallViewModel by viewModels {
         InjectorUtils.provideCallViewModelFactory(this.application)
     }
     private val permissionsHelper = PermissionsHelper(this)
     private lateinit var ringtoneManager: RingtoneManager
-    private var currentSession: RTCSession? = null
+    private var currentSession: P2PSession? = null
     private var audioManager: AppRTCAudioManager? = null
-    private val connectionListener = ConnectionListener()
     private var isInComingCall: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,17 +44,16 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
 
     override fun onStart() {
         super.onStart()
-        ConnectycubeChatService.getInstance().addConnectionListener(connectionListener)
     }
 
     override fun onStop() {
         super.onStop()
-        ConnectycubeChatService.getInstance().removeConnectionListener(connectionListener)
     }
 
     private fun initSession() {
         currentSession = RTCSessionManager.getInstance().currentCall
-        currentSession?.addSessionCallbacksListener(this@CallActivity)
+        currentSession?.addSessionStateCallbacksListener(this)
+        currentSession?.initSignallingWithOpponents()
     }
 
     private fun initFields() {
@@ -90,7 +83,7 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
                 toggle_mute_mic.visibility = View.INVISIBLE
                 toggle_screen_sharing.visibility = View.INVISIBLE
             } else {
-                if (it.isAudioCall) {
+                if (it.getCallType() == CallType.AUDIO) {
                     toggle_mute_mic.visibility = View.VISIBLE
                     toggle_speaker.visibility = View.VISIBLE
                     toggle_screen_sharing.visibility = View.GONE
@@ -123,7 +116,7 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
 
     private fun setMuteAudio(isEnabled: Boolean) {
         currentSession?.apply {
-            mediaStreamManager?.localAudioTrack?.setEnabled(isEnabled)
+            mediaStreamManager?.localAudioTrack?.enabled = isEnabled
         }
     }
 
@@ -132,7 +125,7 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
     }
 
     private fun initCall() {
-        RTCClient.getInstance(this).addSessionCallbacksListener(this)
+        P2PCalls.addSessionCallbacksListener(this)
     }
 
     private fun initAudioManager() {
@@ -140,21 +133,35 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
             audioManager = AppRTCAudioManager.create(this)
             audioManager?.apply {
                 defaultAudioDevice = AppRTCAudioManager.AudioDevice.SPEAKER_PHONE
-                setOnWiredHeadsetStateListener { plugged, hasMicrophone ->
-                    Timber.d("plugged= $plugged, hasMicrophone= $hasMicrophone")
-                }
-                setBluetoothAudioDeviceStateListener { connected ->
-                    Timber.d("connected= $connected")
-                }
+                setOnWiredHeadsetStateListener(object :
+                                                   AppRTCAudioManager.OnWiredHeadsetStateListener {
+                    override fun onWiredHeadsetStateChanged(plugged: Boolean,
+                                                            hasMicrophone: Boolean
+                    ) {
+                        Timber.d("plugged= $plugged, hasMicrophone= $hasMicrophone")
+                    }
+
+                })
+                setBluetoothAudioDeviceStateListener(object :
+                                                         AppRTCAudioManager.BluetoothAudioDeviceStateListener {
+                    override fun onStateChanged(connected: Boolean) {
+                        Timber.d("connected= $connected")
+                    }
+
+                })
             }
         }
     }
 
     private fun startAudioManager() {
-        audioManager?.start { selectedAudioDevice, availableAudioDevices ->
-            Timber.d("Audio device switched to  $selectedAudioDevice")
+        audioManager?.start(object : AppRTCAudioManager.AudioManagerEvents {
+            override fun onAudioDeviceChanged(selectedAudioDevice: AppRTCAudioManager.AudioDevice?,
+                                              availableAudioDevices: Set<AppRTCAudioManager.AudioDevice?>?
+            ) {
+                Timber.d("Audio device switched to  $selectedAudioDevice")
+            }
 
-        }
+        })
     }
 
     private fun initRingtoneManager() {
@@ -209,7 +216,7 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
 
     private fun startCallFragment() {
         val isVideoCall =
-            RTCTypes.ConferenceType.CONFERENCE_TYPE_VIDEO == currentSession?.conferenceType
+            CallType.VIDEO == currentSession?.getCallType()
         val conversationFragment = BaseCallFragment.createInstance(
             if (isVideoCall) VideoCallFragment()
             else AudioCallFragment(),
@@ -262,38 +269,14 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
         }
     }
 
-    override fun onUserNotAnswer(session: RTCSession?, userId: Int?) {
-        if (session != currentSession) {
-            return
-        }
-        ringtoneManager.stop()
-    }
-
-    override fun onSessionStartClose(session: RTCSession) {
+    override fun onSessionStartClose(session: P2PSession) {
         if (session == currentSession) {
-            currentSession?.removeSessionCallbacksListener(this@CallActivity)
+            currentSession?.removeSessionStateCallbacksListener(this@CallActivity)
             callViewModel.callSessionAction.value = CallViewModel.CallSessionAction.CALL_STOPPED
         }
     }
 
-    override fun onReceiveHangUpFromUser(session: RTCSession,
-                                         userId: Int,
-                                         userInfo: MutableMap<String, String>?
-    ) {
-        Timber.d("onReceiveHangUpFromUser userId= $userId")
-    }
-
-    override fun onCallAcceptByUser(session: RTCSession?,
-                                    userId: Int?,
-                                    data: MutableMap<String, String>?
-    ) {
-        if (session != currentSession) {
-            return
-        }
-        ringtoneManager.stop()
-    }
-
-    override fun onReceiveNewSession(session: RTCSession) {
+    override fun onReceiveNewSession(session: P2PSession) {
         Timber.d("onReceiveNewSession")
         if (currentSession != null) {
             Timber.d("reject new session, device is busy")
@@ -301,10 +284,33 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
         }
     }
 
-    override fun onUserNoActions(session: RTCSession?, userId: Int?) {
+    override fun onUserNoActions(session: P2PSession, userId: Int?) {
     }
 
-    override fun onSessionClosed(session: RTCSession) {
+    override fun onCallAcceptByUser(session: P2PSession,
+                                    opponentId: Int,
+                                    userInfo: Map<String, String?>?
+    ) {
+        if (session != currentSession) {
+            return
+        }
+        ringtoneManager.stop()
+    }
+
+    override fun onCallRejectByUser(session: P2PSession,
+                                    opponentId: Int,
+                                    userInfo: Map<String, String?>?
+    ) {
+    }
+
+    override fun onReceiveHangUpFromUser(session: P2PSession,
+                                         opponentId: Int,
+                                         userInfo: Map<String, String?>?
+    ) {
+        Timber.d("onReceiveHangUpFromUser userId= $opponentId")
+    }
+
+    override fun onSessionClosed(session: P2PSession) {
         Timber.d("onSessionClosed session= $session")
         if (session == currentSession) {
             Timber.d("release currentSession")
@@ -314,10 +320,11 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
         }
     }
 
-    override fun onCallRejectByUser(session: RTCSession?,
-                                    userId: Int?,
-                                    data: MutableMap<String, String>?
-    ) {
+    override fun onUserNotAnswer(session: P2PSession, opponentId: Int) {
+        if (session != currentSession) {
+            return
+        }
+        ringtoneManager.stop()
     }
 
     private fun hangUpCurrentSession() {
@@ -327,44 +334,22 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCClientSession
 
     private fun releaseCurrentCall() {
         audioManager?.stop()
-        RTCClient.getInstance(this).removeSessionsCallbacksListener(this)
-        currentSession?.removeSessionCallbacksListener(this)
+        currentSession?.removeSessionStateCallbacksListener(this)
+        P2PCalls.removeSessionCallbacksListener(this)
         currentSession = null
         RTCSessionManager.getInstance().endCall()
     }
 
-    override fun onDisconnectedFromUser(session: RTCSession?, userID: Int?) {
+    override fun onDisconnectedFromUser(session: P2PSession, userId: Int) {
     }
 
-    override fun onConnectedToUser(session: RTCSession?, userID: Int?) {
+    override fun onConnectedToUser(session: P2PSession, userId: Int) {
         callViewModel.callSessionAction.value = CallViewModel.CallSessionAction.CALL_STARTED
     }
 
-    override fun onConnectionClosedForUser(session: RTCSession?, userID: Int?) {
+    override fun onConnectionClosedForUser(session: P2PSession, userId: Int) {
     }
 
-    override fun onStateChanged(session: RTCSession?, state: BaseSession.RTCSessionState?) {
-    }
-
-    private inner class ConnectionListener : AbstractConnectionListener() {
-        override fun connectionClosedOnError(e: Exception?) {
-            showSnackbar(
-                this@CallActivity,
-                R.string.connection_is_disconnected,
-                Snackbar.LENGTH_INDEFINITE
-            )
-        }
-
-        override fun reconnectionSuccessful() {
-            showSnackbar(
-                this@CallActivity,
-                R.string.connection_is_reconnected,
-                Snackbar.LENGTH_SHORT
-            )
-        }
-
-        override fun reconnectingIn(seconds: Int) {
-
-        }
+    override fun onStateChanged(session: P2PSession, state: BaseSession.RTCSessionState) {
     }
 }

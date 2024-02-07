@@ -1,18 +1,18 @@
 package com.connectycube.messenger.viewmodels
 
 import android.app.Application
+import android.text.TextUtils
 import androidx.lifecycle.*
-import com.connectycube.chat.model.ConnectycubeChatDialog
-import com.connectycube.chat.utils.DialogUtils
 import com.connectycube.messenger.R
-import com.connectycube.messenger.data.Chat
 import com.connectycube.messenger.data.ChatRepository
 import com.connectycube.messenger.data.UserRepository
 import com.connectycube.messenger.utilities.SharedPreferencesManager
 import com.connectycube.messenger.utilities.convertToChat
 import com.connectycube.messenger.vo.Resource
 import com.connectycube.messenger.vo.Status
-import com.connectycube.users.model.ConnectycubeUser
+import com.connectycube.chat.models.ConnectycubeDialog
+import com.connectycube.chat.models.ConnectycubeDialogType
+import com.connectycube.users.models.ConnectycubeUser
 
 class CreateChatDialogViewModel internal constructor(
     applicationContext: Application,
@@ -31,11 +31,12 @@ class CreateChatDialogViewModel internal constructor(
             if (it.isNullOrEmpty()) {
                 result.value = Resource.error(
                     getApplication<Application>().getString(R.string.error_while_loading_users),
-                    null)
+                    null
+                )
             } else {
                 result.value = Resource.success(it
-                    .map { user -> user.conUser }
-                    .filter { conUser -> !isCurrentUser(conUser) })
+                                                    .map { user -> user.conUser }
+                                                    .filter { conUser -> !isCurrentUser(conUser) })
                 result.removeSource(source)
             }
         }
@@ -59,7 +60,7 @@ class CreateChatDialogViewModel internal constructor(
         return currentUser.login == user.login
     }
 
-    fun createNewChatDialog(name: String? = null, avatar: String? = null): LiveData<Resource<ConnectycubeChatDialog>> {
+    fun createNewChatDialog(name: String? = null, avatar: String? = null): LiveData<Resource<ConnectycubeDialog>> {
         if (liveSelectedUsers.value == null) return MutableLiveData(
             Resource.error(
                 getApplication<Application>().getString(R.string.select_users_choose_users),
@@ -69,7 +70,7 @@ class CreateChatDialogViewModel internal constructor(
 
         val array = arrayOfNulls<ConnectycubeUser>(liveSelectedUsers.value!!.size)
         liveSelectedUsers.value?.toArray(array)
-        val chatDialog: ConnectycubeChatDialog = DialogUtils.buildDialog(*array)
+        val chatDialog: ConnectycubeDialog = buildDialog(*array)!!
         name?.let { chatDialog.name = name }
         avatar?.let { chatDialog.photo = avatar }
         return Transformations.map(
@@ -85,5 +86,32 @@ class CreateChatDialogViewModel internal constructor(
                 else -> Resource.loading(null)
             }
         }
+    }
+
+    private fun buildDialog(vararg users: ConnectycubeUser?): ConnectycubeDialog? {
+        return if (users.isEmpty()) {
+            throw IllegalArgumentException("Users array can't be empty")
+        } else {
+            when {
+                users.size > 1 -> {
+                    ConnectycubeDialog(dialogId = "", name = createChatNameFromUserList(*users), type = ConnectycubeDialogType.GROUP, occupantsIds = users.map { it!!.id }.toCollection(ArrayList()))
+                }
+                users.size == 1 -> {
+                    ConnectycubeDialog(dialogId = "", name = null, type = ConnectycubeDialogType.PRIVATE, occupantsIds = users.map { it!!.id }.toCollection(ArrayList()))
+                }
+                else -> null
+            }
+        }
+    }
+
+    private fun createChatNameFromUserList(vararg users: ConnectycubeUser?): String {
+        var chatName = ""
+        for (user in users) {
+            val prefix = if (chatName == "") "" else ", "
+            val fullName: String =
+                if (!TextUtils.isEmpty(user!!.fullName)) user.fullName!! else user.id.toString()
+            chatName = chatName + prefix + fullName
+        }
+        return chatName
     }
 }

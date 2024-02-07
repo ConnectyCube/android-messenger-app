@@ -2,9 +2,9 @@ package com.connectycube.messenger.utilities
 
 import android.app.Application
 import android.content.Context
-import com.connectycube.chat.model.ConnectycubeChatDialog
 import com.connectycube.messenger.data.*
 import com.connectycube.messenger.viewmodels.*
+import com.connectycube.chat.models.ConnectycubeDialog
 
 object InjectorUtils {
 
@@ -118,7 +118,7 @@ object InjectorUtils {
     }
 
     fun provideMessageSenderViewModelFactory(application: Application,
-                                             dialog: ConnectycubeChatDialog
+                                             dialog: ConnectycubeDialog
     ):  MessageSenderViewModelFactory {
         val repository = getMessageSenderViewRepository(application)
         return MessageSenderViewModelFactory(application, dialog, repository)

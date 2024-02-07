@@ -2,15 +2,9 @@ package com.connectycube.messenger
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.ListView
-import android.widget.Toast
+import android.widget.*
 import androidx.activity.viewModels
 import androidx.lifecycle.observe
-import com.connectycube.auth.session.ConnectycubeSessionManager
-import com.connectycube.core.EntityCallback
-import com.connectycube.core.exception.ResponseException
 import com.connectycube.messenger.data.User
 import com.connectycube.messenger.utilities.InjectorUtils
 import com.connectycube.messenger.utilities.SAMPLE_CONFIG_FILE_NAME
@@ -18,9 +12,10 @@ import com.connectycube.messenger.utilities.SharedPreferencesManager
 import com.connectycube.messenger.utilities.getAllUsersFromFile
 import com.connectycube.messenger.viewmodels.UserListViewModel
 import com.connectycube.messenger.vo.Status
-import com.connectycube.users.ConnectycubeUsers
-import com.connectycube.users.model.ConnectycubeUser
 import kotlinx.android.synthetic.main.activity_login.*
+import com.connectycube.ConnectyCube
+import com.connectycube.core.ConnectycubeSessionManager
+import com.connectycube.users.models.ConnectycubeUser
 import timber.log.Timber
 
 
@@ -40,18 +35,29 @@ class LoginActivity : BaseActivity() {
             showProgress(progressbar)
             val user = SharedPreferencesManager.getInstance(applicationContext).getCurrentUser()
             text_view.text = getString(R.string.user_logged_in, user.fullName ?: user.login)
-            startDialogsScreen()
+            signInRestIfNeed(user)
         } else {
             initUsers()
             initUserAdapter()
         }
     }
 
+    private fun loginWithSession(user: ConnectycubeUser) {
+        if (ConnectycubeSessionManager.isActiveSessionValid()) loginTo(user)
+        showProgress(progressbar)
+        ConnectyCube.createSession(successCallback = { session ->
+            loginTo(user)
+        }, errorCallback = { error ->
+            hideProgress(progressbar)
+            Timber.e(error, "loginWithSession")
+        })
+    }
+
     private fun loginTo(user: ConnectycubeUser) {
         showProgress(progressbar)
         Timber.d("called loginTo user = $user")
         val usersLogins = ArrayList<String>()
-        users.forEach { usersLogins.add(it.login) }
+        users.forEach { it.login?.let { login -> usersLogins.add(login) } }
 
         val userListViewModel: UserListViewModel by viewModels {
             InjectorUtils.provideUserListViewModelFactory(this, usersLogins)
@@ -72,8 +78,8 @@ class LoginActivity : BaseActivity() {
                     val userRaw: User? = listUser?.find { it.login == user.login }
                     if (userRaw != null) {
                         Timber.d("proceed loginTo user= $userRaw, conUser= ${userRaw.conUser}")
-                        val userToLogin = userRaw.conUser.also { it.password = user.password }
-                        signInRestIdNeed(userToLogin)
+                        val userToLogin = userRaw.conUser.also { it.login = user.login; it.password = user.password }
+                        signInRestIfNeed(userToLogin)
                     } else {
                         errorProcessing(getString(R.string.loading_users_empty))
                     }
@@ -87,9 +93,9 @@ class LoginActivity : BaseActivity() {
     }
 
     private fun isSignedInREST(user: ConnectycubeUser) =
-        ConnectycubeSessionManager.getInstance().sessionParameters?.userId == user.id ?: false
+        ConnectycubeSessionManager.activeSession?.user?.id == user.id
 
-    private fun signInRestIdNeed(user: ConnectycubeUser) {
+    private fun signInRestIfNeed(user: ConnectycubeUser) {
         if (!isSignedInREST(user)) {
             signInRest(user)
         } else {
@@ -98,20 +104,16 @@ class LoginActivity : BaseActivity() {
     }
 
     private fun signInRest(user: ConnectycubeUser) {
-        ConnectycubeUsers.signIn(user).performAsync(object : EntityCallback<ConnectycubeUser> {
-            override fun onSuccess(conUser: ConnectycubeUser, args: Bundle) {
-                SharedPreferencesManager.getInstance(applicationContext).saveCurrentUser(user)
-                startDialogsScreen()
-            }
-
-            override fun onError(ex: ResponseException) {
-                hideProgress(progressbar)
-                Toast.makeText(
-                    applicationContext,
-                    getString(R.string.login_chat_login_error, ex.message),
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
+        ConnectyCube.createSession(user, { conUser ->
+            SharedPreferencesManager.getInstance(applicationContext).saveCurrentUser(user)
+            startDialogsScreen()
+        }, { error ->
+            hideProgress(progressbar)
+            Toast.makeText(
+                applicationContext,
+                getString(R.string.login_chat_login_error, error.message),
+                Toast.LENGTH_SHORT
+            ).show()
         })
     }
 
@@ -137,12 +139,12 @@ class LoginActivity : BaseActivity() {
 
     private fun initUserAdapter() {
         val userList: ArrayList<String> = ArrayList(users.size)
-        users.forEach { userList.add(it.login) }
+        users.forEach { user -> user.login?.let { it -> userList.add(it) } }
         adapter = ArrayAdapter(this, R.layout.list_item_user_simple, userList)
         list_users.adapter = adapter
         list_users.choiceMode = ListView.CHOICE_MODE_SINGLE
         list_users.onItemClickListener = AdapterView.OnItemClickListener { _, _, position, _ ->
-            loginTo(users[position])
+            loginWithSession(users[position])
         }
     }
 }

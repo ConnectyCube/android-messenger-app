@@ -21,7 +21,7 @@ class SelectUsersActivity : SelectUsersBaseActivity<SelectUsersViewModel>() {
     override fun loadData() {
         super.loadData()
 
-        getViewMode().getUsers(intent.extras.getIntegerArrayList(EXTRA_FILTER_IDS))
+        getViewMode().getUsers(intent.extras!!.getIntegerArrayList(EXTRA_FILTER_IDS)!!)
             .observe(this) { result ->
                 when (result.status) {
                     Status.LOADING -> showProgress(progressbar)

@@ -1,58 +1,53 @@
 package com.connectycube.messenger.utilities
 
-import android.os.Bundle
-import com.connectycube.core.ConnectycubeProgressCallback
-import com.connectycube.core.EntityCallback
-import com.connectycube.core.exception.ResponseException
-import com.connectycube.core.server.Performer
 import com.connectycube.messenger.api.ApiResponse
-import com.connectycube.messenger.vo.AppExecutors
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import com.connectycube.core.utils.coroutineDispatcher
 
 open class ResponsePerformer<T, R> {
-    var progressCallBack: ConnectycubeProgressCallback? = null
 
-    open fun perform(performer: Performer<T>, converter: Converter<R, T>, callback: Callback<R>?) {
-        performer.performAsync(object : EntityCallback<T> {
-            override fun onSuccess(response: T, bundle: Bundle?) {
-                val wrapped = converter.convertTo(response)
-                callback?.onResult(ApiResponse.create(wrapped, bundle))
-            }
+    open fun perform(performer: suspend () -> T, converter: Converter<R, T>, callback: Callback<R>?) {
 
-            override fun onError(ex: ResponseException) {
-                callback?.onResult(ApiResponse.create(ex))
+        GlobalScope.apply {
+            launch(coroutineDispatcher) {
+                try {
+                    val wrapped = converter.convertTo(performer.invoke())
+                    callback?.onResult(ApiResponse.create(wrapped, null))
+                } catch (ex: Exception) {
+                    callback?.onResult(ApiResponse.create(ex))
+                }
             }
-        })
+        }
     }
 
-    open fun perform(performer: Performer<T>, callback: Callback<T>?) {
-        performer.performAsync(object : EntityCallback<T> {
-            override fun onSuccess(response: T, bundle: Bundle?) {
-                callback?.onResult(ApiResponse.create(response, bundle))
+    open fun perform(performer: suspend () -> T, callback: Callback<T>?) {
+        GlobalScope.apply {
+            launch(coroutineDispatcher) {
+                try {
+                    val wrapped = performer.invoke()
+                    callback?.onResult(ApiResponse.create(wrapped, null))
+                } catch (ex: Exception) {
+                    callback?.onResult(ApiResponse.create(ex))
+                }
             }
-
-            override fun onError(ex: ResponseException) {
-                callback?.onResult(ApiResponse.create(ex))
-            }
-        })
+        }
     }
 
-    open fun performProgress(performer: Performer<T>,
+    open fun performProgress(performer: suspend () -> T,
                      converter: Converter<R, T>,
                      callback: Callback<R>?
     ) {
-
-        progressCallBack = ConnectycubeProgressCallback { callback?.onResult(ApiResponse.create(it)) }
-
-        performer.performAsync(object : EntityCallback<T> {
-            override fun onSuccess(response: T, bundle: Bundle?) {
-                val wrapped = converter.convertTo(response)
-                callback?.onResult(ApiResponse.create(wrapped, bundle))
+        GlobalScope.apply {
+            launch(coroutineDispatcher) {
+                try {
+                    val wrapped = converter.convertTo(performer.invoke())
+                    callback?.onResult(ApiResponse.create(wrapped, null))
+                } catch (ex: Exception) {
+                    callback?.onResult(ApiResponse.create(ex))
+                }
             }
-
-            override fun onError(ex: ResponseException) {
-                callback?.onResult(ApiResponse.create(ex))
-            }
-        })
+        }
     }
 
     interface Callback<T> {

@@ -38,6 +38,7 @@ abstract class NetworkBoundResource<ResultType, RequestType>
                     is ApiSuccessResponse -> {
                         newCallData = processResponse(response)
                     }
+                    else -> {}
                 }
                 if (shouldFetch(data, newCallData)) {
                     fetchFromNetwork(dbSource)
@@ -94,6 +95,7 @@ abstract class NetworkBoundResource<ResultType, RequestType>
                         setValue(Resource.error(response.errorMessage, newData))
                     }
                 }
+                else -> {}
             }
         }
     }

@@ -6,11 +6,11 @@ import androidx.work.WorkerParameters
 import com.connectycube.messenger.data.AppDatabase
 import com.connectycube.messenger.data.User
 import com.connectycube.messenger.utilities.SAMPLE_CONFIG_FILE_NAME
-import com.connectycube.users.model.ConnectycubeUser
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.google.gson.stream.JsonReader
 import kotlinx.coroutines.coroutineScope
+import com.connectycube.users.models.ConnectycubeUser
 import timber.log.Timber
 
 class ChatDatabaseWorker(
@@ -34,7 +34,9 @@ class ChatDatabaseWorker(
                                 mapPassword[login]!!,
                                 login,
                                 "",
-                                ConnectycubeUser(login, mapPassword.keys.elementAt(0)).apply { id = mapPassword[login] }
+                                ConnectycubeUser(login, mapPassword.keys.elementAt(0)).apply { id =
+                                    mapPassword[login] ?: error("password is null")
+                                }
                             )
                         )
                     }
@@ -44,7 +46,7 @@ class ChatDatabaseWorker(
                 }
             }
         } catch (ex: Exception) {
-            Timber.e("Error seeding database", ex)
+            Timber.e(ex, "Error seeding database")
             Result.failure()
         }
     }

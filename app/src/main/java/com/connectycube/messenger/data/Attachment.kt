@@ -3,7 +3,7 @@ package com.connectycube.messenger.data
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.connectycube.chat.model.ConnectycubeAttachment
+import com.connectycube.chat.models.ConnectycubeAttachment
 
 @Entity(tableName = "attachments")
 data class Attachment(

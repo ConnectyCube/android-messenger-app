@@ -3,15 +3,15 @@ package com.connectycube.messenger.viewmodels
 import android.app.Application
 import androidx.lifecycle.*
 import androidx.lifecycle.Transformations.map
-import com.connectycube.chat.model.ConnectycubeChatDialog
-import com.connectycube.chat.model.ConnectycubeChatMessage
 import com.connectycube.messenger.R
 import com.connectycube.messenger.data.ChatMessageRepository
 import com.connectycube.messenger.data.ChatRepository
 import com.connectycube.messenger.data.UserRepository
 import com.connectycube.messenger.utilities.convertToMessage
 import com.connectycube.messenger.vo.Resource
-import com.connectycube.users.model.ConnectycubeUser
+import com.connectycube.chat.models.ConnectycubeDialog
+import com.connectycube.chat.models.ConnectycubeMessage
+import com.connectycube.users.models.ConnectycubeUser
 import java.util.concurrent.atomic.AtomicBoolean
 
 private const val PAGE_SIZE = 20
@@ -33,7 +33,7 @@ class ChatMessageListViewModel internal constructor(
     var unreadCounter = 0
     private val dialogName = createShowDialog()
     private val repoResult = map(dialogName) {
-        repository.postsOfDialogId(it.dialogId, PAGE_SIZE)
+        repository.postsOfDialogId(it.dialogId!!, PAGE_SIZE)
     }
 
     val liveDialog by lazy {
@@ -44,15 +44,15 @@ class ChatMessageListViewModel internal constructor(
     val messages = Transformations.switchMap(repoResult, { it.pagedList })
     val refreshState = Transformations.switchMap(repoResult, { it.refreshState })
 
-    private fun createShowDialog(): LiveData<out ConnectycubeChatDialog> {
+    private fun createShowDialog(): LiveData<out ConnectycubeDialog> {
         return chatRepository.getChat(dialogId)
     }
 
-    fun getOccupants(chatDialog: ConnectycubeChatDialog): LiveData<Resource<List<ConnectycubeUser>>> {
+    fun getOccupants(chatDialog: ConnectycubeDialog): LiveData<Resource<List<ConnectycubeUser>>> {
         val result = MediatorLiveData<Resource<List<ConnectycubeUser>>>()
         result.value = Resource.loading(null)
 
-        val source = usersRepository.getUsersByIds(*chatDialog.occupants.toIntArray())
+        val source = usersRepository.getUsersByIds(*chatDialog.occupantsIds!!.toIntArray())
         result.addSource(source) {
             if (it.isNullOrEmpty()) {
                 result.value = Resource.error(
@@ -69,8 +69,8 @@ class ChatMessageListViewModel internal constructor(
         return result
     }
 
-    fun getChatDialog(dialogId: String = this.dialogId): LiveData<Resource<ConnectycubeChatDialog>> {
-        val result = MediatorLiveData<Resource<ConnectycubeChatDialog>>()
+    fun getChatDialog(dialogId: String = this.dialogId): LiveData<Resource<ConnectycubeDialog>> {
+        val result = MediatorLiveData<Resource<ConnectycubeDialog>>()
         result.value = Resource.loading(null)
 
         val source = chatRepository.getChat(dialogId)
@@ -89,7 +89,7 @@ class ChatMessageListViewModel internal constructor(
         return result
     }
 
-    fun postItem(message: ConnectycubeChatMessage) {
+    fun postItem(message: ConnectycubeMessage) {
         repository.insertItemIntoDb(convertToMessage(message))
     }
 

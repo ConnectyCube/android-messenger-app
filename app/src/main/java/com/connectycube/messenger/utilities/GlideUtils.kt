@@ -9,7 +9,7 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.RequestOptions
 import com.connectycube.messenger.R
-import com.connectycube.users.model.ConnectycubeUser
+import com.connectycube.users.models.ConnectycubeUser
 
 fun loadChatDialogPhoto(activityContext: Context, isPrivate: Boolean, url: String?, imageView: ImageView) {
     val placeholder = if (isPrivate) R.drawable.ic_avatar_placeholder else R.drawable.ic_avatar_placeholder_group

@@ -9,15 +9,16 @@ import androidx.activity.viewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.connectycube.chat.model.ConnectycubeChatDialog
 import com.connectycube.messenger.adapters.DialogOccupantsAdapter
 import com.connectycube.messenger.utilities.*
 import com.connectycube.messenger.viewmodels.ChatDialogDetailsViewModel
 import com.connectycube.messenger.vo.Status
-import com.connectycube.users.model.ConnectycubeUser
 import com.yalantis.ucrop.UCrop
 import com.zhihu.matisse.Matisse
 import kotlinx.android.synthetic.main.activity_chat_dialog_details.*
+import com.connectycube.chat.models.ConnectycubeDialog
+import com.connectycube.chat.models.ConnectycubeDialogType
+import com.connectycube.users.models.ConnectycubeUser
 import timber.log.Timber
 
 const val EXTRA_CHAT_DIALOG_ID = "chat_dialog_id"
@@ -33,7 +34,7 @@ class ChatDialogDetailsActivity : BaseChatActivity(),
 
     private val permissionsHelper = PermissionsHelper(this)
     private lateinit var chatDialogDetailsViewModel: ChatDialogDetailsViewModel
-    private lateinit var currentChatDialog: ConnectycubeChatDialog
+    private lateinit var currentChatDialog: ConnectycubeDialog
     private lateinit var occupantsAdapter: DialogOccupantsAdapter
     private var dialogOccupants: MutableList<ConnectycubeUser> = mutableListOf()
 
@@ -99,7 +100,7 @@ class ChatDialogDetailsActivity : BaseChatActivity(),
     }
 
     private fun loadData() {
-        chatDialogDetailsViewModel = getViewModel(intent.getStringExtra(EXTRA_CHAT_DIALOG_ID))
+        chatDialogDetailsViewModel = getViewModel(intent.getStringExtra(EXTRA_CHAT_DIALOG_ID)!!)
 
         chatDialogDetailsViewModel.liveDialog.observe(this, Observer { resource ->
             when (resource.status) {
@@ -123,10 +124,10 @@ class ChatDialogDetailsActivity : BaseChatActivity(),
         })
     }
 
-    private fun attachData(chatDialog: ConnectycubeChatDialog) {
+    private fun attachData(chatDialog: ConnectycubeDialog) {
         currentChatDialog = chatDialog
 
-        if (currentChatDialog.isPrivate) {
+        if (currentChatDialog.type == ConnectycubeDialogType.PRIVATE) {
             group_description_layout.visibility = View.GONE
             add_occupants_img.visibility = View.GONE
             edit_group_name_btn.visibility = View.GONE
@@ -160,19 +161,19 @@ class ChatDialogDetailsActivity : BaseChatActivity(),
         description_txt.text = chatDialog.description
         chat_dialog_name_txt.text = chatDialog.name
         remove_occupants_img.visibility = if (isUserAdmin(getCurrentUser()) || isUserCreator(getCurrentUser())) View.VISIBLE else View.GONE
-        loadChatDialogPhoto(this, chatDialog.isPrivate, chatDialog.photo, avatar_img)
+        loadChatDialogPhoto(this, chatDialog.type == ConnectycubeDialogType.PRIVATE, chatDialog.photo, avatar_img)
     }
 
     private fun addOccupants() {
         val intent = Intent(this, SelectUsersActivity::class.java)
-        intent.putIntegerArrayListExtra(EXTRA_FILTER_IDS, ArrayList(currentChatDialog.occupants))
+        intent.putIntegerArrayListExtra(EXTRA_FILTER_IDS, ArrayList(currentChatDialog.occupantsIds))
         startActivityForResult(intent, REQUEST_ADD_OCCUPANTS)
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
     }
 
     private fun removeOccupants() {
         val intent = Intent(this, SelectUsersFromExistActivity::class.java)
-        intent.putIntegerArrayListExtra(EXTRA_USERS_TO_LOAD, ArrayList(currentChatDialog.occupants.filter { it != currentChatDialog.userId }))
+        intent.putIntegerArrayListExtra(EXTRA_USERS_TO_LOAD, ArrayList(currentChatDialog.occupantsIds!!.filter { it != currentChatDialog.userId }))
         startActivityForResult(intent, REQUEST_REMOVE_OCCUPANTS)
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
     }
@@ -208,10 +209,10 @@ class ChatDialogDetailsActivity : BaseChatActivity(),
                 startNameUpdate(data.getStringExtra(EXTRA_DATA))
             }
             REQUEST_ADD_OCCUPANTS -> {
-                startAddOccupants(data.getIntegerArrayListExtra(EXTRA_SELECTED_USERS))
+                startAddOccupants(data.getIntegerArrayListExtra(EXTRA_SELECTED_USERS)!!)
             }
             REQUEST_REMOVE_OCCUPANTS -> {
-                startRemoveOccupants(data.getIntegerArrayListExtra(EXTRA_SELECTED_USERS))
+                startRemoveOccupants(data.getIntegerArrayListExtra(EXTRA_SELECTED_USERS)!!)
             }
 //            update photo
             REQUEST_CODE_CHOOSE -> {
@@ -253,7 +254,7 @@ class ChatDialogDetailsActivity : BaseChatActivity(),
 
     private fun startPhotoUpdate(path: String?) {
         path?.let {
-            chatDialogDetailsViewModel.updateGroupPhoto(currentChatDialog.dialogId, path)
+            chatDialogDetailsViewModel.updateGroupPhoto(currentChatDialog.dialogId!!, path)
         }
     }
 
@@ -261,7 +262,7 @@ class ChatDialogDetailsActivity : BaseChatActivity(),
         if (newDescription.isNullOrEmpty()) {
             Toast.makeText(this, R.string.group_description_can_not_be_empty, Toast.LENGTH_LONG).show()
         } else if (currentChatDialog.description != newDescription) {
-            chatDialogDetailsViewModel.updateGroupDescription(currentChatDialog.dialogId, newDescription)
+            chatDialogDetailsViewModel.updateGroupDescription(currentChatDialog.dialogId!!, newDescription)
         }
     }
 
@@ -269,34 +270,34 @@ class ChatDialogDetailsActivity : BaseChatActivity(),
         if (newName.isNullOrEmpty()) {
             Toast.makeText(this, R.string.group_name_can_not_be_empty, Toast.LENGTH_LONG).show()
         } else if (currentChatDialog.description != newName) {
-            chatDialogDetailsViewModel.updateGroupName(currentChatDialog.dialogId, newName)
+            chatDialogDetailsViewModel.updateGroupName(currentChatDialog.dialogId!!, newName)
         }
     }
 
     private fun startAddOccupants(selectedUsers: java.util.ArrayList<Int>) {
         chatDialogDetailsViewModel.addOccupants(
-            currentChatDialog.dialogId,
+            currentChatDialog.dialogId!!,
             *selectedUsers.toIntArray()
         )
     }
 
     private fun startRemoveOccupants(selectedUsers: java.util.ArrayList<Int>) {
         chatDialogDetailsViewModel.removeOccupants(
-            currentChatDialog.dialogId,
+            currentChatDialog.dialogId!!,
             *selectedUsers.toIntArray()
         )
     }
 
     override fun onAddUserToAdmins(userId: Int) {
-        chatDialogDetailsViewModel.addUserToAdmins(currentChatDialog.dialogId, userId)
+        chatDialogDetailsViewModel.addUserToAdmins(currentChatDialog.dialogId!!, userId)
     }
 
     override fun onRemoveUserFromAdmins(userId: Int) {
-        chatDialogDetailsViewModel.removeUserFromAdmins(currentChatDialog.dialogId, userId)
+        chatDialogDetailsViewModel.removeUserFromAdmins(currentChatDialog.dialogId!!, userId)
     }
 
     override fun onRemoveUserFromOccupants(userId: Int) {
-        chatDialogDetailsViewModel.removeOccupants(currentChatDialog.dialogId, userId)
+        chatDialogDetailsViewModel.removeOccupants(currentChatDialog.dialogId!!, userId)
     }
 
     override fun isUserCreator(user: ConnectycubeUser): Boolean {
@@ -304,7 +305,7 @@ class ChatDialogDetailsActivity : BaseChatActivity(),
     }
 
     override fun isUserAdmin(user: ConnectycubeUser): Boolean {
-        return currentChatDialog.adminsIds.contains(user.id)
+        return currentChatDialog.adminsIds!!.contains(user.id)
     }
 
     override fun isCurrentUser(user: ConnectycubeUser): Boolean {

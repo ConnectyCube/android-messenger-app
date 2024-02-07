@@ -24,6 +24,7 @@ abstract class UpdateResourceProcessor<RequestType>
                     processError(response.errorMessage)
                 }
             }
+            else -> {}
         }
     }
 

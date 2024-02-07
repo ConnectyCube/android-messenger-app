@@ -1,43 +1,38 @@
 package com.connectycube.messenger.api
 
-import com.connectycube.chat.ConnectycubeRestChatService
-import com.connectycube.chat.model.ConnectycubeChatDialog
-import com.connectycube.chat.model.ConnectycubeChatMessage
-import com.connectycube.chat.request.MessageGetBuilder
-import com.connectycube.core.server.Performer
-import java.util.ArrayList
+import com.connectycube.ConnectyCube
+import com.connectycube.chat.models.ConnectycubeMessage
+import com.connectycube.chat.queries.GetMessagesParameters
+import com.connectycube.core.rest.request.RequestFilter
+import com.connectycube.core.rest.request.RequestSorter
 
 class ChatMessageApi {
 
-    fun getTop(dialogId: String, limit: Int): Performer<ArrayList<ConnectycubeChatMessage>> {
-        val messageGetBuilder = MessageGetBuilder()
+    suspend fun getTop(dialogId: String, limit: Int): List<ConnectycubeMessage> {
+        val messageGetBuilder: GetMessagesParameters = GetMessagesParameters().also { it.limit = limit; it.markAsRead = false; it.sorter = RequestSorter("", "date_sent", "desc")}
 
-        messageGetBuilder.limit = limit
-        messageGetBuilder.sortDesc("date_sent")
-        messageGetBuilder.markAsRead(false)
-
-        return ConnectycubeRestChatService.getDialogMessages(ConnectycubeChatDialog(dialogId), messageGetBuilder)
+        return ConnectyCube.getMessages(dialogId, messageGetBuilder.getRequestParameters()).items
     }
 
-    fun getTopBefore(dialogId: String, limit: Int, before: Long): Performer<ArrayList<ConnectycubeChatMessage>> {
-        val messageGetBuilder = MessageGetBuilder()
+    suspend fun getTopBefore(dialogId: String, limit: Int, before: Long): List<ConnectycubeMessage> {
+        val messageGetBuilder: GetMessagesParameters = GetMessagesParameters().also { it.sorter = RequestSorter("", "date_sent", "desc")}
 
         messageGetBuilder.limit = limit
-        messageGetBuilder.sortDesc("date_sent")
-        messageGetBuilder.lt("date_sent", before)
-        messageGetBuilder.markAsRead(false)
+        messageGetBuilder.markAsRead = false
+        messageGetBuilder.sorter = RequestSorter("", "date_sent", "desc")
+        messageGetBuilder.filters = listOf(RequestFilter("", fieldName = "date_sent", fieldValue = before, "lt"))
 
-        return ConnectycubeRestChatService.getDialogMessages(ConnectycubeChatDialog(dialogId), messageGetBuilder)
+        return ConnectyCube.getMessages(dialogId, messageGetBuilder.getRequestParameters()).items
     }
 
-    fun getTopAfter(dialogId: String, limit: Int, after: Long): Performer<ArrayList<ConnectycubeChatMessage>> {
-        val messageGetBuilder = MessageGetBuilder()
+    suspend fun getTopAfter(dialogId: String, limit: Int, after: Long): List<ConnectycubeMessage> {
+        val messageGetBuilder: GetMessagesParameters = GetMessagesParameters().also { it.sorter = RequestSorter("", "date_sent", "desc")}
 
         messageGetBuilder.limit = limit
-        messageGetBuilder.sortDesc("date_sent")
-        messageGetBuilder.gt("date_sent", after)
-        messageGetBuilder.markAsRead(false)
+        messageGetBuilder.markAsRead = false
+        messageGetBuilder.sorter = RequestSorter("", "date_sent", "desc")
+        messageGetBuilder.filters = listOf(RequestFilter("", fieldName = "date_sent", fieldValue = after, rule = "gt"))
 
-        return ConnectycubeRestChatService.getDialogMessages(ConnectycubeChatDialog(dialogId), messageGetBuilder)
+        return ConnectyCube.getMessages(dialogId, messageGetBuilder.getRequestParameters()).items
     }
 }
