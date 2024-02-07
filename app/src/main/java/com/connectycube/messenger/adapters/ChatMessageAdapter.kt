@@ -14,29 +14,28 @@ import androidx.annotation.NonNull
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.connectycube.chat.model.ConnectycubeAttachment
-import com.connectycube.chat.model.ConnectycubeChatDialog
-import com.connectycube.chat.model.ConnectycubeChatMessage
-import com.connectycube.chat.model.ConnectycubeDialogType
-import com.connectycube.core.helper.CollectionsUtil
 import com.connectycube.messenger.R
 import com.connectycube.messenger.paging.NetworkState
 import com.connectycube.messenger.utilities.*
-import com.connectycube.users.model.ConnectycubeUser
 import com.timehop.stickyheadersrecyclerview.StickyRecyclerHeadersAdapter
+import com.connectycube.chat.models.ConnectycubeAttachment
+import com.connectycube.chat.models.ConnectycubeDialog
+import com.connectycube.chat.models.ConnectycubeDialogType
+import com.connectycube.chat.models.ConnectycubeMessage
+import com.connectycube.users.models.ConnectycubeUser
 import timber.log.Timber
 
 
 typealias AttachmentClickListener = (ConnectycubeAttachment, View) -> Unit
-typealias MarkAsReadListener = (ConnectycubeChatMessage) -> Unit
+typealias MarkAsReadListener = (ConnectycubeMessage) -> Unit
 private typealias PAYLOAD_PROGRESS = ChatMessageAdapter.ProgressMessage
 
 class ChatMessageAdapter(
     val context: Context,
-    var chatDialog: ConnectycubeChatDialog,
+    var chatDialog: ConnectycubeDialog,
     private val attachmentClickListener: AttachmentClickListener,
     private val markAsReadListener: MarkAsReadListener
-) : PagedListAdapter<ConnectycubeChatMessage, RecyclerView.ViewHolder>(diffCallback),
+) : PagedListAdapter<ConnectycubeMessage, RecyclerView.ViewHolder>(diffCallback),
     StickyRecyclerHeadersAdapter<RecyclerView.ViewHolder> {
 
     val IN_PROGRESS = -1
@@ -47,7 +46,7 @@ class ChatMessageAdapter(
 
     val localUserId = SharedPreferencesManager.getInstance(context).getCurrentUser().id
     val occupantsIds: ArrayList<Int> =
-        ArrayList<Int>(chatDialog.occupants).apply { remove(localUserId) }
+        ArrayList<Int>(chatDialog.occupantsIds).apply { remove(localUserId) }
     val occupants: MutableMap<Int, ConnectycubeUser> = mutableMapOf()
     private var networkState: NetworkState? = null
 
@@ -98,7 +97,7 @@ class ChatMessageAdapter(
     }
 
 
-    fun getItemByPosition(position: Int): ConnectycubeChatMessage? {
+    fun getItemByPosition(position: Int): ConnectycubeMessage? {
         return getItem(position)
     }
 
@@ -161,7 +160,7 @@ class ChatMessageAdapter(
                 bindTo(it)
                 message.let {
                     itemView.setSingleOnClickListener {
-                        attachmentClickListener(message.attachments.first(), holder.attachmentView)
+                        attachmentClickListener(message.attachments!!.first(), holder.attachmentView)
                     }
                 }
             }
@@ -174,23 +173,23 @@ class ChatMessageAdapter(
             with(holder) {
                 bindTo(it, showAvatar(position, message), showName(position, message))
                 itemView.setSingleOnClickListener {
-                    attachmentClickListener(message.attachments.first(), holder.attachmentView)
+                    attachmentClickListener(message.attachments!!.first(), holder.attachmentView)
                 }
             }
         }
     }
 
-    private fun showAvatar(position: Int, currentMsg: ConnectycubeChatMessage): Boolean {
+    private fun showAvatar(position: Int, currentMsg: ConnectycubeMessage): Boolean {
         return isNeedShowExtraData(position, currentMsg)
     }
 
-    private fun showName(position: Int, currentMsg: ConnectycubeChatMessage): Boolean {
-        return !chatDialog.isPrivate && isNeedShowExtraData(position, currentMsg)
+    private fun showName(position: Int, currentMsg: ConnectycubeMessage): Boolean {
+        return chatDialog.type != ConnectycubeDialogType.PRIVATE && isNeedShowExtraData(position, currentMsg)
     }
 
-    private fun isNeedShowExtraData(position: Int, currentMsg: ConnectycubeChatMessage): Boolean {
+    private fun isNeedShowExtraData(position: Int, currentMsg: ConnectycubeMessage): Boolean {
         fun isPreviousTheSameSender(position: Int,
-                                    currentMsg: ConnectycubeChatMessage
+                                    currentMsg: ConnectycubeMessage
         ): Boolean {
             val previousPosition = position + 1
             if (previousPosition >= itemCount) {
@@ -236,8 +235,8 @@ class ChatMessageAdapter(
         val msgCurrent = getItem(position)
         val msgNext = getItem(position - 1)
         if (msgCurrent != null && msgNext != null) {
-            val dateMsgCurrent: Long? = getDateAsHeaderId(msgCurrent.dateSent * 1000)
-            val dateMsgNext: Long? = getDateAsHeaderId(msgNext.dateSent * 1000)
+            val dateMsgCurrent: Long? = getDateAsHeaderId(msgCurrent.dateSent!! * 1000)
+            val dateMsgNext: Long? = getDateAsHeaderId(msgNext.dateSent!! * 1000)
             return dateMsgCurrent != dateMsgNext
         }
         return false
@@ -247,7 +246,7 @@ class ChatMessageAdapter(
         val chatMessage = getItem(position)
         var date = 0L
         chatMessage?.let {
-            date = getDateAsHeaderId(chatMessage.dateSent * 1000)
+            date = getDateAsHeaderId(chatMessage.dateSent!! * 1000)
         }
         return date
     }
@@ -268,11 +267,11 @@ class ChatMessageAdapter(
 
         val chatMessage = getItem(position)
         chatMessage?.let {
-            dateView.text = getPrettyMessageDate(context, chatMessage.dateSent * 1000)
+            dateView.text = getPrettyMessageDate(context, chatMessage.dateSent!! * 1000)
         }
     }
 
-    fun setStatus(imgStatus: ImageView?, msg: ConnectycubeChatMessage) {
+    fun setStatus(imgStatus: ImageView?, msg: ConnectycubeMessage) {
         when {
             messageIsRead(msg) -> imgStatus?.setImageResource(R.drawable.ic_check_double_color_16)
             messageIsDelivered(msg) -> imgStatus?.setImageResource(R.drawable.ic_check_double_16)
@@ -321,11 +320,11 @@ class ChatMessageAdapter(
         occupantsIds.addAll(newOccupants.keys.toList())
     }
 
-    fun isIncoming(chatMessage: ConnectycubeChatMessage): Boolean {
-        return chatMessage.senderId != null && chatMessage.senderId != localUserId
+    fun isIncoming(chatMessage: ConnectycubeMessage): Boolean {
+        return chatMessage.senderId != 0 && chatMessage.senderId != localUserId
     }
 
-    fun withAttachment(chatMessage: ConnectycubeChatMessage): Boolean {
+    fun withAttachment(chatMessage: ConnectycubeMessage): Boolean {
         val attachments = chatMessage.attachments
         return attachments != null && !attachments.isEmpty()
     }
@@ -334,8 +333,8 @@ class ChatMessageAdapter(
         return DateUtils.formatDateTime(context, seconds * 1000L, DateUtils.FORMAT_SHOW_TIME)
     }
 
-    private fun isRead(chatMessage: ConnectycubeChatMessage): Boolean {
-        return !CollectionsUtil.isEmpty(chatMessage.readIds) && chatMessage.readIds.contains(
+    private fun isRead(chatMessage: ConnectycubeMessage): Boolean {
+        return (!chatMessage.readIds.isNullOrEmpty()) && chatMessage.readIds!!.contains(
             localUserId
         )
     }
@@ -346,18 +345,18 @@ class ChatMessageAdapter(
          * PagedLists arrive.
          */
         private val PAYLOAD_STATUS = Any()
-        private val diffCallback = object : DiffUtil.ItemCallback<ConnectycubeChatMessage>() {
-            override fun areItemsTheSame(oldItem: ConnectycubeChatMessage,
-                                         newItem: ConnectycubeChatMessage
+        private val diffCallback = object : DiffUtil.ItemCallback<ConnectycubeMessage>() {
+            override fun areItemsTheSame(oldItem: ConnectycubeMessage,
+                                         newItem: ConnectycubeMessage
             ): Boolean =
-                oldItem.id == newItem.id
+                oldItem.messageId == newItem.messageId
 
             override fun areContentsTheSame(
-                oldItem: ConnectycubeChatMessage,
-                newItem: ConnectycubeChatMessage
+                oldItem: ConnectycubeMessage,
+                newItem: ConnectycubeMessage
             ): Boolean {
                 val resultMessage =
-                    oldItem.id == newItem.id && oldItem.readIds == newItem.readIds && oldItem.deliveredIds == newItem.deliveredIds
+                    oldItem.messageId == newItem.messageId && oldItem.readIds == newItem.readIds && oldItem.deliveredIds == newItem.deliveredIds
                 var resultAttachment = true
                 if (!(oldItem.attachments.isNullOrEmpty() && newItem.attachments.isNullOrEmpty())) {
                     resultAttachment = oldItem.attachments?.first() == newItem.attachments?.first()
@@ -365,40 +364,40 @@ class ChatMessageAdapter(
                 return resultMessage && resultAttachment
             }
 
-            override fun getChangePayload(oldItem: ConnectycubeChatMessage,
-                                          newItem: ConnectycubeChatMessage
+            override fun getChangePayload(oldItem: ConnectycubeMessage,
+                                          newItem: ConnectycubeMessage
             ): Any? {
                 return if (sameExceptStatus(oldItem, newItem)) {
                     PAYLOAD_STATUS
                 } else null
             }
 
-            fun sameExceptStatus(oldItem: ConnectycubeChatMessage,
-                                 newItem: ConnectycubeChatMessage
+            fun sameExceptStatus(oldItem: ConnectycubeMessage,
+                                 newItem: ConnectycubeMessage
             ): Boolean {
                 return newItem.readIds != oldItem.readIds || newItem.deliveredIds != oldItem.deliveredIds
             }
         }
     }
 
-    private fun messageIsSent(message: ConnectycubeChatMessage): Boolean {
+    private fun messageIsSent(message: ConnectycubeMessage): Boolean {
         return message.deliveredIds?.contains(localUserId) ?: false
     }
 
-    private fun messageIsRead(message: ConnectycubeChatMessage): Boolean {
-        if (chatDialog.isPrivate) return message.readIds != null &&
-                (message.recipientId == null || message.readIds.contains(message.recipientId))
-        return message.readIds != null && message.readIds.any { it in occupantsIds }
+    private fun messageIsRead(message: ConnectycubeMessage): Boolean {
+        if (chatDialog.type == ConnectycubeDialogType.PRIVATE) return message.readIds != null &&
+                (message.recipientId == null || message.readIds!!.contains(message.recipientId))
+        return message.readIds != null && message.readIds!!.any { it in occupantsIds }
     }
 
-    private fun messageIsDelivered(message: ConnectycubeChatMessage): Boolean {
-        if (chatDialog.isPrivate) return message.deliveredIds?.contains(message.recipientId)
+    private fun messageIsDelivered(message: ConnectycubeMessage): Boolean {
+        if (chatDialog.type == ConnectycubeDialogType.PRIVATE) return message.deliveredIds?.contains(message.recipientId)
             ?: false
-        return message.deliveredIds != null && message.deliveredIds.any { it in occupantsIds }
+        return message.deliveredIds != null && message.deliveredIds!!.any { it in occupantsIds }
     }
 
     fun getAttachImageUrl(attachment: ConnectycubeAttachment): String {
-        return attachment.url
+        return attachment.url!!
     }
 
     open inner class BaseChatMessageViewHolder(@NonNull itemView: View) : RecyclerView.ViewHolder(
@@ -409,8 +408,8 @@ class ChatMessageAdapter(
          * Items might be null if they are not paged in yet. PagedListAdapter will re-bind the
          * ViewHolder when Item is loaded.
          */
-        open fun bindTo(message: ConnectycubeChatMessage) {
-            dateView.text = formatDate(message.dateSent)
+        open fun bindTo(message: ConnectycubeMessage) {
+            dateView.text = formatDate(message.dateSent!!)
         }
     }
 
@@ -419,9 +418,9 @@ class ChatMessageAdapter(
             LayoutInflater.from(parent.context).inflate(chatItem, parent, false)
         ) {
         private val bodyView = itemView.findViewById<TextView>(R.id.text_message_body)
-        private var message: ConnectycubeChatMessage? = null
+        private var message: ConnectycubeMessage? = null
 
-        override fun bindTo(message: ConnectycubeChatMessage) {
+        override fun bindTo(message: ConnectycubeMessage) {
             super.bindTo(message)
             this.message = message
             bodyView.text = message.body
@@ -433,7 +432,7 @@ class ChatMessageAdapter(
         private val imgAvatar: ImageView = itemView.findViewById(R.id.avatar_image_view)
         private val senderName: TextView = itemView.findViewById(R.id.text_message_sender)
 
-        fun bindTo(message: ConnectycubeChatMessage, showAvatar: Boolean, showName: Boolean) {
+        fun bindTo(message: ConnectycubeMessage, showAvatar: Boolean, showName: Boolean) {
             super.bindTo(message)
             if (showAvatar || showName) {
                 val sender = occupants[message.senderId]
@@ -467,7 +466,7 @@ class ChatMessageAdapter(
     inner class ChatMessageOutcomingViewHolder(parent: ViewGroup, @LayoutRes chatItem: Int) :
         BaseChatMessageTextViewHolder(parent, chatItem) {
         val imgStatus: ImageView = itemView.findViewById(R.id.message_status_image_view)
-        override fun bindTo(message: ConnectycubeChatMessage) {
+        override fun bindTo(message: ConnectycubeMessage) {
             super.bindTo(message)
             setStatus(imgStatus, message)
         }
@@ -479,13 +478,13 @@ class ChatMessageAdapter(
         ) {
         val attachmentView: ImageView = itemView.findViewById(R.id.attachment_image_view)
 
-        override fun bindTo(message: ConnectycubeChatMessage) {
+        override fun bindTo(message: ConnectycubeMessage) {
             super.bindTo(message)
             showImageAttachment(message)
         }
 
-        private fun showImageAttachment(message: ConnectycubeChatMessage) {
-            val attachment = message.attachments.iterator().next()
+        private fun showImageAttachment(message: ConnectycubeMessage) {
+            val attachment = message.attachments!!.iterator().next()
             val validUrl = getAttachImageUrl(attachment)
             attachmentView.layoutParams.apply {
                 if (attachment.height != 0 && attachment.width != 0) {
@@ -506,7 +505,7 @@ class ChatMessageAdapter(
         private val imgAvatar: ImageView = itemView.findViewById(R.id.avatar_image_view)
         private val senderName: TextView = itemView.findViewById(R.id.text_message_sender)
 
-        fun bindTo(message: ConnectycubeChatMessage, showAvatar: Boolean, showName: Boolean) {
+        fun bindTo(message: ConnectycubeMessage, showAvatar: Boolean, showName: Boolean) {
             super.bindTo(message)
             if (showAvatar || showName) {
                 val sender = occupants[message.senderId]
@@ -539,7 +538,7 @@ class ChatMessageAdapter(
     inner class ChatImageAttachOutcomingViewHolder(parent: ViewGroup, @LayoutRes chatItem: Int) :
         BaseChatImageAttachViewHolder(parent, chatItem) {
         private val imgStatus: ImageView = itemView.findViewById(R.id.message_status_image_view)
-        override fun bindTo(message: ConnectycubeChatMessage) {
+        override fun bindTo(message: ConnectycubeMessage) {
             super.bindTo(message)
             setStatus(imgStatus, message)
         }

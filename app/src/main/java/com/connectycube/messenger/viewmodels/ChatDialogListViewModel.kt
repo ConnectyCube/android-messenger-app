@@ -1,7 +1,6 @@
 package com.connectycube.messenger.viewmodels
 
 import androidx.lifecycle.*
-import com.connectycube.chat.model.ConnectycubeChatDialog
 import com.connectycube.messenger.data.Chat
 import com.connectycube.messenger.data.ChatMessageRepository
 import com.connectycube.messenger.data.ChatRepository
@@ -10,6 +9,7 @@ import com.connectycube.messenger.vo.Status
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import com.connectycube.chat.models.ConnectycubeDialog
 
 class ChatDialogListViewModel internal constructor(val chatRepository: ChatRepository,
                                                    val messageRepository: ChatMessageRepository) :
@@ -32,7 +32,7 @@ class ChatDialogListViewModel internal constructor(val chatRepository: ChatRepos
         return chatRepository.loadChats()
     }
 
-    fun getChatDialogs(): LiveData<Resource<List<ConnectycubeChatDialog>>>{
+    fun getChatDialogs(): LiveData<Resource<List<ConnectycubeDialog>>>{
         return transformData(getChats())
     }
 
@@ -47,8 +47,8 @@ class ChatDialogListViewModel internal constructor(val chatRepository: ChatRepos
         chatRepository.updateChat(dialogId)
     }
 
-    fun deleteChat(chatDialog: ConnectycubeChatDialog): LiveData<Resource<List<ConnectycubeChatDialog>>>{
-        return transformData(chatRepository.deleteChats(false, chatsIds = *arrayOf(chatDialog.dialogId)))
+    fun deleteChat(chatDialog: ConnectycubeDialog): LiveData<Resource<List<ConnectycubeDialog>>>{
+        return transformData(chatRepository.deleteChats(false, chatsIds = *arrayOf(chatDialog.dialogId!!)))
     }
 
     fun updateMessageReadStatus(messageId: String, userId: Int) {
@@ -59,7 +59,7 @@ class ChatDialogListViewModel internal constructor(val chatRepository: ChatRepos
         messageRepository.updateItemDeliveredStatus(messageId, userId)
     }
 
-    private fun transformData(source: LiveData<Resource<List<Chat>>>): LiveData<Resource<List<ConnectycubeChatDialog>>>{
+    private fun transformData(source: LiveData<Resource<List<Chat>>>): LiveData<Resource<List<ConnectycubeDialog>>>{
         return Transformations.map(source){
             when(it.status){
                 Status.LOADING -> Resource.loading(null)

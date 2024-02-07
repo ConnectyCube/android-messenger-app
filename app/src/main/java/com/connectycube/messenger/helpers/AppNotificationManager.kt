@@ -13,13 +13,13 @@ import android.os.Bundle
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.*
-import com.connectycube.chat.ConnectycubeChatService
 import com.connectycube.messenger.*
 import com.connectycube.messenger.data.AppDatabase
 import com.connectycube.messenger.data.Chat
 import com.connectycube.messenger.data.ChatRepository
 import com.connectycube.messenger.utilities.SharedPreferencesManager
-import com.connectycube.videochat.RTCConfig
+import com.connectycube.ConnectyCube
+import com.connectycube.webrtc.WebRTCConfig
 import java.util.*
 
 
@@ -92,7 +92,8 @@ class AppNotificationManager {
             .addNextIntent(Intent(context, ChatDialogActivity::class.java))
             .addNextIntent(intent)
 
-        val pendingIntent = taskStackBuilder.getPendingIntent(Random().nextInt(), FLAG_UPDATE_CURRENT)!!
+        val pendingIntent = taskStackBuilder.getPendingIntent(Random().nextInt(),
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE else FLAG_UPDATE_CURRENT)!!
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createChatNotificationsChannel(context)
@@ -110,7 +111,7 @@ class AppNotificationManager {
                     Intent(context, SendFastReplyMessageService::class.java).apply {
                         putExtra(EXTRA_CHAT_ID, dialogId)
                     },
-                    FLAG_ONE_SHOT
+                    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) FLAG_ONE_SHOT or PendingIntent.FLAG_MUTABLE else FLAG_ONE_SHOT
                 )
             } else {
                 pendingIntent
@@ -155,11 +156,12 @@ class AppNotificationManager {
     }
 
     private fun showCallNotification(context: Context, data: Map<String, String>) {
-        if (ConnectycubeChatService.getInstance().isLoggedIn) return
+        if (ConnectyCube.chat.isLoggedIn()) return
 
         val intent = prepareStartIntent(context, LoginActivity::class.java, Bundle())
 
-        val pendingIntent: PendingIntent = PendingIntent.getActivity(context, 0, intent, 0)
+        val pendingIntent: PendingIntent = PendingIntent.getActivity(context, 0, intent,
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) 0 or PendingIntent.FLAG_MUTABLE else 0)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createCallsNotificationsChannel(context)
@@ -171,7 +173,7 @@ class AppNotificationManager {
             .setContentText(data[PARAM_MESSAGE])
             .setContentIntent(pendingIntent)
 
-        var cancelNotificationTimeoutSec = RTCConfig.getAnswerTimeInterval()
+        var cancelNotificationTimeoutSec = WebRTCConfig.answerTimeInterval
         val answerTimeout = data[PARAM_ANSWER_TIMEOUT]?.toLong()
         if (answerTimeout != null && answerTimeout > 0) {
             cancelNotificationTimeoutSec = answerTimeout

@@ -43,9 +43,7 @@ This project contains a chat messenger & video calling open source demo app for 
 
 3. Follow to <https://admin.connectycube.com> and create users in **Users** module. Then put to the **app/src/main/assets/user_configiration.json** file at least 2 and max 5 users with format *[\"login\":{\"password\":userId}]*, for ex. *"userchatLogin1":{"userchatPassword1":310}*.
 
-4. For offline pushes setup server key [FCM](https://developers.connectycube.com/android/push-notifications?id=configure-firebase-project-and-api-key), define **sender_id** (your sender id from google console) in string resource and put your **google-services.json** to module package, also uncomment *apply plugin: 'com.google.gms.google-services'* line in app module **build.gradle** file. For more information look at <https://developers.connectycube.com/android/push-notifications>
-
-5. Run project.
+4. Run project.
 
 ## Documentation
 

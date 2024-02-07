@@ -4,8 +4,7 @@ import androidx.annotation.NonNull
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.connectycube.chat.model.ConnectycubeChatDialog
-import com.connectycube.chat.model.ConnectycubeDialogType
+import com.connectycube.chat.models.ConnectycubeDialog
 
 @Entity(
     tableName = "chats",
@@ -16,17 +15,13 @@ data class Chat(
     @NonNull
     @ColumnInfo(name = "chat_id") val chatId: String,
     val dialogType: Int
-) : ConnectycubeChatDialog() {
+) : ConnectycubeDialog() {
     init {
-        type = ConnectycubeDialogType.parseByCode(dialogType)
-    }
-
-    fun getOccupantsIds(): List<Int>? {
-        return occupants
+        type = dialogType
     }
 
     override fun equals(other: Any?): Boolean {
-        return this === other || other is ConnectycubeChatDialog && other.dialogId == this.dialogId
+        return this === other || other is ConnectycubeDialog && other.dialogId == this.dialogId
                 && other.lastMessageDateSent == this.lastMessageDateSent
                 && other.lastMessage == this.lastMessage
                 && other.unreadMessageCount == this.unreadMessageCount

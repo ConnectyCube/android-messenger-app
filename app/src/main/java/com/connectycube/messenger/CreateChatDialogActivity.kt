@@ -13,13 +13,13 @@ import androidx.appcompat.app.ActionBar.DISPLAY_SHOW_TITLE
 import androidx.lifecycle.observe
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.connectycube.chat.model.ConnectycubeChatDialog
 import com.connectycube.messenger.adapters.CheckableUsersAdapter
 import com.connectycube.messenger.utilities.InjectorUtils
 import com.connectycube.messenger.viewmodels.CreateChatDialogViewModel
 import com.connectycube.messenger.vo.Status
-import com.connectycube.users.model.ConnectycubeUser
 import kotlinx.android.synthetic.main.activity_create_chat.*
+import com.connectycube.chat.models.ConnectycubeDialog
+import com.connectycube.users.models.ConnectycubeUser
 import timber.log.Timber
 
 class CreateChatDialogActivity : BaseChatActivity(),
@@ -134,7 +134,7 @@ class CreateChatDialogActivity : BaseChatActivity(),
                 resource.status == Status.SUCCESS -> {
                     hideProgress(progressbar)
 
-                    val newChatDialog: ConnectycubeChatDialog? = resource.data
+                    val newChatDialog: ConnectycubeDialog? = resource.data
                     if (newChatDialog != null) {
                         startChatActivity(newChatDialog)
                         finish()
@@ -149,7 +149,7 @@ class CreateChatDialogActivity : BaseChatActivity(),
         }
     }
 
-    private fun startChatActivity(chat: ConnectycubeChatDialog) {
+    private fun startChatActivity(chat: ConnectycubeDialog) {
         val intent = Intent(this, ChatMessageActivity::class.java)
         intent.addFlags(FLAG_ACTIVITY_FORWARD_RESULT)
         intent.putExtra(EXTRA_CHAT, chat)

@@ -3,9 +3,9 @@ package com.connectycube.messenger.viewmodels
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
-import com.connectycube.chat.model.ConnectycubeAttachment
 import com.connectycube.messenger.data.AttachmentRepository
 import com.connectycube.messenger.vo.Resource
+import com.connectycube.chat.models.ConnectycubeAttachment
 
 class AttachmentViewModel internal constructor(
     applicationContext: Application,

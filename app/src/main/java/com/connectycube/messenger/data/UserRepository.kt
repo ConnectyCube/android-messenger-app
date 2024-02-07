@@ -6,9 +6,9 @@ import com.connectycube.messenger.api.*
 import com.connectycube.messenger.vo.AppExecutors
 import com.connectycube.messenger.vo.NetworkBoundResource
 import com.connectycube.messenger.vo.Resource
-import com.connectycube.users.model.ConnectycubeUser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import com.connectycube.users.models.ConnectycubeUser
 
 /**
  * Repository that handles Users objects.

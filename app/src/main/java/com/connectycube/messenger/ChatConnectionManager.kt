@@ -1,18 +1,14 @@
 package com.connectycube.messenger
 
 import android.content.Context
-import android.os.Bundle
-import com.connectycube.chat.ConnectycubeChatService
-import com.connectycube.core.EntityCallback
-import com.connectycube.core.exception.ResponseException
 import com.connectycube.messenger.events.EVENT_CHAT_LOGIN
 import com.connectycube.messenger.events.EventChatConnection
 import com.connectycube.messenger.events.LiveDataBus
 import com.connectycube.messenger.helpers.RTCSessionManager
 import com.connectycube.messenger.utilities.SharedPreferencesManager
-import com.connectycube.users.model.ConnectycubeUser
-import org.jivesoftware.smack.AbstractConnectionListener
-import org.jivesoftware.smack.XMPPConnection
+import com.connectycube.ConnectyCube
+import com.connectycube.chat.realtime.ConnectycubeConnectionListener
+import com.connectycube.users.models.ConnectycubeUser
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -37,41 +33,37 @@ class ChatConnectionManager {
         if (isPending.get() || isInitialized.get()) return
 
         if (SharedPreferencesManager.getInstance(context).currentUserExists()
-            && !ConnectycubeChatService.getInstance().isLoggedIn
+            && !ConnectyCube.chat.isLoggedIn()
         ) {
             isPending.set(true)
             Timber.d("Start chat login")
             initConnectionListener()
-            ConnectycubeChatService.getInstance().login(
+            ConnectyCube.chat.login(
                 SharedPreferencesManager.getInstance(context).getCurrentUser(),
-                object : EntityCallback<Void> {
-                    override fun onSuccess(void: Void?, bundle: Bundle?) {
-                        isPending.set(false)
-                        isInitialized.set(true)
-                        registerAppLifeCycleObserver()
-                        initCallManager(context)
-                    }
-
-                    override fun onError(ex: ResponseException) {
-                        isPending.set(false)
-                        Timber.d("Error while login to chat, error = ${ex.message}")
-                        notifyErrorLoginToChat(ex)
-                    }
+                {
+                    isPending.set(false)
+                    isInitialized.set(true)
+                    registerAppLifeCycleObserver()
+                    initCallManager(context)
+                },
+                { ex ->
+                    isPending.set(false)
+                    Timber.d("Error while login to chat, error = ${ex.message}")
+                    notifyErrorLoginToChat(ex)
                 })
         }
     }
 
     private fun initConnectionListener() {
-        ConnectycubeChatService.getInstance().addConnectionListener(object :
-                                                                        AbstractConnectionListener() {
-            override fun authenticated(connection: XMPPConnection?, resumed: Boolean) {
+        ConnectyCube.chat.addConnectionListener(object : ConnectycubeConnectionListener {
+            override fun onConnected() {
                 Timber.d("authenticated")
-                notifySuccessLoginToChat(ConnectycubeChatService.getInstance().user)
+                notifySuccessLoginToChat(ConnectyCube.chat.userForLogin!!)
             }
 
-            override fun connectionClosedOnError(e: Exception) {
-                Timber.d("connectionClosedOnError e= $e")
-                notifyErrorLoginToChat(e)
+            override fun onDisconnected() {
+                Timber.d("onDisconnected")
+                notifyErrorLoginToChat(Exception("onDisconnected"))
             }
         })
     }
@@ -100,7 +92,7 @@ class ChatConnectionManager {
     }
 
     fun terminate() {
-        ConnectycubeChatService.getInstance().destroy()
+        ConnectyCube.chat.logout()
         unregisterAppLifeCycleObserver()
         isPending.set(false)
         isInitialized.set(false)

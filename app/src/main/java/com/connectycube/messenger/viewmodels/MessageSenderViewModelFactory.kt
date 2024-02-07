@@ -3,12 +3,12 @@ package com.connectycube.messenger.viewmodels
 import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.connectycube.chat.model.ConnectycubeChatDialog
 import com.connectycube.messenger.data.MessageSenderRepository
+import com.connectycube.chat.models.ConnectycubeDialog
 
 class MessageSenderViewModelFactory(
     private val applicationContext: Application,
-    private val dialog: ConnectycubeChatDialog,
+    private val dialog: ConnectycubeDialog,
     private val repository: MessageSenderRepository
 ) : ViewModelProvider.NewInstanceFactory() {
 

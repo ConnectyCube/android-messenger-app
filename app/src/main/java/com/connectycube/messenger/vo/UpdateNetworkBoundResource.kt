@@ -41,6 +41,7 @@ abstract class UpdateNetworkBoundResource<ResultType, RequestType>
                         })
                     }
                 }
+                else -> {}
             }
         })
     }

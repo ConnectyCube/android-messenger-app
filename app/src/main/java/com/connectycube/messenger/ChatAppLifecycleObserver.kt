@@ -1,10 +1,10 @@
 package com.connectycube.messenger
 
 import androidx.lifecycle.*
-import com.connectycube.chat.ConnectycubeChatService
 import com.connectycube.messenger.events.EVENT_CHAT_LOGIN
 import com.connectycube.messenger.events.EventChatConnection
 import com.connectycube.messenger.events.LiveDataBus
+import com.connectycube.ConnectyCube
 import timber.log.Timber
 
 
@@ -20,7 +20,6 @@ class ChatAppLifecycleObserver : DefaultLifecycleObserver {
                 Timber.d("connected")
                 if (ProcessLifecycleOwner.get().lifecycle.currentState == Lifecycle.State.RESUMED) {
                     Timber.d("connected enterActiveState")
-                    ConnectycubeChatService.getInstance().enterActiveState()
                 }
             }
         })
@@ -36,17 +35,15 @@ class ChatAppLifecycleObserver : DefaultLifecycleObserver {
 
     override fun onStart(owner: LifecycleOwner) {
         registeredEventChat(owner)
-        if (ConnectycubeChatService.getInstance().isLoggedIn) {
+        if (ConnectyCube.chat.isLoggedIn()) {
             Timber.d("onStart enterActiveState")
-            ConnectycubeChatService.getInstance().enterActiveState()
         }
     }
 
     override fun onStop(owner: LifecycleOwner) {
         unregisteredEventChat(owner)
-        if (ConnectycubeChatService.getInstance().isLoggedIn) {
+        if (ConnectyCube.chat.isLoggedIn()) {
             Timber.d("onStop enterInactiveState")
-            ConnectycubeChatService.getInstance().enterInactiveState()
         }
     }
 }

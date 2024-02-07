@@ -2,7 +2,6 @@ package com.connectycube.messenger.data
 
 import android.os.Bundle
 import androidx.lifecycle.LiveData
-import com.connectycube.core.Consts
 import com.connectycube.messenger.api.ApiResponse
 import com.connectycube.messenger.api.ConnectycubeService
 import com.connectycube.messenger.utilities.UpdateResourceProcessor
@@ -99,8 +98,8 @@ class ChatRepository private constructor(private val chatDao: ChatDao, private v
     }
 
     fun deleteChats(force: Boolean, vararg chatsIds: String): LiveData<Resource<List<Chat>>> {
-        return object : DeleteNetworkBoundResource<List<Chat>, ArrayList<String>>(appExecutors) {
-            override fun saveCallResult(item: ArrayList<String>) {
+        return object : DeleteNetworkBoundResource<List<Chat>, List<String>>(appExecutors) {
+            override fun saveCallResult(item: List<String>) {
             }
 
             override fun createCall() = service.deleteDialog(dialogId = *chatsIds, forceDelete = force)
@@ -111,7 +110,7 @@ class ChatRepository private constructor(private val chatDao: ChatDao, private v
 //                val notFoundIds: ArrayList<String>  = bundle.getStringArrayList(Consts.NOT_FOUND_IDS)
 //                val wrongPermissionsIds: ArrayList<String>  = bundle.getStringArrayList(Consts.WRONG_PERMISSIONS_IDS)
 
-                val successfullyDeletedIds: ArrayList<String>? = bundle.getStringArrayList(Consts.SUCCESSFULLY_DELETED_IDS)
+                val successfullyDeletedIds: ArrayList<String>? = bundle.getStringArrayList("Successfully_deleted")
                 if (!successfullyDeletedIds.isNullOrEmpty()) {
                     val array = arrayOfNulls<String>(successfullyDeletedIds.size)
                     successfullyDeletedIds.toArray(array)

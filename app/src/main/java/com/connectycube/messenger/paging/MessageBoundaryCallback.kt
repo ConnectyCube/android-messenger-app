@@ -1,15 +1,15 @@
 package com.connectycube.messenger.paging
 
-import android.os.Bundle
 import androidx.annotation.MainThread
 import androidx.paging.PagedList
 import androidx.paging.PagingRequestHelper
-import com.connectycube.chat.model.ConnectycubeChatMessage
-import com.connectycube.core.EntityCallback
-import com.connectycube.core.exception.ResponseException
 import com.connectycube.messenger.api.ChatMessageApi
 import com.connectycube.messenger.data.Message
 import com.connectycube.messenger.utilities.convertToMessages
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import com.connectycube.chat.models.ConnectycubeMessage
+import com.connectycube.core.utils.coroutineDispatcher
 import timber.log.Timber
 import java.util.concurrent.Executor
 
@@ -26,7 +26,7 @@ class MessageBoundaryCallback(
     private val handleResponse: (List<Message>?) -> Unit,
     private val ioExecutor: Executor,
     private val networkPageSize: Int
-) : PagedList.BoundaryCallback<ConnectycubeChatMessage>() {
+) : PagedList.BoundaryCallback<ConnectycubeMessage>() {
 
     val helper = PagingRequestHelper(ioExecutor)
     val networkState = helper.createStatusLiveData()
@@ -38,11 +38,19 @@ class MessageBoundaryCallback(
     override fun onZeroItemsLoaded() {
         Timber.d("onZeroItemsLoaded")
         helper.runIfNotRunning(PagingRequestHelper.RequestType.INITIAL) {
-            chatMessageApi.getTop(
-                dialogId = dialogId,
-                limit = networkPageSize
-            )
-                .performAsync(createWebserviceCallback(it))
+            GlobalScope.apply {
+                launch(coroutineDispatcher) {
+                    try {
+                        val items = chatMessageApi.getTop(
+                            dialogId = dialogId,
+                            limit = networkPageSize
+                        )
+                        insertItemsIntoDb(convertToMessages(items), it)
+                    } catch (ex: Exception) {
+                        it.recordFailure(ex)
+                    }
+                }
+            }
         }
     }
 
@@ -50,15 +58,23 @@ class MessageBoundaryCallback(
      * User reached to the end of the list.
      */
     @MainThread
-    override fun onItemAtEndLoaded(itemAtEnd: ConnectycubeChatMessage) {
+    override fun onItemAtEndLoaded(itemAtEnd: ConnectycubeMessage) {
         Timber.d("onItemAtEndLoaded itemAtEnd= ${itemAtEnd.body}")
         helper.runIfNotRunning(PagingRequestHelper.RequestType.BEFORE) {
-            chatMessageApi.getTopBefore(
-                dialogId = dialogId,
-                before = itemAtEnd.dateSent,
-                limit = networkPageSize
-            )
-                .performAsync(createWebserviceCallback(it))
+            GlobalScope.apply {
+                launch(coroutineDispatcher) {
+                    try {
+                        val items = chatMessageApi.getTopBefore(
+                            dialogId = dialogId,
+                            before = itemAtEnd.dateSent?: 0,
+                            limit = networkPageSize
+                        )
+                        insertItemsIntoDb(convertToMessages(items), it)
+                    } catch (ex: Exception) {
+                        it.recordFailure(ex)
+                    }
+                }
+            }
         }
     }
 
@@ -76,27 +92,22 @@ class MessageBoundaryCallback(
         }
     }
 
-    override fun onItemAtFrontLoaded(itemAtFront: ConnectycubeChatMessage) {
+    override fun onItemAtFrontLoaded(itemAtFront: ConnectycubeMessage) {
         Timber.d("onItemAtFrontLoaded= ${itemAtFront.body}")
         helper.runIfNotRunning(PagingRequestHelper.RequestType.AFTER) {
-            chatMessageApi.getTopAfter(
-                dialogId = dialogId,
-                after = itemAtFront.dateSent,
-                limit = networkPageSize
-            )
-                .performAsync(createWebserviceCallback(it))
-        }
-    }
-
-    private fun createWebserviceCallback(it: PagingRequestHelper.Request.Callback)
-            : EntityCallback<ArrayList<ConnectycubeChatMessage>> {
-        return object : EntityCallback<ArrayList<ConnectycubeChatMessage>> {
-            override fun onSuccess(items: ArrayList<ConnectycubeChatMessage>, bundle: Bundle?) {
-                insertItemsIntoDb(convertToMessages(items), it)
-            }
-
-            override fun onError(ex: ResponseException) {
-                it.recordFailure(ex)
+            GlobalScope.apply {
+                launch(coroutineDispatcher) {
+                    try {
+                        val items = chatMessageApi.getTopAfter(
+                            dialogId = dialogId,
+                            after = itemAtFront.dateSent?: 0,
+                            limit = networkPageSize
+                        )
+                        insertItemsIntoDb(convertToMessages(items), it)
+                    } catch (ex: Exception) {
+                        it.recordFailure(ex)
+                    }
+                }
             }
         }
     }

@@ -5,8 +5,8 @@ import android.content.Intent
 import android.widget.Toast
 import com.connectycube.messenger.EXTRA_USERS_TO_LOAD
 import com.connectycube.messenger.SelectCallMembersActivity
-import com.connectycube.videochat.RTCClient
-import com.connectycube.videochat.RTCTypes
+import com.connectycube.ConnectyCube
+import com.connectycube.webrtc.CallType
 
 const val EXTRA_CALL_TYPE = "call_type"
 
@@ -15,11 +15,11 @@ const val CALL_TYPE_AUDIO = 2
 
 fun startCall(context: Context, occupants: ArrayList<Int>, callType: Int) {
     val rtcCallType =
-        if (callType == CALL_TYPE_VIDEO) RTCTypes.ConferenceType.CONFERENCE_TYPE_VIDEO
-        else RTCTypes.ConferenceType.CONFERENCE_TYPE_AUDIO
+        if (callType == CALL_TYPE_VIDEO) CallType.VIDEO
+        else CallType.AUDIO
 
-    val rtcClient = RTCClient.getInstance(context.applicationContext)
-    val rtcSession = rtcClient.createNewSessionWithOpponents(occupants, rtcCallType)
+    val p2pCalls = ConnectyCube.p2pCalls
+    val rtcSession = p2pCalls.createSession(occupants, rtcCallType)
 
     RTCSessionManager.getInstance().startCall(rtcSession)
 

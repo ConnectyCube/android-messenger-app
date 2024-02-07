@@ -10,20 +10,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import com.connectycube.messenger.adapters.VideoCallAdapter
-import com.connectycube.users.model.ConnectycubeUser
-import com.connectycube.videochat.BaseSession
-import com.connectycube.videochat.RTCCameraVideoCapturer
-import com.connectycube.videochat.RTCClient
-import com.connectycube.videochat.RTCSession
-import com.connectycube.videochat.callbacks.RTCClientVideoTracksCallback
-import com.connectycube.videochat.callbacks.RTCSessionEventsCallback
-import com.connectycube.videochat.callbacks.RTCSessionStateCallback
-import com.connectycube.videochat.view.RTCSurfaceView
-import com.connectycube.videochat.view.RTCVideoTrack
 import kotlinx.android.synthetic.main.fragment_video_call.*
+import com.connectycube.users.models.ConnectycubeUser
+import com.connectycube.webrtc.*
+import com.connectycube.webrtc.callbacks.RTCSessionEventsCallback
+import com.connectycube.webrtc.callbacks.RTCSessionStateCallback
+import com.connectycube.webrtc.callbacks.VideoTracksCallback
 import org.webrtc.CameraVideoCapturer
 import org.webrtc.RendererCommon
-import org.webrtc.SurfaceViewRenderer
 import timber.log.Timber
 import java.util.*
 
@@ -32,7 +26,7 @@ private const val VIDEO_TRACK_INITIALIZE_DELAY = 500L
 
 class VideoCallFragment :
     BaseCallFragment(R.layout.fragment_video_call, R.string.title_video_call),
-    RTCClientVideoTracksCallback<RTCSession>, RTCSessionStateCallback<RTCSession>,
+    VideoTracksCallback<P2PSession>, RTCSessionStateCallback<P2PSession>,
     RTCSessionEventsCallback {
     private lateinit var videoCallAdapter: VideoCallAdapter
     private val userViewHolders: HashMap<Int, VideoCallAdapter.ViewHolder> = HashMap()
@@ -104,19 +98,19 @@ class VideoCallFragment :
 
     private fun switchCamera() {
         toggle_camera.isEnabled = false
-        (currentSession?.mediaStreamManager?.videoCapturer as RTCCameraVideoCapturer)
+        (currentSession?.mediaStreamManager?.videoCapturer as CameraVideoCapturer)
             .switchCamera(cameraSwitchHandler)
     }
 
     private fun setMuteCamera(isEnabled: Boolean) {
         currentSession?.apply {
-            mediaStreamManager?.localVideoTrack?.setEnabled(isEnabled)
+            mediaStreamManager?.localVideoTrack?.enabled = isEnabled
         }
     }
 
     private fun setMuteAudio(isEnabled: Boolean) {
         currentSession?.apply {
-            mediaStreamManager?.localAudioTrack?.setEnabled(isEnabled)
+            mediaStreamManager?.localAudioTrack?.enabled = isEnabled
         }
     }
 
@@ -231,26 +225,26 @@ class VideoCallFragment :
 
     private fun initSessionListener() {
         currentSession?.apply {
-            addSessionCallbacksListener(this@VideoCallFragment)
+            addSessionStateCallbacksListener(this@VideoCallFragment)
         }
     }
 
     private fun removeSessionListener() {
         currentSession?.apply {
-            removeSessionCallbacksListener(this@VideoCallFragment)
+            removeSessionStateCallbacksListener(this@VideoCallFragment)
         }
     }
 
     private fun initRTCClientListener() {
-        RTCClient.getInstance(context).addSessionCallbacksListener(this@VideoCallFragment)
+        P2PCalls.addSessionCallbacksListener(this@VideoCallFragment)
     }
 
     private fun removeRTCClientListener() {
-        RTCClient.getInstance(context).removeSessionsCallbacksListener(this@VideoCallFragment)
+        P2PCalls.removeSessionCallbacksListener(this@VideoCallFragment)
     }
 
     //RTCClientVideoTracksCallback callbacks
-    override fun onLocalVideoTrackReceive(rtcSession: RTCSession, videoTrack: RTCVideoTrack) {
+    override fun onLocalVideoTrackReceive(session: P2PSession, videoTrack: ConnectycubeVideoTrack) {
         Timber.d("onLocalVideoTrackReceive currentUser= $currentUser")
         setUserToAdapter(currentUser)
         mainHandler.postDelayed(
@@ -260,8 +254,8 @@ class VideoCallFragment :
 
     }
 
-    override fun onRemoteVideoTrackReceive(session: RTCSession,
-                                           videoTrack: RTCVideoTrack,
+    override fun onRemoteVideoTrackReceive(session: P2PSession,
+                                           videoTrack: ConnectycubeVideoTrack,
                                            userId: Int
     ) {
         Timber.d("onRemoteVideoTrackReceive userId= $userId")
@@ -273,49 +267,48 @@ class VideoCallFragment :
         )
     }
 
-    //    RTCSessionConnectionCallbacks
-    override fun onStateChanged(rtcSession: RTCSession, state: BaseSession.RTCSessionState) {
+    override fun onStateChanged(rtcSession: P2PSession, state: BaseSession.RTCSessionState) {
 
     }
 
-    override fun onConnectedToUser(rtcSession: RTCSession, userId: Int) {
+    override fun onConnectedToUser(session: P2PSession, userId: Int) {
         setStatusUser(userId, getString(R.string.status_connected))
     }
 
-    override fun onConnectionClosedForUser(rtcSession: RTCSession, userId: Int) {
+    override fun onConnectionClosedForUser(session: P2PSession, userId: Int) {
         setStatusUser(userId, getString(R.string.status_closed))
         removeUserFromAdapter(userId)
     }
 
-    override fun onDisconnectedFromUser(rtcSession: RTCSession, userId: Int) {
+    override fun onDisconnectedFromUser(session: P2PSession, userId: Int) {
         setStatusUser(userId, getString(R.string.status_disconnected))
     }
 
     //RTCClientSessionUserCallbacks
-    override fun onUserNotAnswer(session: RTCSession, userId: Int) {
+    override fun onUserNotAnswer(session: P2PSession, userId: Int) {
         Timber.d("onUserNotAnswer= $userId")
     }
 
-    override fun onCallRejectByUser(session: RTCSession,
-                                    userId: Int,
-                                    userInfo: Map<String, String>?
+    override fun onCallRejectByUser(session: P2PSession,
+                                    opponentId: Int,
+                                    userInfo: Map<String, String?>?
     ) {
-        Timber.d("onCallRejectByUser= $userId")
+        Timber.d("onCallRejectByUser= $opponentId")
     }
 
-    override fun onCallAcceptByUser(session: RTCSession,
-                                    userId: Int,
-                                    userInfo: Map<String, String>?
+    override fun onCallAcceptByUser(session: P2PSession,
+                                    opponentId: Int,
+                                    userInfo: Map<String, String?>?
     ) {
-        Timber.d("onCallAcceptByUser= $userId")
+        Timber.d("onCallAcceptByUser= $opponentId")
     }
 
-    override fun onReceiveHangUpFromUser(session: RTCSession,
-                                         userId: Int,
-                                         userInfo: Map<String, String>?
+    override fun onReceiveHangUpFromUser(session: P2PSession,
+                                         opponentId: Int,
+                                         userInfo: Map<String, String?>?
     ) {
-        Timber.d("onReceiveHangUpFromUser user= $userId")
-        val user = users.first { it.id == userId }
+        Timber.d("onReceiveHangUpFromUser user= $opponentId")
+        val user = users.first { it.id == opponentId }
         Toast.makeText(
             context, "${user.fullName
                 ?: user.login} " + getString(R.string.call_status_hang_up),
@@ -323,7 +316,7 @@ class VideoCallFragment :
         ).show()
     }
 
-    override fun onSessionClosed(session: RTCSession) {
+    override fun onSessionClosed(session: P2PSession) {
     }
 
     private fun setUserToAdapter(user: ConnectycubeUser) {
@@ -346,7 +339,7 @@ class VideoCallFragment :
         updateViewSizeIfNeed()
     }
 
-    private fun setViewCall(userId: Int, videoTrack: RTCVideoTrack, remoteRenderer: Boolean) {
+    private fun setViewCall(userId: Int, videoTrack: ConnectycubeVideoTrack, remoteRenderer: Boolean) {
         Timber.d("setViewCall userId= $userId")
         if (isCurrentSessionClosed()) {
             return
@@ -359,22 +352,22 @@ class VideoCallFragment :
         }
     }
 
-    private fun initVideoView(videoView: RTCSurfaceView, videoTrack: RTCVideoTrack,
+    private fun initVideoView(videoView: RTCSurfaceView, videoTrack: ConnectycubeVideoTrack,
                               remoteRenderer: Boolean
     ) {
-        videoTrack.removeRenderer(videoTrack.renderer)
-        videoTrack.addRenderer(videoView)
+        videoTrack.videoSink?.let { videoTrack.removeSink(it) }
+        videoTrack.addSink(videoView.videoSink)
         if (!remoteRenderer) {
             updateVideoView(videoView, isCameraFront)
         }
         Timber.d(if (remoteRenderer) "remote" else "local", " track is rendering")
     }
 
-    private fun updateVideoView(surfaceViewRenderer: SurfaceViewRenderer, mirror: Boolean) {
+    private fun updateVideoView(surfaceViewRenderer: RTCSurfaceView, mirror: Boolean) {
         updateVideoView(surfaceViewRenderer, mirror, RendererCommon.ScalingType.SCALE_ASPECT_FILL)
     }
 
-    private fun updateVideoView(surfaceViewRenderer: SurfaceViewRenderer,
+    private fun updateVideoView(surfaceViewRenderer: RTCSurfaceView,
                                 mirror: Boolean,
                                 scalingType: RendererCommon.ScalingType
     ) {
@@ -417,9 +410,9 @@ class VideoCallFragment :
             isCameraFront = !isCameraFront
 
             val localView = getViewHolderForUser(currentUser.id)?.rtcView
-            localView?.let {
-                updateVideoView(it, isCameraFront)
-            }
+                localView?.let {
+                    updateVideoView(it, isCameraFront)
+                }
         }
 
         override fun onCameraSwitchError(err: String?) {

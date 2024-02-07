@@ -8,7 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import com.connectycube.messenger.R
 import com.connectycube.messenger.data.UserRepository
 import com.connectycube.messenger.vo.Resource
-import com.connectycube.users.model.ConnectycubeUser
+import com.connectycube.users.models.ConnectycubeUser
 
 open class SelectUsersViewModel internal constructor(
     applicationContext: Application,
