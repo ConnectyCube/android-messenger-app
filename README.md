@@ -9,23 +9,9 @@ This project contains a chat and voice / video calling app for Android written i
 <img src="https://developers.connectycube.com/docs/_images/code_samples/android_codesample_messenger_demo3.jpg" width=180 />
 
 ## Features 
-- Chat 
-- Video chat
-
-## Technical specification:
-- Language - [Kotlin](https://kotlinlang.org) (with using coroutines)
-- Support library - [androidx](https://developer.android.com/jetpack/androidx)
-
-## Used Android Architecture Components:
-- [LiveData](https://developer.android.com/topic/libraries/architecture/livedata) - Notify views when underlying database changes
-- [ViewModel](https://developer.android.com/topic/libraries/architecture/viewmodel) - Manage UI-related data in a lifecycle-conscious way
-- [Room](https://developer.android.com/topic/libraries/architecture/room) - Fluent SQLite database access
-- [Paging](https://developer.android.com/topic/libraries/architecture/paging) - Gradually load information on demand from data source
-- [WorkManager](https://developer.android.com/topic/libraries/architecture/workmanager) - Manage Android background jobs
-
-## Project contains the following features implemented:
-- Edit username and avatar
-- Chat dialogs creation (private and group)
+- User authorization 
+- User profile and avatar
+- Chat dialogs (private and group)
 - Group chat: edit group name, description; add/remove participants; add/remove admins
 - Group chat info
 - Send messages
@@ -34,6 +20,16 @@ This project contains a chat and voice / video calling app for Android written i
 - ‘Is typing’ statuses
 - Video and Audio calls (p2p and group)
 
+## Technical specification:
+- Language - [Kotlin](https://kotlinlang.org) (with using coroutines)
+- Support library - [androidx](https://developer.android.com/jetpack/androidx)
+
+**Used Android Architecture Components:**
+- [LiveData](https://developer.android.com/topic/libraries/architecture/livedata) - Notify views when underlying database changes
+- [ViewModel](https://developer.android.com/topic/libraries/architecture/viewmodel) - Manage UI-related data in a lifecycle-conscious way
+- [Room](https://developer.android.com/topic/libraries/architecture/room) - Fluent SQLite database access
+- [Paging](https://developer.android.com/topic/libraries/architecture/paging) - Gradually load information on demand from data source
+- [WorkManager](https://developer.android.com/topic/libraries/architecture/workmanager) - Manage Android background jobs
 
 ## How to run:
 
@@ -47,12 +43,11 @@ This project contains a chat and voice / video calling app for Android written i
 
 ## Documentation
 
-All the samples use ConnectyCube SDK. The following tech integration documentation is available:
-
 - [Android SDK documentation](https://developers.connectycube.com/android/)
+- [Authentication and Users](https://developers.connectycube.com/android/authentication-and-users)
 - [Chat API](https://developers.connectycube.com/android/messaging)
 - [Video Chat API](https://developers.connectycube.com/android/videocalling)
-- [Authentication and Users](https://developers.connectycube.com/android/authentication-and-users)
+- [Push Notifications API](https://developers.connectycube.com/android/push-notifications)
 
 ## Have an issue?
 
