@@ -98,8 +98,7 @@ class VideoCallFragment :
 
     private fun switchCamera() {
         toggle_camera.isEnabled = false
-        (currentSession?.mediaStreamManager?.videoCapturer as CameraVideoCapturer)
-            .switchCamera(cameraSwitchHandler)
+        currentSession?.mediaStreamManager?.videoCapturer?.switchCamera(cameraSwitchHandler)
     }
 
     private fun setMuteCamera(isEnabled: Boolean) {

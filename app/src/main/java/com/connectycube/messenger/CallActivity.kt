@@ -237,7 +237,7 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCCallSessionCa
     }
 
     private fun rejectCurrentSession() {
-        currentSession?.rejectCall(HashMap<String, String>())
+        currentSession?.rejectCall(null)
     }
 
     override fun onRequestPermissionsResult(
@@ -329,7 +329,7 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCCallSessionCa
 
     private fun hangUpCurrentSession() {
         ringtoneManager.stop()
-        currentSession?.hangUp(HashMap<String, String>())
+        currentSession?.hangUp()
     }
 
     private fun releaseCurrentCall() {
