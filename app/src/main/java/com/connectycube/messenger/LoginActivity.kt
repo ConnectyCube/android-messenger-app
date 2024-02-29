@@ -15,6 +15,7 @@ import com.connectycube.messenger.vo.Status
 import kotlinx.android.synthetic.main.activity_login.*
 import com.connectycube.ConnectyCube
 import com.connectycube.core.ConnectycubeSessionManager
+import com.connectycube.messenger.api.PushService
 import com.connectycube.users.models.ConnectycubeUser
 import timber.log.Timber
 
@@ -106,6 +107,7 @@ class LoginActivity : BaseActivity() {
     private fun signInRest(user: ConnectycubeUser) {
         ConnectyCube.createSession(user, { conUser ->
             SharedPreferencesManager.getInstance(applicationContext).saveCurrentUser(user)
+            PushService.instance.subscribeToPushesIfNeed(this)
             startDialogsScreen()
         }, { error ->
             hideProgress(progressbar)

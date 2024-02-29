@@ -81,22 +81,12 @@ class RTCSessionManager {
         cubeEventParams.environment = DEVELOPMENT
         cubeEventParams.notificationType = PUSH
 
+        cubeEventParams.parameters[PARAM_MESSAGE] =
+            applicationContext?.getString(R.string.you_have_got_new_incoming_call_open_app_to_manage_it) as String
+        cubeEventParams.parameters[PARAM_NOTIFICATION_TYPE] = NOTIFICATION_TYPE_CALL
+        cubeEventParams.parameters[PARAM_CALL_ID] = sessionId
+        cubeEventParams.parameters[PARAM_ANSWER_TIMEOUT] = answerTimeInterval
 
-
-        val json = JSONObject()
-        try {
-            json.put(
-                PARAM_MESSAGE,
-                applicationContext?.getString(R.string.you_have_got_new_incoming_call_open_app_to_manage_it)
-            )
-            // custom parameters
-            json.put(PARAM_NOTIFICATION_TYPE, NOTIFICATION_TYPE_CALL)
-            json.put(PARAM_CALL_ID, sessionId)
-            json.put(PARAM_ANSWER_TIMEOUT, answerTimeInterval)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        cubeEventParams.parameters["message"] = json.toString()
         val event = cubeEventParams.getEventForRequest()
 
         ConnectycubePushSender().sendCallPushEvent(event)

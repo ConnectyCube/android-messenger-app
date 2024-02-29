@@ -360,6 +360,6 @@ class ConnectycubeService {
                         callback: ResponsePerformer.Callback<ConnectycubePushEvent>?
     ) {
         InjectorUtils.provideSyncConnectycubeServiceForType<ConnectycubePushEvent, ConnectycubePushEvent>()
-            .perform({ CreateEventQuery(event).execute().first()}, callback)
+            .perform({ ConnectyCube.createPushEvent(event).first()}, callback)
     }
 }
