@@ -75,9 +75,9 @@ abstract class BaseCallFragment(
     private fun initCurrentCall() {
         if (currentSession?.state != BaseSession.RTCSessionState.RTC_SESSION_CONNECTED) {
             if (isIncomingCall) {
-                currentSession?.acceptCall(null)
+                currentSession?.acceptCall()
             } else {
-                currentSession?.startCall(null)
+                currentSession?.startCall()
             }
         }
     }

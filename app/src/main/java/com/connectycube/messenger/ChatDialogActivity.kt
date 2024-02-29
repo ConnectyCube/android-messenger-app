@@ -32,6 +32,7 @@ import com.connectycube.chat.models.ConnectycubeDialog
 import com.connectycube.chat.models.ConnectycubeMessage
 import com.connectycube.chat.realtime.ConnectycubeMessageListener
 import com.connectycube.chat.realtime.ConnectycubeMessageStatusListener
+import com.connectycube.messenger.api.PushService
 import com.connectycube.users.models.ConnectycubeUser
 import timber.log.Timber
 
@@ -241,6 +242,7 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
         chatDialogListViewModel.chatLiveDataLazy.removeObservers(this)
         LiveDataBus.unregister(EVENT_CHAT_LOGIN)
         GlobalScope.launch(Dispatchers.Main) {
+            PushService.instance.unsubscribe(applicationContext).await()
             UserService.instance.ultimateLogout(applicationContext)
             RTCSessionManager.getInstance().destroy()
             SharedPreferencesManager.getInstance(applicationContext).deleteCurrentUser()

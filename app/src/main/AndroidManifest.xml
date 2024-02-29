@@ -96,11 +96,13 @@
             android:name=".SelectCallMembersActivity"
             android:label="@string/title_select_call_members" />
 
-<!--        <service android:name=".fcm.PushListenerService">-->
-<!--            <intent-filter>-->
-<!--                <action android:name="com.google.firebase.MESSAGING_EVENT" />-->
-<!--            </intent-filter>-->
-<!--        </service>-->
+        <service
+            android:name=".fcm.PushListenerService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
 
         <service android:name=".SendFastReplyMessageService" />
 
@@ -113,10 +115,6 @@
                     android:name="android.support.FILE_PROVIDER_PATHS"
                     android:resource="@xml/file_paths_public" />
         </provider>
-
-        <meta-data android:name="com.connectycube.pushnotifications.TYPE" android:value="FCM" />
-        <meta-data android:name="com.connectycube.pushnotifications.SENDER_ID" android:value="@string/sender_id" />
-        <meta-data android:name="com.connectycube.pushnotifications.ENVIRONMENT" android:value="DEVELOPMENT" />
     </application>
 
 </manifest>

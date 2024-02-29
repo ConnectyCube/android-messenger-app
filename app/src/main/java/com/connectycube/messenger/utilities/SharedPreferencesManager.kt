@@ -10,6 +10,7 @@ const val CUBE_USER_PASSWORD = "cube_user_password"
 const val CUBE_USER_ID = "cube_user_id"
 const val CUBE_USER_NAME = "cube_user_name"
 const val CUBE_USER_AVATAR = "cube_user_avatar"
+const val CUBE_SUBSCRIPTION_ID = "cube_subscription_id"
 
 class SharedPreferencesManager private constructor(val applicationContext: Context) {
 
@@ -76,5 +77,21 @@ class SharedPreferencesManager private constructor(val applicationContext: Conte
             }
         }
         return currentUser
+    }
+
+    fun getSubscriptionId(): Int {
+        return sharedPreferences.getInt(CUBE_SUBSCRIPTION_ID, 0)
+    }
+
+    fun saveSubscriptionId(id: Int) {
+        val editor = sharedPreferences.edit()
+        editor.putInt(CUBE_SUBSCRIPTION_ID, id)
+        editor.apply()
+    }
+
+    fun deleteSubscriptionId() {
+        val editor = sharedPreferences.edit()
+        editor.remove(CUBE_SUBSCRIPTION_ID)
+        editor.apply()
     }
 }
