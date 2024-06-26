@@ -4,9 +4,9 @@
 
 This project contains a chat and voice / video calling app for Android written in Kotlin and based on [ConnectyCube](https://connectycube.com/) communication platform.
 
-<img src="https://developers.connectycube.com/docs/_images/code_samples/android_codesample_messenger_demo1.jpg" width=180 />&nbsp;&nbsp;&nbsp;
-<img src="https://developers.connectycube.com/docs/_images/code_samples/android_codesample_messenger_demo2.jpg" width=180 />&nbsp;&nbsp;&nbsp;
-<img src="https://developers.connectycube.com/docs/_images/code_samples/android_codesample_messenger_demo3.jpg" width=180 />
+<img src="https://developers.connectycube.com/images/code_samples/android_codesample_messenger_demo1.jpg" width=180 />&nbsp;&nbsp;&nbsp;
+<img src="https://developers.connectycube.com/images/code_samples/android_codesample_messenger_demo2.jpg" width=180 />&nbsp;&nbsp;&nbsp;
+<img src="https://developers.connectycube.com/images/code_samples/android_codesample_messenger_demo3.jpg" width=180 />
 
 ## Features 
 - User authorization 
