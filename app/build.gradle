@@ -65,7 +65,7 @@ ext {
 dependencies { configuration ->
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1"
 
-    connectycubeComponents(configuration, "2.0.0-beta05")
+    connectycubeComponents(configuration, "2.0.0")
     androidJetPackComponents(configuration, roomVersion, lifecycleVersion, paging_version, workVersion)
     androidXComponents(configuration)
     kotlinComponents(configuration, kotlin_version)

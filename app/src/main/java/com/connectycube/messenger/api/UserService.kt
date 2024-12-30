@@ -37,6 +37,6 @@ class UserService private constructor() {
     }
 
     private fun signOutAsync() = GlobalScope.async(Dispatchers.IO) {
-        ConnectyCube.signOut()
+        ConnectyCube.destroySession()
     }
 }
