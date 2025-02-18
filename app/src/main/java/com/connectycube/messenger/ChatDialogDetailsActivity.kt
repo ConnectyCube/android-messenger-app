@@ -15,9 +15,9 @@ import com.connectycube.messenger.viewmodels.ChatDialogDetailsViewModel
 import com.connectycube.messenger.vo.Status
 import com.yalantis.ucrop.UCrop
 import com.zhihu.matisse.Matisse
-import kotlinx.android.synthetic.main.activity_chat_dialog_details.*
 import com.connectycube.chat.models.ConnectycubeDialog
 import com.connectycube.chat.models.ConnectycubeDialogType
+import com.connectycube.messenger.databinding.ActivityChatDialogDetailsBinding
 import com.connectycube.users.models.ConnectycubeUser
 import timber.log.Timber
 
@@ -32,6 +32,7 @@ const val REQUEST_REMOVE_OCCUPANTS = 11
 class ChatDialogDetailsActivity : BaseChatActivity(),
     DialogOccupantsAdapter.DialogOccupantsAdapterCallback {
 
+    private lateinit var binding: ActivityChatDialogDetailsBinding
     private val permissionsHelper = PermissionsHelper(this)
     private lateinit var chatDialogDetailsViewModel: ChatDialogDetailsViewModel
     private lateinit var currentChatDialog: ConnectycubeDialog
@@ -40,7 +41,8 @@ class ChatDialogDetailsActivity : BaseChatActivity(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_chat_dialog_details)
+        binding = ActivityChatDialogDetailsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         initToolbar()
         initUserAdapter()
         initViews()
@@ -48,13 +50,13 @@ class ChatDialogDetailsActivity : BaseChatActivity(),
     }
 
     private fun initToolbar() {
-        setSupportActionBar(toolbar)
-        back_btn.setOnClickListener { onBackPressed() }
-        edit_group_name_btn.setSingleOnClickListener { editGroupName() }
-        edit_grop_description_btn.setSingleOnClickListener { editGroupDescription() }
-        edit_avatar_btn.setSingleOnClickListener { editGroupPhoto() }
-        add_occupants_img.setSingleOnClickListener { addOccupants() }
-        remove_occupants_img.setSingleOnClickListener { removeOccupants() }
+        setSupportActionBar(binding.toolbar)
+        binding.backBtn.setOnClickListener { onBackPressed() }
+        binding.editGroupNameBtn.setSingleOnClickListener { editGroupName() }
+        binding.editGropDescriptionBtn.setSingleOnClickListener { editGroupDescription() }
+        binding.editAvatarBtn.setSingleOnClickListener { editGroupPhoto() }
+        binding.addOccupantsImg.setSingleOnClickListener { addOccupants() }
+        binding.removeOccupantsImg.setSingleOnClickListener { removeOccupants() }
     }
 
     private fun editGroupPhoto() {
@@ -94,9 +96,9 @@ class ChatDialogDetailsActivity : BaseChatActivity(),
     }
 
     private fun initViews() {
-        occupants_recycler_view.layoutManager = LinearLayoutManager(this)
-        occupants_recycler_view.itemAnimator = DefaultItemAnimator()
-        occupants_recycler_view.adapter = occupantsAdapter
+        binding.occupantsRecyclerView.layoutManager = LinearLayoutManager(this)
+        binding.occupantsRecyclerView.itemAnimator = DefaultItemAnimator()
+        binding.occupantsRecyclerView.adapter = occupantsAdapter
     }
 
     private fun loadData() {
@@ -105,16 +107,16 @@ class ChatDialogDetailsActivity : BaseChatActivity(),
         chatDialogDetailsViewModel.liveDialog.observe(this, Observer { resource ->
             when (resource.status) {
                 Status.SUCCESS -> {
-                    hideProgress(progressbar)
+                    hideProgress(binding.progressbar)
                     resource.data?.let { chatDialog ->
                         attachData(chatDialog)
                     }
                 }
                 Status.LOADING -> {
-                    showProgressValueIfNotNull(progressbar, resource.progress)
+                    showProgressValueIfNotNull(binding.progressbar, resource.progress)
                 }
                 Status.ERROR -> {
-                    hideProgress(progressbar)
+                    hideProgress(binding.progressbar)
                     resource.data?.let { chatDialog ->
                         attachData(chatDialog)
                     }
@@ -128,27 +130,27 @@ class ChatDialogDetailsActivity : BaseChatActivity(),
         currentChatDialog = chatDialog
 
         if (currentChatDialog.type == ConnectycubeDialogType.PRIVATE) {
-            group_description_layout.visibility = View.GONE
-            add_occupants_img.visibility = View.GONE
-            edit_group_name_btn.visibility = View.GONE
-            if (!isUserCreator(getCurrentUser())) edit_avatar_btn.visibility = View.GONE
+            binding.groupDescriptionLayout.visibility = View.GONE
+            binding.addOccupantsImg.visibility = View.GONE
+            binding.editGroupNameBtn.visibility = View.GONE
+            if (!isUserCreator(getCurrentUser())) binding.editAvatarBtn.visibility = View.GONE
         } else if (!isUserCreator(getCurrentUser()) && !isUserAdmin(getCurrentUser())) {
-            edit_grop_description_btn.visibility = View.GONE
-            edit_avatar_btn.visibility = View.GONE
-            edit_group_name_btn.visibility = View.GONE
+            binding.editGropDescriptionBtn.visibility = View.GONE
+            binding.editAvatarBtn.visibility = View.GONE
+            binding.editGroupNameBtn.visibility = View.GONE
         }
 
         chatDialogDetailsViewModel.getUsers(chatDialog).observe(this, Observer { resource ->
             when (resource.status) {
                 Status.LOADING -> {
-                    occupants_progress.visibility = View.VISIBLE
+                    binding.occupantsProgress.visibility = View.VISIBLE
                 }
                 Status.ERROR -> {
-                    occupants_progress.visibility = View.GONE
+                    binding.occupantsProgress.visibility = View.GONE
                     Toast.makeText(this, resource.message, Toast.LENGTH_LONG).show()
                 }
                 Status.SUCCESS -> {
-                    occupants_progress.visibility = View.GONE
+                    binding.occupantsProgress.visibility = View.GONE
                     val occupants: List<ConnectycubeUser>? = resource.data
                     occupants?.let {
                         dialogOccupants = ArrayList(occupants)
@@ -158,10 +160,10 @@ class ChatDialogDetailsActivity : BaseChatActivity(),
             }
         })
 
-        description_txt.text = chatDialog.description
-        chat_dialog_name_txt.text = chatDialog.name
-        remove_occupants_img.visibility = if (isUserAdmin(getCurrentUser()) || isUserCreator(getCurrentUser())) View.VISIBLE else View.GONE
-        loadChatDialogPhoto(this, chatDialog.type == ConnectycubeDialogType.PRIVATE, chatDialog.photo, avatar_img)
+        binding.descriptionTxt.text = chatDialog.description
+        binding.chatDialogNameTxt.text = chatDialog.name
+        binding.removeOccupantsImg.visibility = if (isUserAdmin(getCurrentUser()) || isUserCreator(getCurrentUser())) View.VISIBLE else View.GONE
+        loadChatDialogPhoto(this, chatDialog.type == ConnectycubeDialogType.PRIVATE, chatDialog.photo, binding.avatarImg)
     }
 
     private fun addOccupants() {

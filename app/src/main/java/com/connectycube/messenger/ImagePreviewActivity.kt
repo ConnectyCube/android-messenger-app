@@ -10,8 +10,8 @@ import android.view.View
 import android.view.Window
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
+import com.connectycube.messenger.databinding.ActivityImagePreviewBinding
 import com.connectycube.messenger.utilities.image.loadPreview
-import kotlinx.android.synthetic.main.activity_image_preview.*
 
 
 const val EXTRA_IMAGE_URL = "image_url"
@@ -61,10 +61,12 @@ fun startImagePreview(activity: AppCompatActivity,
 }
 
 class ImagePreviewActivity : BaseActivity() {
+    private lateinit var binding: ActivityImagePreviewBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_image_preview)
+        binding = ActivityImagePreviewBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         supportPostponeEnterTransition()
 
         initToolBar()
@@ -73,19 +75,19 @@ class ImagePreviewActivity : BaseActivity() {
 
     private fun initToolBar() {
         val title = intent.getStringExtra(EXTRA_IMAGE_PREVIEW_TITLE)
-        image_title.text = title
-        back_btn.setOnClickListener { onBackPressed() }
-        setSupportActionBar(image_toolbar)
+        binding.imageTitle.text = title
+        binding.backBtn.setOnClickListener { onBackPressed() }
+        setSupportActionBar(binding.imageToolbar)
     }
 
     private fun loadAttachment() {
         val url = intent.getStringExtra(EXTRA_IMAGE_URL)
         if (url.isNullOrEmpty()) {
-            image_view.setImageResource(R.drawable.ic_image_black_24dp)
+            binding.imageView.setImageResource(R.drawable.ic_image_black_24dp)
             return
         }
 
-        image_view.loadPreview(url) {
+        binding.imageView.loadPreview(url) {
             supportStartPostponedEnterTransition()
         }
     }

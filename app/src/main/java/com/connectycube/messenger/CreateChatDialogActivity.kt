@@ -17,8 +17,8 @@ import com.connectycube.messenger.adapters.CheckableUsersAdapter
 import com.connectycube.messenger.utilities.InjectorUtils
 import com.connectycube.messenger.viewmodels.CreateChatDialogViewModel
 import com.connectycube.messenger.vo.Status
-import kotlinx.android.synthetic.main.activity_create_chat.*
 import com.connectycube.chat.models.ConnectycubeDialog
+import com.connectycube.messenger.databinding.ActivityCreateChatBinding
 import com.connectycube.users.models.ConnectycubeUser
 import timber.log.Timber
 
@@ -29,12 +29,14 @@ class CreateChatDialogActivity : BaseChatActivity(),
         InjectorUtils.provideCreateChatDialogViewModelFactory(this.application)
     }
 
+    private lateinit var binding: ActivityCreateChatBinding
     private lateinit var usersAdapter: CheckableUsersAdapter
     private var selectedUsers: MutableList<ConnectycubeUser> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_create_chat)
+        binding = ActivityCreateChatBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         initToolbar()
         initUserAdapter()
         initViews()
@@ -51,9 +53,9 @@ class CreateChatDialogActivity : BaseChatActivity(),
     }
 
     private fun initViews() {
-        users_recycler_view.layoutManager = LinearLayoutManager(this)
-        users_recycler_view.itemAnimator = DefaultItemAnimator()
-        users_recycler_view.adapter = usersAdapter
+        binding.usersRecyclerView.layoutManager = LinearLayoutManager(this)
+        binding.usersRecyclerView.itemAnimator = DefaultItemAnimator()
+        binding.usersRecyclerView.adapter = usersAdapter
     }
 
     private fun loadData() {
@@ -65,10 +67,10 @@ class CreateChatDialogActivity : BaseChatActivity(),
 
         createChatDialogViewModel.getUsers().observe(this) { result ->
             when (result.status) {
-                Status.LOADING -> showProgress(progressbar)
-                Status.ERROR -> hideProgress(progressbar)
+                Status.LOADING -> showProgress(binding.progressbar)
+                Status.ERROR -> hideProgress(binding.progressbar)
                 Status.SUCCESS -> {
-                    hideProgress(progressbar)
+                    hideProgress(binding.progressbar)
                     val users = result.data
                     if (users?.isNotEmpty()!!) {
                         usersAdapter.setItems(users)
@@ -132,7 +134,7 @@ class CreateChatDialogActivity : BaseChatActivity(),
         createChatDialogViewModel.createNewChatDialog(name, avatar).observe(this) { resource ->
             when {
                 resource.status == Status.SUCCESS -> {
-                    hideProgress(progressbar)
+                    hideProgress(binding.progressbar)
 
                     val newChatDialog: ConnectycubeDialog? = resource.data
                     if (newChatDialog != null) {
@@ -140,9 +142,9 @@ class CreateChatDialogActivity : BaseChatActivity(),
                         finish()
                     }
                 }
-                resource.status == Status.LOADING -> showProgress(progressbar)
+                resource.status == Status.LOADING -> showProgress(binding.progressbar)
                 resource.status == Status.ERROR -> {
-                    hideProgress(progressbar)
+                    hideProgress(binding.progressbar)
                     Toast.makeText(this, resource.message, Toast.LENGTH_SHORT).show()
                 }
             }

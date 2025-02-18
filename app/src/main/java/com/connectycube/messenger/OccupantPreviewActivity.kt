@@ -3,11 +3,11 @@ package com.connectycube.messenger
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
+import com.connectycube.messenger.databinding.ActivityOccupantPreviewBinding
 import com.connectycube.messenger.utilities.CREATED_AT_SIMPLE_DATE_FORMAT
 import com.connectycube.messenger.utilities.SharedPreferencesManager
 import com.connectycube.messenger.utilities.getPrettyLastActivityDate
 import com.connectycube.messenger.utilities.loadUserAvatar
-import kotlinx.android.synthetic.main.activity_occupant_preview.*
 import com.connectycube.users.models.ConnectycubeUser
 import java.text.SimpleDateFormat
 import java.util.*
@@ -15,10 +15,12 @@ import java.util.*
 const val EXTRA_USER = "extra_user"
 
 class OccupantPreviewActivity : BaseChatActivity() {
+    private lateinit var binding: ActivityOccupantPreviewBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_occupant_preview)
+        binding = ActivityOccupantPreviewBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         initToolBar()
         initUser()
     }
@@ -29,14 +31,14 @@ class OccupantPreviewActivity : BaseChatActivity() {
 
     private fun initUser() {
         val user: ConnectycubeUser = intent.getSerializableExtra(EXTRA_USER) as ConnectycubeUser
-        user_name_txt.text = user.fullName ?: user.login
-        loadUserAvatar(this, user, avatar_img)
+        binding.userNameTxt.text = user.fullName ?: user.login
+        loadUserAvatar(this, user, binding.avatarImg)
 
         val currentUser = SharedPreferencesManager.getInstance(this).getCurrentUser()
         val isCurrentUser = currentUser.id != null && user.id == currentUser.id
         if (!isCurrentUser) {
-            last_activity_title_txt.visibility = View.VISIBLE
-            last_activity_text_view.text =
+            binding.lastActivityTitleTxt.visibility = View.VISIBLE
+            binding.lastActivityTextView.text =
                 getPrettyLastActivityDate(this, SimpleDateFormat(
                     CREATED_AT_SIMPLE_DATE_FORMAT, Locale.getDefault()).parse(user.lastRequestAt))
         }

@@ -8,12 +8,12 @@ import android.view.MenuItem
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.lifecycle.observe
+import com.connectycube.messenger.databinding.ActivitySettingsBinding
 import com.connectycube.messenger.utilities.*
 import com.connectycube.messenger.viewmodels.UserDetailsViewModel
 import com.connectycube.messenger.vo.Status
 import com.yalantis.ucrop.UCrop
 import com.zhihu.matisse.Matisse
-import kotlinx.android.synthetic.main.activity_settings.*
 import com.connectycube.users.models.ConnectycubeUser
 import timber.log.Timber
 
@@ -22,6 +22,8 @@ const val REQUEST_EDIT_USER_NAME = 100
 const val EXTRA_LOGOUT = "chat_logout"
 
 class SettingsActivity : BaseChatActivity() {
+    private lateinit var binding: ActivitySettingsBinding
+
     private val permissionsHelper = PermissionsHelper(this)
     var currentUser: ConnectycubeUser? = null
 
@@ -34,7 +36,8 @@ class SettingsActivity : BaseChatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_settings)
+        binding = ActivitySettingsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         initToolBar()
         initData()
         initViews()
@@ -45,27 +48,27 @@ class SettingsActivity : BaseChatActivity() {
     }
 
     private fun initViews() {
-        edit_name_fb.setSingleOnClickListener { editName() }
-        avatar_img.setSingleOnClickListener { editAvatar() }
+        binding.editNameFb.setSingleOnClickListener { editName() }
+        binding.avatarImg.setSingleOnClickListener { editAvatar() }
     }
 
     private fun initData() {
         userDetailsViewModel.liveDataUser.observe(this) { resource ->
             when (resource.status) {
                 Status.SUCCESS -> {
-                    hideProgress(progressbar)
+                    hideProgress(binding.progressbar)
                     resource.data?.let {
                         updateUserData(resource.data)
                         Timber.d("currentUser= $currentUser")
-                        loadUserAvatar(this, currentUser!!, avatar_img)
-                        user_name_txt.text = currentUser?.fullName ?: currentUser?.login
+                        loadUserAvatar(this, currentUser!!, binding.avatarImg)
+                        binding.userNameTxt.text = currentUser?.fullName ?: currentUser?.login
                     }
                 }
                 Status.LOADING -> {
-                    showProgressValueIfNotNull(progressbar, resource.progress)
+                    showProgressValueIfNotNull(binding.progressbar, resource.progress)
                 }
                 Status.ERROR -> {
-                    hideProgress(progressbar)
+                    hideProgress(binding.progressbar)
                     Toast.makeText(this, resource.message, Toast.LENGTH_LONG).show()
                 }
             }

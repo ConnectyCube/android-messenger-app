@@ -6,13 +6,13 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
+import com.connectycube.messenger.databinding.ActivityCallBinding
 import com.connectycube.messenger.helpers.RTCSessionManager
 import com.connectycube.messenger.helpers.RingtoneManager
 import com.connectycube.messenger.utilities.*
 import com.connectycube.messenger.viewmodels.CallViewModel
 import com.connectycube.webrtc.*
 import com.connectycube.webrtc.callbacks.RTCCallSessionCallback
-import kotlinx.android.synthetic.main.activity_call.*
 import timber.log.Timber
 import com.connectycube.webrtc.callbacks.RTCSessionStateCallback
 
@@ -25,6 +25,7 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCCallSessionCa
     private val callViewModel: CallViewModel by viewModels {
         InjectorUtils.provideCallViewModelFactory(this.application)
     }
+    private lateinit var binding: ActivityCallBinding
     private val permissionsHelper = PermissionsHelper(this)
     private lateinit var ringtoneManager: RingtoneManager
     private var currentSession: P2PSession? = null
@@ -33,6 +34,7 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCCallSessionCa
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        binding = ActivityCallBinding.inflate(layoutInflater)
         initSession()
         initFields()
         initToolbar()
@@ -61,10 +63,10 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCCallSessionCa
     }
 
     private fun initToolbar() {
-        setSupportActionBar(toolbar)
-        toggle_speaker.setOnClickListener { switchAudioDevice() }
-        toggle_mute_mic.setOnClickListener { setMuteAudio(toggle_mute_mic.isChecked) }
-        toggle_screen_sharing.setOnClickListener { screenSharing() }
+        setSupportActionBar(binding.toolbar)
+        binding.toggleSpeaker.setOnClickListener { switchAudioDevice() }
+        binding.toggleMuteMic.setOnClickListener { setMuteAudio(binding.toggleMuteMic.isChecked) }
+        binding.toggleScreenSharing.setOnClickListener { screenSharing() }
         updateToolbar()
     }
 
@@ -79,18 +81,18 @@ class CallActivity : AppCompatActivity(R.layout.activity_call), RTCCallSessionCa
     private fun updateToolbar(showFull: Boolean = false) {
         currentSession?.let {
             if (isInComingCall && !showFull) {
-                toggle_speaker.visibility = View.INVISIBLE
-                toggle_mute_mic.visibility = View.INVISIBLE
-                toggle_screen_sharing.visibility = View.INVISIBLE
+                binding.toggleSpeaker.visibility = View.INVISIBLE
+                binding.toggleMuteMic.visibility = View.INVISIBLE
+                binding.toggleSpeaker.visibility = View.INVISIBLE
             } else {
                 if (it.getCallType() == CallType.AUDIO) {
-                    toggle_mute_mic.visibility = View.VISIBLE
-                    toggle_speaker.visibility = View.VISIBLE
-                    toggle_screen_sharing.visibility = View.GONE
+                    binding.toggleMuteMic.visibility = View.VISIBLE
+                    binding.toggleSpeaker.visibility = View.VISIBLE
+                    binding.toggleScreenSharing.visibility = View.GONE
                 } else {
-                    toggle_screen_sharing.visibility = View.VISIBLE
-                    toggle_mute_mic.visibility = View.GONE
-                    toggle_speaker.visibility = View.GONE
+                    binding.toggleScreenSharing.visibility = View.VISIBLE
+                    binding.toggleMuteMic.visibility = View.GONE
+                    binding.toggleSpeaker.visibility = View.GONE
                 }
             }
         }

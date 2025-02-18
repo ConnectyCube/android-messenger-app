@@ -24,7 +24,6 @@ import com.connectycube.messenger.utilities.loadUserAvatar
 import com.connectycube.messenger.utilities.setSingleOnClickListener
 import com.connectycube.messenger.viewmodels.ChatDialogListViewModel
 import com.connectycube.messenger.vo.Status
-import kotlinx.android.synthetic.main.activity_chatdialogs.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -33,6 +32,7 @@ import com.connectycube.chat.models.ConnectycubeMessage
 import com.connectycube.chat.realtime.ConnectycubeMessageListener
 import com.connectycube.chat.realtime.ConnectycubeMessageStatusListener
 import com.connectycube.messenger.api.PushService
+import com.connectycube.messenger.databinding.ActivityChatdialogsBinding
 import com.connectycube.users.models.ConnectycubeUser
 import timber.log.Timber
 
@@ -46,6 +46,7 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
         InjectorUtils.provideChatDialogListViewModelFactory(this)
     }
 
+    private lateinit var binding: ActivityChatdialogsBinding
     private lateinit var chatDialogAdapter: ChatDialogAdapter
     private val messageStatusListener: ConnectycubeMessageStatusListener =
         ChatMessagesStatusListener()
@@ -56,7 +57,8 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Timber.d("onCreate")
-        setContentView(R.layout.activity_chatdialogs)
+        binding = ActivityChatdialogsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         initActionbar()
         initDialogsAdapter()
         initDialogsRecyclerView()
@@ -69,20 +71,20 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
     }
 
     private fun initActionbar() {
-        action_bar_view.setSingleOnClickListener { startSettingsActivity() }
+        binding.actionBarView.setSingleOnClickListener { startSettingsActivity() }
         setCurrentUser()
     }
 
     private fun setCurrentUser() {
         val currentUser = getCurrentUser()
-        current_user_name.text = currentUser.fullName ?: currentUser.login
-        loadUserAvatar(this, currentUser, avatar_img)
+        binding.currentUserName.text = currentUser.fullName ?: currentUser.login
+        loadUserAvatar(this, currentUser, binding.avatarImg)
     }
 
     private fun initDialogsRecyclerView() {
-        chats_recycler_view.layoutManager = LinearLayoutManager(this)
-        chats_recycler_view.itemAnimator = DefaultItemAnimator()
-        chats_recycler_view.adapter = chatDialogAdapter
+        binding.chatsRecyclerView.layoutManager = LinearLayoutManager(this)
+        binding.chatsRecyclerView.itemAnimator = DefaultItemAnimator()
+        binding.chatsRecyclerView.adapter = chatDialogAdapter
 
         chatDialogAdapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
             override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
@@ -100,12 +102,12 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
     }
 
     private fun scrollUp() {
-        chats_recycler_view.scrollToPosition(0)
+        binding.chatsRecyclerView.scrollToPosition(0)
     }
 
     private fun subscribeUi() {
         Timber.d("subscribeUi")
-        showProgress(progressbar)
+        showProgress(binding.progressbar)
 
         if (ConnectyCube.chat.isLoggedIn()) {
             initManagers()
@@ -130,13 +132,13 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
         chatDialogListViewModel.chatLiveDataLazy.observe(this) { resource ->
             when (resource.status) {
                 Status.SUCCESS -> {
-                    hideProgress(progressbar)
+                    hideProgress(binding.progressbar)
                     val listChatDialogs = resource.data
                     Timber.d("chatDialogListViewModel.getChats() = ${listChatDialogs?.size}")
                     updateDialogAdapter(listChatDialogs)
                 }
                 Status.LOADING -> Timber.d("Status.LOADING")
-                Status.ERROR -> hideProgress(progressbar)
+                Status.ERROR -> hideProgress(binding.progressbar)
             }
         }
     }
@@ -202,16 +204,16 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
     }
 
     override fun onChatDialogsListUpdated(currentList: List<ConnectycubeDialog>) {
-        chats_empty_layout.visibility = if (currentList.isEmpty()) View.VISIBLE else View.GONE
+        binding.chatsEmptyLayout.visibility = if (currentList.isEmpty()) View.VISIBLE else View.GONE
     }
 
     override fun onChatDialogDelete(chatDialog: ConnectycubeDialog) {
         Timber.d("Try delete dialog= ${chatDialog.dialogId}")
         chatDialogListViewModel.deleteChat(chatDialog).observe(this) { resource ->
             when (resource.status) {
-                Status.SUCCESS -> hideProgress(progressbar)
-                Status.LOADING -> showProgress(progressbar)
-                Status.ERROR -> hideProgress(progressbar)
+                Status.SUCCESS -> hideProgress(binding.progressbar)
+                Status.LOADING -> showProgress(binding.progressbar)
+                Status.ERROR -> hideProgress(binding.progressbar)
             }
         }
     }
@@ -237,7 +239,7 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
     }
 
     private fun logout() {
-        showProgress(progressbar)
+        showProgress(binding.progressbar)
         currentDialogId = null
         chatDialogListViewModel.chatLiveDataLazy.removeObservers(this)
         LiveDataBus.unregister(EVENT_CHAT_LOGIN)
@@ -247,7 +249,7 @@ class ChatDialogActivity : BaseChatActivity(), ChatDialogAdapter.ChatDialogAdapt
             RTCSessionManager.getInstance().destroy()
             SharedPreferencesManager.getInstance(applicationContext).deleteCurrentUser()
             startLoginActivity()
-            hideProgress(progressbar)
+            hideProgress(binding.progressbar)
 
             finish()
         }

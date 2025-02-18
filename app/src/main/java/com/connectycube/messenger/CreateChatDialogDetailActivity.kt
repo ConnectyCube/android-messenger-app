@@ -8,12 +8,11 @@ import android.view.MenuItem
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.lifecycle.observe
+import com.connectycube.messenger.databinding.ActivityCreateChatDetailsBinding
 import com.connectycube.messenger.utilities.*
 import com.connectycube.messenger.viewmodels.CreateDialogDetailsViewModel
 import com.yalantis.ucrop.UCrop
 import com.zhihu.matisse.Matisse
-import kotlinx.android.synthetic.main.activity_create_chat_details.*
-import kotlinx.android.synthetic.main.activity_create_chat_details.avatar_img
 import timber.log.Timber
 
 const val REQUEST_CREATE_DIALOG_DETAILS = 250
@@ -21,6 +20,7 @@ const val EXTRA_DIALOG_NAME = "dialog_name"
 const val EXTRA_DIALOG_AVATAR = "dialog_avatar"
 
 class CreateChatDialogDetailActivity : BaseChatActivity() {
+    private lateinit var binding: ActivityCreateChatDetailsBinding
     private val permissionsHelper = PermissionsHelper(this)
 
     private val modelCreateDialogDetails: CreateDialogDetailsViewModel by viewModels {
@@ -29,10 +29,11 @@ class CreateChatDialogDetailActivity : BaseChatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_create_chat_details)
+        binding = ActivityCreateChatDetailsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         initToolbar()
         subscribeUi()
-        edit_avatar_btn.setSingleOnClickListener { editAvatar() }
+        binding.editAvatarBtn.setSingleOnClickListener { editAvatar() }
     }
 
     private fun initToolbar() {
@@ -49,18 +50,18 @@ class CreateChatDialogDetailActivity : BaseChatActivity() {
         modelCreateDialogDetails.liveDataResult.observe(this) { resource ->
             when {
                 resource.status == com.connectycube.messenger.vo.Status.LOADING -> {
-                    showProgress(progressbar)
-                    progressbar.progress = resource.progress ?: 0
+                    showProgress(binding.progressbar)
+                    binding.progressbar.progress = resource.progress ?: 0
                 }
 
                 resource.status == com.connectycube.messenger.vo.Status.SUCCESS -> {
-                    hideProgress(progressbar)
+                    hideProgress(binding.progressbar)
                     val url: String = resource.data!!
                     Timber.d(" startAvatarUpload url= $url")
-                    loadChatDialogPhoto(this, false, url, avatar_img)
+                    loadChatDialogPhoto(this, false, url, binding.avatarImg)
                 }
                 resource.status == com.connectycube.messenger.vo.Status.ERROR -> {
-                    hideProgress(progressbar)
+                    hideProgress(binding.progressbar)
                     Toast.makeText(
                         applicationContext,
                         getString(R.string.load_avatar_error, resource.message),
@@ -118,7 +119,7 @@ class CreateChatDialogDetailActivity : BaseChatActivity() {
     }
 
     private fun setResult() {
-        val name = chat_dialog_name_txt.text.toString()
+        val name = binding.chatDialogNameTxt.text.toString()
         val avatar = modelCreateDialogDetails.photoUrl
         Timber.d("setResult avatar=$avatar, name= $name")
         if (name.isEmpty()) {

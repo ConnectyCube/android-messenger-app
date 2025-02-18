@@ -2,20 +2,22 @@ package com.connectycube.messenger
 
 import android.os.Bundle
 import android.os.SystemClock
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Chronometer
+import android.widget.TextView
 import androidx.annotation.LayoutRes
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.viewbinding.ViewBinding
 import com.connectycube.messenger.helpers.RTCSessionManager
 import com.connectycube.messenger.utilities.InjectorUtils
 import com.connectycube.messenger.viewmodels.CallViewModel
 import com.connectycube.messenger.vo.Status
-import kotlinx.android.synthetic.main.call_hang_up.*
-import kotlinx.android.synthetic.main.outgoing_view.*
 import com.connectycube.ConnectyCube
 import com.connectycube.users.models.ConnectycubeUser
 import com.connectycube.webrtc.BaseSession
@@ -23,9 +25,10 @@ import com.connectycube.webrtc.P2PSession
 import timber.log.Timber
 
 abstract class BaseCallFragment(
-    @LayoutRes contentLayoutId: Int,
     @StringRes val title: Int
-) : Fragment(contentLayoutId) {
+) : Fragment() {
+
+    protected var _binding: ViewBinding? = null
 
     lateinit var callViewModel: CallViewModel
     protected var currentSession: P2PSession? = null
@@ -72,6 +75,11 @@ abstract class BaseCallFragment(
         initCurrentCall()
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
     private fun initCurrentCall() {
         if (currentSession?.state != BaseSession.RTCSessionState.RTC_SESSION_CONNECTED) {
             if (isIncomingCall) {
@@ -94,7 +102,7 @@ abstract class BaseCallFragment(
                         val opponentsFiltered =
                             resource.data?.filterNot { it.id ==  ConnectyCube.chat.userForLogin!!.id }
                         val names = opponentsFiltered?.joinToString { it.fullName ?: it.login.toString() }
-                        text_opponents_names.text = names
+                        textOpponentsNames().text = names
                     }
                     resource.data?.let { list ->
                         currentUser =
@@ -107,6 +115,9 @@ abstract class BaseCallFragment(
     }
 
     protected abstract fun initWithOpponents(opponents: List<ConnectycubeUser>?)
+    protected abstract fun textOpponentsNames(): TextView
+    protected abstract fun layoutOutgoingView(): View
+    protected abstract fun buttonHangup(): View
 
     private fun subscribeCallSessionAction() {
         callViewModel.callSessionAction.observe(this, Observer {
@@ -114,7 +125,7 @@ abstract class BaseCallFragment(
                 when (it) {
                     CallViewModel.CallSessionAction.CALL_STARTED -> {
                         startInCallChronometer()
-                        layout_outgoing_view.visibility = View.GONE
+                        layoutOutgoingView().visibility = View.GONE
                     }
                     CallViewModel.CallSessionAction.CALL_STOPPED -> {
                         stopInCallChronometer()
@@ -127,7 +138,7 @@ abstract class BaseCallFragment(
 
     protected open fun initViews() {
         if (isIncomingCall) {
-            layout_outgoing_view.visibility = View.GONE
+            layoutOutgoingView().visibility = View.GONE
         }
     }
 
@@ -148,7 +159,7 @@ abstract class BaseCallFragment(
     }
 
     private fun initButtons() {
-        button_hangup.setOnClickListener {
+        buttonHangup().setOnClickListener {
             callViewModel.callUserAction.value = CallViewModel.CallUserAction.HANGUP
         }
     }
