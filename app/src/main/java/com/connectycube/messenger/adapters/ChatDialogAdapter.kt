@@ -133,8 +133,8 @@ internal class ChatDialogAdapter(private val context: Context) :
             menu?.add(Menu.NONE, MENU_ITEM_DELETE, Menu.NONE, R.string.delete)?.setOnMenuItemClickListener(this)
         }
 
-        override fun onMenuItemClick(item: MenuItem?): Boolean {
-            when (item?.itemId) {
+        override fun onMenuItemClick(item: MenuItem): Boolean {
+            when (item.itemId) {
                 MENU_ITEM_DELETE -> notifyItemDelete()
             }
             return true

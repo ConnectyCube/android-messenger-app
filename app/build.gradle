@@ -1,22 +1,17 @@
 apply plugin: 'com.android.application'
 
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlinx-serialization'
 
-repositories {
-    flatDir {
-        dirs 'libs'
-    }
-}
 
 android {
-    compileSdk 31
+    namespace "com.connectycube.messenger"
+    compileSdk 34
     defaultConfig {
         applicationId "com.connectycube.messenger"
         minSdkVersion 18
-        targetSdkVersion 31
+        targetSdkVersion 35
         versionCode 5
         versionName "1.2.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -27,7 +22,10 @@ android {
                         "room.incremental": "true"]
             }
         }
-
+        buildFeatures {
+            buildConfig true
+            viewBinding true
+        }
     }
     buildTypes {
         release {
@@ -43,12 +41,12 @@ android {
 
     // work-runtime-ktx 2.1.0 and above now requires Java 8
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 }
 
@@ -73,6 +71,7 @@ dependencies { configuration ->
 
     implementation "com.google.android.material:material:$materialVersion"
     implementation 'com.jakewharton.timber:timber:4.7.1'
+    implementation(files("libs/matisse-0.5.3-beta3.aar"))
 
     implementation "com.google.android.gms:play-services-gcm:17.0.0"
     implementation "com.google.firebase:firebase-messaging:20.0.0"
@@ -113,8 +112,6 @@ private static void kotlinComponents(configuration, kotlin_version) {
 }
 
 private static void externalMediaComponents(configuration) {
-//    configuration.implementation "com.zhihu.android:matisse:0.5.3-beta3"
-    configuration.implementation(name: 'matisse-0.5.3-beta3', ext: 'aar')
     configuration.implementation 'com.github.yalantis:ucrop:2.2.4'
     configuration.implementation "com.github.bumptech.glide:glide:4.9.0"
     configuration.implementation 'com.github.chrisbanes:PhotoView:2.2.0'

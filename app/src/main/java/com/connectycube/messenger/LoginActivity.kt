@@ -12,30 +12,33 @@ import com.connectycube.messenger.utilities.SharedPreferencesManager
 import com.connectycube.messenger.utilities.getAllUsersFromFile
 import com.connectycube.messenger.viewmodels.UserListViewModel
 import com.connectycube.messenger.vo.Status
-import kotlinx.android.synthetic.main.activity_login.*
 import com.connectycube.ConnectyCube
 import com.connectycube.core.ConnectycubeSessionManager
 import com.connectycube.messenger.api.PushService
+import com.connectycube.messenger.databinding.ActivityLoginBinding
 import com.connectycube.users.models.ConnectycubeUser
 import timber.log.Timber
 
 
 class LoginActivity : BaseActivity() {
+    private lateinit var binding: ActivityLoginBinding
+
     private lateinit var users: ArrayList<ConnectycubeUser>
     private lateinit var adapter: ArrayAdapter<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_login)
+        binding = ActivityLoginBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         actionBar?.setTitle(R.string.title_login_activity)
         makeLogin()
     }
 
     private fun makeLogin() {
         if (SharedPreferencesManager.getInstance(applicationContext).currentUserExists()) {
-            showProgress(progressbar)
+            showProgress(binding.progressbar)
             val user = SharedPreferencesManager.getInstance(applicationContext).getCurrentUser()
-            text_view.text = getString(R.string.user_logged_in, user.fullName ?: user.login)
+            binding.textView.text = getString(R.string.user_logged_in, user.fullName ?: user.login)
             signInRestIfNeed(user)
         } else {
             initUsers()
@@ -45,17 +48,17 @@ class LoginActivity : BaseActivity() {
 
     private fun loginWithSession(user: ConnectycubeUser) {
         if (ConnectycubeSessionManager.isActiveSessionValid()) loginTo(user)
-        showProgress(progressbar)
+        showProgress(binding.progressbar)
         ConnectyCube.createSession(successCallback = { session ->
             loginTo(user)
         }, errorCallback = { error ->
-            hideProgress(progressbar)
+            hideProgress(binding.progressbar)
             Timber.e(error, "loginWithSession")
         })
     }
 
     private fun loginTo(user: ConnectycubeUser) {
-        showProgress(progressbar)
+        showProgress(binding.progressbar)
         Timber.d("called loginTo user = $user")
         val usersLogins = ArrayList<String>()
         users.forEach { it.login?.let { login -> usersLogins.add(login) } }
@@ -64,7 +67,7 @@ class LoginActivity : BaseActivity() {
             InjectorUtils.provideUserListViewModelFactory(this, usersLogins)
         }
         fun errorProcessing(msg: String) {
-            hideProgress(progressbar)
+            hideProgress(binding.progressbar)
             Toast.makeText(
                 applicationContext,
                 msg,
@@ -110,7 +113,7 @@ class LoginActivity : BaseActivity() {
             PushService.instance.subscribeToPushesIfNeed(this)
             startDialogsScreen()
         }, { error ->
-            hideProgress(progressbar)
+            hideProgress(binding.progressbar)
             Toast.makeText(
                 applicationContext,
                 getString(R.string.login_chat_login_error, error.message),
@@ -120,7 +123,7 @@ class LoginActivity : BaseActivity() {
     }
 
     fun startDialogsScreen() {
-        hideProgress(progressbar)
+        hideProgress(binding.progressbar)
         startDialogs()
     }
 
@@ -141,11 +144,11 @@ class LoginActivity : BaseActivity() {
 
     private fun initUserAdapter() {
         val userList: ArrayList<String> = ArrayList(users.size)
-        users.forEach { user -> user.login?.let { it -> userList.add(it) } }
+        users.forEach { user -> user.login?.let { userList.add(it) } }
         adapter = ArrayAdapter(this, R.layout.list_item_user_simple, userList)
-        list_users.adapter = adapter
-        list_users.choiceMode = ListView.CHOICE_MODE_SINGLE
-        list_users.onItemClickListener = AdapterView.OnItemClickListener { _, _, position, _ ->
+        binding.listUsers.adapter = adapter
+        binding.listUsers.choiceMode = ListView.CHOICE_MODE_SINGLE
+        binding.listUsers.onItemClickListener = AdapterView.OnItemClickListener { _, _, position, _ ->
             loginWithSession(users[position])
         }
     }

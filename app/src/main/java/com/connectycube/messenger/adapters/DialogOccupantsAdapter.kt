@@ -227,8 +227,8 @@ internal class DialogOccupantsAdapter(
             }
         }
 
-        override fun onMenuItemClick(item: MenuItem?): Boolean {
-            when (item?.itemId) {
+        override fun onMenuItemClick(item: MenuItem): Boolean {
+            when (item.itemId) {
                 MENU_ITEM_ADMIN_ADD -> notifyAddAdmin()
                 MENU_ITEM_ADMIN_REMOVE -> notifyRemoveAdmin()
                 MENU_ITEM_OCCUPANT_REMOVE -> notifyRemoveOccupant()

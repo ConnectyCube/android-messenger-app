@@ -19,7 +19,9 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-        <include layout="@layout/outgoing_view" />
+        <include
+            android:id="@+id/outgoing_view"
+            layout="@layout/outgoing_view" />
 
         <Chronometer
                 android:id="@+id/chronometer"

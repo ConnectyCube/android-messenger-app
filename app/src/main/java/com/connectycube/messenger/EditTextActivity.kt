@@ -9,7 +9,7 @@ import android.text.TextWatcher
 import android.view.MenuItem
 import androidx.appcompat.app.ActionBar.DISPLAY_HOME_AS_UP
 import androidx.appcompat.app.ActionBar.DISPLAY_SHOW_TITLE
-import kotlinx.android.synthetic.main.activity_edit_text.*
+import com.connectycube.messenger.databinding.ActivityEditTextBinding
 
 const val EXTRA_TITLE: String = "extra_title"
 const val EXTRA_DESCRIPTION: String = "extra_description"
@@ -20,10 +20,12 @@ const val EXTRA_DATA: String = "extra_data"
 
 
 class EditTextActivity : BaseChatActivity() {
+    private lateinit var binding: ActivityEditTextBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_edit_text)
+        binding = ActivityEditTextBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         initToolbar()
         initViews()
     }
@@ -35,29 +37,29 @@ class EditTextActivity : BaseChatActivity() {
 
     private fun initViews() {
         val maxLength: Int = intent.getIntExtra(EXTRA_MAX_LENGTH, 0)
-        edit_text.hint = intent.getStringExtra(EXTRA_HINT)
+        binding.editText.hint = intent.getStringExtra(EXTRA_HINT)
 
         if (maxLength > 0) {
-            edit_text.filters = arrayOf(InputFilter.LengthFilter(maxLength))
+            binding.editText.filters = arrayOf(InputFilter.LengthFilter(maxLength))
         }
 
-        edit_text.addTextChangedListener(object : TextWatcher {
+        binding.editText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
                 if (s == null) return
 
                 if (maxLength > 0) {
-                    length_countdown_txt.text = (maxLength - s.length).toString()
+                    binding.lengthCountdownTxt.text = (maxLength - s.length).toString()
                 } else {
-                    length_countdown_txt.text = s.length.toString()
+                    binding.lengthCountdownTxt.text = s.length.toString()
                 }
             }
         })
 
-        edit_text.setText(intent.getStringExtra(EXTRA_EXIST_VALUE))
-        description_txt.text = intent.getStringExtra(EXTRA_DESCRIPTION)
-        ok_btn.setOnClickListener { applyEdit(edit_text.text) }
+        binding.editText.setText(intent.getStringExtra(EXTRA_EXIST_VALUE))
+        binding.descriptionTxt.text = intent.getStringExtra(EXTRA_DESCRIPTION)
+        binding.okBtn.setOnClickListener { applyEdit(binding.editText.text) }
     }
 
     private fun applyEdit(text: Editable) {

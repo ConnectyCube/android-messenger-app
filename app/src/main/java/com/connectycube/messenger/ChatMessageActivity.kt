@@ -29,7 +29,6 @@ import com.google.android.material.button.MaterialButton.ICON_GRAVITY_START
 import com.google.android.material.button.MaterialButton.ICON_GRAVITY_TEXT_END
 import com.timehop.stickyheadersrecyclerview.StickyRecyclerHeadersDecoration
 import com.zhihu.matisse.Matisse
-import kotlinx.android.synthetic.main.activity_chatmessages.*
 import com.connectycube.ConnectyCube
 import com.connectycube.chat.models.ConnectycubeAttachment
 import com.connectycube.chat.models.ConnectycubeDialog
@@ -38,6 +37,7 @@ import com.connectycube.chat.models.ConnectycubeMessage
 import com.connectycube.chat.realtime.ConnectycubeChatTypingListener
 import com.connectycube.chat.realtime.ConnectycubeMessageListener
 import com.connectycube.chat.realtime.ConnectycubeMessageSentListener
+import com.connectycube.messenger.databinding.ActivityChatmessagesBinding
 import com.connectycube.users.models.ConnectycubeUser
 import timber.log.Timber
 import java.util.*
@@ -52,6 +52,7 @@ const val REQUEST_CODE_DETAILS = 55
 
 class ChatMessageActivity : BaseChatActivity() {
 
+    private lateinit var binding: ActivityChatmessagesBinding
     private val attachmentClickListener: AttachmentClickListener = this::onMessageAttachmentClicked
     private val markAsReadListener: MarkAsReadListener = this::onMarkAsReadPerform
     private val messageListener: ChatMessageListener = ChatMessageListener()
@@ -85,8 +86,9 @@ class ChatMessageActivity : BaseChatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Timber.d("onCreate")
-        setContentView(R.layout.activity_chatmessages)
-        setSupportActionBar(toolbar)
+        binding = ActivityChatmessagesBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        setSupportActionBar(binding.toolbar)
         initWithData()
     }
 
@@ -230,9 +232,9 @@ class ChatMessageActivity : BaseChatActivity() {
                             this,
                             chatDialog.type == ConnectycubeDialogType.PRIVATE,
                             chatDialog.photo,
-                            avatar_img
+                            binding.avatarImg
                         )
-                        chat_message_name.text = chatDialog.name
+                        binding.chatMessageName.text = chatDialog.name
                         subscribeToOccupants(chatDialog)
                     }
                 }
@@ -250,14 +252,14 @@ class ChatMessageActivity : BaseChatActivity() {
 
         initManagers()
 
-        input_chat_message.addTextChangedListener(textTypingWatcher)
+        binding.inputChatMessage.addTextChangedListener(textTypingWatcher)
     }
 
     private fun initToolbar() {
-        back_btn.setOnClickListener { onBackPressed() }
-        toolbar_layout.setSingleOnClickListener { startChatDetailsActivity() }
-        loadChatDialogPhoto(this, chatDialog.type == ConnectycubeDialogType.PRIVATE, chatDialog.photo, avatar_img)
-        chat_message_name.text = chatDialog.name
+        binding.backBtn.setOnClickListener { onBackPressed() }
+        binding.toolbarLayout.setSingleOnClickListener { startChatDetailsActivity() }
+        loadChatDialogPhoto(this, chatDialog.type == ConnectycubeDialogType.PRIVATE, chatDialog.photo, binding.avatarImg)
+        binding.chatMessageName.text = chatDialog.name
     }
 
     private fun subscribeToOccupants(chatDialog: ConnectycubeDialog = this.chatDialog) {
@@ -280,7 +282,7 @@ class ChatMessageActivity : BaseChatActivity() {
                         addAll(occupants.map { it.value.fullName ?: it.value.login!! })
                     }
 
-                    if (chatDialog.type != ConnectycubeDialogType.PRIVATE) chat_message_members_typing.text = membersNames.joinToString()
+                    if (chatDialog.type != ConnectycubeDialogType.PRIVATE) binding.chatMessageMembersTyping.text = membersNames.joinToString()
                 }
             }
         })
@@ -302,12 +304,12 @@ class ChatMessageActivity : BaseChatActivity() {
 
     private fun initChatAdapter() {
         chatAdapter = ChatMessageAdapter(this, chatDialog, attachmentClickListener, markAsReadListener)
-        scroll_fb.setOnClickListener { scrollDown() }
+        binding.scrollFb.setOnClickListener { scrollDown() }
         layoutManager.stackFromEnd = false
         layoutManager.reverseLayout = true
-        messages_recycleview.layoutManager = layoutManager
-        messages_recycleview.adapter = chatAdapter
-        messages_recycleview.addItemDecoration(
+        binding.messagesRecycleview.layoutManager = layoutManager
+        binding.messagesRecycleview.adapter = chatAdapter
+        binding.messagesRecycleview.addItemDecoration(
             MarginItemDecoration(
                 resources.getDimension(R.dimen.margin_normal).toInt()
             )
@@ -322,12 +324,12 @@ class ChatMessageActivity : BaseChatActivity() {
             }
         })
 
-        messages_recycleview.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+        binding.messagesRecycleview.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             fun shrinkFab() {
-                scroll_fb.iconGravity = ICON_GRAVITY_START
-                scroll_fb.shrink()
-                scroll_fb.hide(false)
-                scroll_fb.text = ""
+                binding.scrollFb.iconGravity = ICON_GRAVITY_START
+                binding.scrollFb.shrink()
+                binding.scrollFb.hide(false)
+                binding.scrollFb.text = ""
             }
 
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
@@ -345,25 +347,25 @@ class ChatMessageActivity : BaseChatActivity() {
                 }
 
                 if (totalItemCount > 0 && shouldShow) {
-                    if (!scroll_fb.isShown) {
-                        scroll_fb.show(false)
-                        scroll_fb.alpha = 0.3f
+                    if (!binding.scrollFb.isShown) {
+                        binding.scrollFb.show(false)
+                        binding.scrollFb.alpha = 0.3f
                     }
                     val count: String? =
-                        Regex(pattern = "\\d+").find(input = scroll_fb.text.toString())?.value
+                        Regex(pattern = "\\d+").find(input = binding.scrollFb.text.toString())?.value
                     val shouldAddCounter =
-                        scroll_fb.text.isEmpty() || count?.toInt() != modelChatMessageList.unreadCounter
+                        binding.scrollFb.text.isEmpty() || count?.toInt() != modelChatMessageList.unreadCounter
                     if (modelChatMessageList.unreadCounter > 0 && shouldAddCounter) {
-                        scroll_fb.iconGravity = ICON_GRAVITY_TEXT_END
-                        scroll_fb.text =
+                        binding.scrollFb.iconGravity = ICON_GRAVITY_TEXT_END
+                        binding.scrollFb.text =
                             getString(
                                 R.string.fbd_scroll_counter_label,
                                 modelChatMessageList.unreadCounter.toString()
                             )
-                        scroll_fb.extend()
+                        binding.scrollFb.extend()
                     }
                 } else {
-                    if (scroll_fb.isShown) shrinkFab()
+                    if (binding.scrollFb.isShown) shrinkFab()
                 }
                 if (firstVisible == 0) {
                     modelChatMessageList.unreadCounter = 0
@@ -373,9 +375,9 @@ class ChatMessageActivity : BaseChatActivity() {
         modelChatMessageList.refreshState.observe(this, Observer {
             Timber.d("refreshState= $it")
             if (it.status == Status.RUNNING && chatAdapter.itemCount == 0) {
-                showProgress(progressbar)
+                showProgress(binding.progressbar)
             } else if (it.status == Status.SUCCESS) {
-                hideProgress(progressbar)
+                hideProgress(binding.progressbar)
             }
         })
 
@@ -417,7 +419,7 @@ class ChatMessageActivity : BaseChatActivity() {
         unsubscribeModels()
         if (ConnectyCube.chat.isLoggedIn()) {
             unregisterChatManagers()
-            input_chat_message.removeTextChangedListener(textTypingWatcher)
+            binding.inputChatMessage.removeTextChangedListener(textTypingWatcher)
         }
     }
 
@@ -429,7 +431,7 @@ class ChatMessageActivity : BaseChatActivity() {
     }
 
     fun onSendChatClick(view: View) {
-        val text = input_chat_message.text.toString().trim()
+        val text = binding.inputChatMessage.text.toString().trim()
         if (text.isNotEmpty()) sendChatMessage(text)
     }
 
@@ -457,7 +459,7 @@ class ChatMessageActivity : BaseChatActivity() {
         }
         modelChatMessageList.scroll = true
         modelMessageSender.sendMessage(text)
-        input_chat_message.setText("")
+        binding.inputChatMessage.setText("")
     }
 
     fun submitMessage(message: ConnectycubeMessage) {
@@ -479,7 +481,7 @@ class ChatMessageActivity : BaseChatActivity() {
     }
 
     fun scrollDown() {
-        messages_recycleview.scrollToPosition(0)
+        binding.messagesRecycleview.scrollToPosition(0)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -584,8 +586,8 @@ class ChatMessageActivity : BaseChatActivity() {
     inner class TimerTypingTask : TimerTask() {
         override fun run() {
             runOnUiThread {
-                if (chatDialog.type != ConnectycubeDialogType.PRIVATE) chat_message_members_typing.text = membersNames.joinToString()
-                else chat_message_members_typing.text = null
+                if (chatDialog.type != ConnectycubeDialogType.PRIVATE) binding.chatMessageMembersTyping.text = membersNames.joinToString()
+                else binding.chatMessageMembersTyping.text = null
             }
         }
     }
@@ -604,7 +606,7 @@ class ChatMessageActivity : BaseChatActivity() {
             userStatus?.let {
                 userStatus = getString(R.string.chat_typing, userStatus)
             }
-            chat_message_members_typing.text = userStatus
+            binding.chatMessageMembersTyping.text = userStatus
             restartTypingTimer()
         }
 

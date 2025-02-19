@@ -10,9 +10,8 @@ import androidx.lifecycle.observe
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.connectycube.messenger.adapters.CheckableUsersAdapter
+import com.connectycube.messenger.databinding.ActivitySelectUsersBinding
 import com.connectycube.messenger.viewmodels.SelectUsersViewModel
-import kotlinx.android.synthetic.main.activity_create_chat.users_recycler_view
-import kotlinx.android.synthetic.main.activity_select_users.*
 import com.connectycube.users.models.ConnectycubeUser
 import java.util.*
 
@@ -23,12 +22,14 @@ abstract class SelectUsersBaseActivity<VM : SelectUsersViewModel> : BaseChatActi
 
     abstract fun getViewMode(): VM
 
+    protected lateinit var binding: ActivitySelectUsersBinding
     private lateinit var usersAdapter: CheckableUsersAdapter
     private var selectedUsers: MutableList<ConnectycubeUser> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_select_users)
+        binding = ActivitySelectUsersBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         initToolbar()
         initUserAdapter()
         initViews()
@@ -44,9 +45,9 @@ abstract class SelectUsersBaseActivity<VM : SelectUsersViewModel> : BaseChatActi
     }
 
     protected fun initViews() {
-        users_recycler_view.layoutManager = LinearLayoutManager(this)
-        users_recycler_view.itemAnimator = DefaultItemAnimator()
-        users_recycler_view.adapter = usersAdapter
+        binding.usersRecyclerView.layoutManager = LinearLayoutManager(this)
+        binding.usersRecyclerView.itemAnimator = DefaultItemAnimator()
+        binding.usersRecyclerView.adapter = usersAdapter
     }
 
     protected open fun loadData() {
@@ -60,9 +61,9 @@ abstract class SelectUsersBaseActivity<VM : SelectUsersViewModel> : BaseChatActi
     protected open fun setUsers(users: List<ConnectycubeUser>?) {
         if (users?.isNotEmpty()!!) {
             usersAdapter.setItems(users)
-            txt_empty_list.visibility = View.GONE
+            binding.txtEmptyList.visibility = View.GONE
         } else {
-            txt_empty_list.visibility = View.VISIBLE
+            binding.txtEmptyList.visibility = View.VISIBLE
         }
     }
 

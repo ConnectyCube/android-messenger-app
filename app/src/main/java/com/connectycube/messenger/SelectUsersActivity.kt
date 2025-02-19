@@ -5,7 +5,6 @@ import androidx.lifecycle.observe
 import com.connectycube.messenger.utilities.InjectorUtils
 import com.connectycube.messenger.viewmodels.SelectUsersViewModel
 import com.connectycube.messenger.vo.Status
-import kotlinx.android.synthetic.main.activity_create_chat.*
 
 const val EXTRA_FILTER_IDS = "filter_ids"
 
@@ -24,10 +23,10 @@ class SelectUsersActivity : SelectUsersBaseActivity<SelectUsersViewModel>() {
         getViewMode().getUsers(intent.extras!!.getIntegerArrayList(EXTRA_FILTER_IDS)!!)
             .observe(this) { result ->
                 when (result.status) {
-                    Status.LOADING -> showProgress(progressbar)
-                    Status.ERROR -> hideProgress(progressbar)
+                    Status.LOADING -> showProgress(binding.progressbar)
+                    Status.ERROR -> hideProgress(binding.progressbar)
                     Status.SUCCESS -> {
-                        hideProgress(progressbar)
+                        hideProgress(binding.progressbar)
                         val users = result.data
                         setUsers(users)
                     }

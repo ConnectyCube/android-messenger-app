@@ -3,14 +3,17 @@ package com.connectycube.messenger
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.os.Handler
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.view.ViewTreeObserver
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import com.connectycube.messenger.adapters.VideoCallAdapter
-import kotlinx.android.synthetic.main.fragment_video_call.*
+import com.connectycube.messenger.databinding.FragmentVideoCallBinding
 import com.connectycube.users.models.ConnectycubeUser
 import com.connectycube.webrtc.*
 import com.connectycube.webrtc.callbacks.RTCSessionEventsCallback
@@ -25,9 +28,13 @@ private const val SPAN_COUNT = 2
 private const val VIDEO_TRACK_INITIALIZE_DELAY = 500L
 
 class VideoCallFragment :
-    BaseCallFragment(R.layout.fragment_video_call, R.string.title_video_call),
+    BaseCallFragment(R.string.title_video_call),
     VideoTracksCallback<P2PSession>, RTCSessionStateCallback<P2PSession>,
     RTCSessionEventsCallback {
+
+    val binding by lazy {
+        _binding as FragmentVideoCallBinding
+    }
     private lateinit var videoCallAdapter: VideoCallAdapter
     private val userViewHolders: HashMap<Int, VideoCallAdapter.ViewHolder> = HashMap()
     private var users: ArrayList<ConnectycubeUser> = ArrayList()
@@ -46,6 +53,15 @@ class VideoCallFragment :
                 )
             )
         )
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        _binding = FragmentVideoCallBinding.inflate(inflater, container, false)
+        return _binding?.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -74,7 +90,7 @@ class VideoCallFragment :
     }
 
     private fun releaseUsersViews() {
-        val layoutManager = recycler_view_opponents.layoutManager
+        val layoutManager = binding.recyclerViewOpponents.layoutManager
         layoutManager?.let { manager ->
             val childCount = manager.childCount
             Timber.d("releaseUsersViews for  $childCount views")
@@ -83,7 +99,7 @@ class VideoCallFragment :
                 Timber.d(" release View for  $i, $childView")
                 childView?.let {
                     val childViewHolder =
-                        recycler_view_opponents.getChildViewHolder(it) as VideoCallAdapter.ViewHolder
+                        binding.recyclerViewOpponents.getChildViewHolder(it) as VideoCallAdapter.ViewHolder
                     childViewHolder.rtcView.release()
                 }
             }
@@ -91,13 +107,13 @@ class VideoCallFragment :
     }
 
     private fun initButtons() {
-        toggle_camera.setOnClickListener { switchCamera() }
-        toggle_mute_camera.setOnClickListener { setMuteCamera(toggle_mute_camera.isChecked) }
-        toggle_mute_mic.setOnClickListener { setMuteAudio(toggle_mute_mic.isChecked) }
+        binding.toggleCamera.setOnClickListener { switchCamera() }
+        binding.toggleCamera.setOnClickListener { setMuteCamera(binding.toggleCamera.isChecked) }
+        binding.toggleMuteMic.setOnClickListener { setMuteAudio(binding.toggleMuteMic.isChecked) }
     }
 
     private fun switchCamera() {
-        toggle_camera.isEnabled = false
+        binding.toggleCamera.isEnabled = false
         currentSession?.mediaStreamManager?.videoCapturer?.switchCamera(cameraSwitchHandler)
     }
 
@@ -120,30 +136,42 @@ class VideoCallFragment :
         }
     }
 
+    override fun textOpponentsNames(): TextView {
+        return binding.outgoingView.textOpponentsNames
+    }
+
+    override fun layoutOutgoingView(): View {
+        return binding.outgoingView.root
+    }
+
+    override fun buttonHangup(): View {
+        return binding.callHangUp.buttonHangup
+    }
+
     override fun initViews() {
         super.initViews()
-        chronometerInCall = chronometer
+        chronometerInCall = binding.chronometer
         initRecyclerView()
         initAdapter()
     }
 
     private fun initRecyclerView() {
-        recycler_view_opponents.setHasFixedSize(false)
+        binding.recyclerViewOpponents.setHasFixedSize(false)
         val layoutManager = GridLayoutManager(activity, SPAN_COUNT)
         layoutManager.reverseLayout = false
         layoutManager.spanSizeLookup = SpanSizeLookupForCall().apply {
             isSpanIndexCacheEnabled = false
         }
-        recycler_view_opponents.layoutManager = layoutManager
-        recycler_view_opponents.itemAnimator = null
+        binding.recyclerViewOpponents.layoutManager = layoutManager
+        binding.recyclerViewOpponents.itemAnimator = null
 
-        recycler_view_opponents.viewTreeObserver.addOnGlobalLayoutListener(object :
+        binding.recyclerViewOpponents.viewTreeObserver.addOnGlobalLayoutListener(object :
                                                                                ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
-                val height = recycler_view_opponents.height
+                val height = binding.recyclerViewOpponents.height
                 if (height != 0) {
                     updateAllViewHeight(height)
-                    recycler_view_opponents.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                    binding.recyclerViewOpponents.viewTreeObserver.removeOnGlobalLayoutListener(this)
                 }
             }
         })
@@ -151,16 +179,16 @@ class VideoCallFragment :
 
     private fun updateViewSizeIfNeed() {
         val height = if (videoCallAdapter.itemCount < 2) {
-            recycler_view_opponents.height
+            binding.recyclerViewOpponents.height
         } else {
-            recycler_view_opponents.height / 2
+            binding.recyclerViewOpponents.height / 2
         }
         initCurrentUserViewHeight(height)
         videoCallAdapter.itemHeight = height
     }
 
     private fun initCurrentUserViewHeight(height: Int) {
-        val holder = recycler_view_opponents.findViewHolderForAdapterPosition(0)
+        val holder = binding.recyclerViewOpponents.findViewHolderForAdapterPosition(0)
         if (holder is VideoCallAdapter.ViewHolder) {
             videoCallAdapter.initViewHeight(holder, height)
         }
@@ -186,11 +214,11 @@ class VideoCallFragment :
     }
 
     private fun findHolder(userId: Int): VideoCallAdapter.ViewHolder? {
-        val childCount = recycler_view_opponents.getChildCount()
+        val childCount = binding.recyclerViewOpponents.getChildCount()
         for (i in 0 until childCount) {
-            val childView = recycler_view_opponents.getChildAt(i)
+            val childView = binding.recyclerViewOpponents.getChildAt(i)
             val childViewHolder =
-                recycler_view_opponents.getChildViewHolder(childView) as VideoCallAdapter.ViewHolder
+                binding.recyclerViewOpponents.getChildViewHolder(childView) as VideoCallAdapter.ViewHolder
             if (userId == childViewHolder.userId) {
                 return childViewHolder
             }
@@ -202,7 +230,7 @@ class VideoCallFragment :
         val itemHeight = itemHeight()
         val connectycubeUsers = ArrayList<ConnectycubeUser>()
         videoCallAdapter = VideoCallAdapter(connectycubeUsers, itemHeight)
-        recycler_view_opponents.adapter = videoCallAdapter
+        binding.recyclerViewOpponents.adapter = videoCallAdapter
     }
 
     private fun itemHeight(): Int {
@@ -320,7 +348,7 @@ class VideoCallFragment :
 
     private fun setUserToAdapter(user: ConnectycubeUser) {
         videoCallAdapter.add(user)
-        recycler_view_opponents.requestLayout()
+        binding.recyclerViewOpponents.requestLayout()
     }
 
     private fun setUserToAdapter(userId: Int) {
@@ -405,13 +433,13 @@ class VideoCallFragment :
 
     private inner class CameraSwitchHandler : CameraVideoCapturer.CameraSwitchHandler {
         override fun onCameraSwitchDone(isFront: Boolean) {
-            toggle_camera.isEnabled = true
+            binding.toggleCamera.isEnabled = true
             isCameraFront = !isCameraFront
 
             val localView = getViewHolderForUser(currentUser.id)?.rtcView
-                localView?.let {
-                    updateVideoView(it, isCameraFront)
-                }
+            localView?.let {
+                updateVideoView(it, isCameraFront)
+            }
         }
 
         override fun onCameraSwitchError(err: String?) {
@@ -419,7 +447,7 @@ class VideoCallFragment :
                 context, getString(R.string.camera_switch_error),
                 Toast.LENGTH_SHORT
             ).show()
-            toggle_camera.isEnabled = true
+            binding.toggleCamera.isEnabled = true
         }
     }
 }

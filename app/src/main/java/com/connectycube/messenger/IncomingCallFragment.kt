@@ -1,7 +1,9 @@
 package com.connectycube.messenger
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -11,15 +13,17 @@ import com.connectycube.messenger.helpers.RingtoneManager
 import com.connectycube.messenger.utilities.loadUserAvatar
 import com.connectycube.messenger.viewmodels.CallViewModel
 import com.connectycube.messenger.vo.Status
-import kotlinx.android.synthetic.main.fragment_incoming_call.*
 import com.connectycube.ConnectyCube
+import com.connectycube.messenger.databinding.FragmentIncomingCallBinding
 import com.connectycube.users.models.ConnectycubeUser
 import com.connectycube.webrtc.CallType
 import com.connectycube.webrtc.P2PSession
 import timber.log.Timber
 
 
-class IncomingCallFragment : Fragment(R.layout.fragment_incoming_call) {
+class IncomingCallFragment : Fragment() {
+    private var binding: FragmentIncomingCallBinding? = null
+
     private var currentSession: P2PSession? = null
     private lateinit var ringtoneManager: RingtoneManager
     private var opponentsIds: List<Int>? = null
@@ -33,6 +37,15 @@ class IncomingCallFragment : Fragment(R.layout.fragment_incoming_call) {
         val actionBar = (activity as AppCompatActivity).supportActionBar
         actionBar?.setTitle(R.string.title_incoming_call)
         ringtoneManager = RingtoneManager(context!!)
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        binding = FragmentIncomingCallBinding.inflate(inflater, container, false)
+        return binding?.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -52,6 +65,11 @@ class IncomingCallFragment : Fragment(R.layout.fragment_incoming_call) {
     override fun onPause() {
         super.onPause()
         stopRingtone()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        binding = null
     }
 
     private fun startRingtone() {
@@ -78,14 +96,14 @@ class IncomingCallFragment : Fragment(R.layout.fragment_incoming_call) {
                 if (result.status == Status.SUCCESS) {
                     val callerUser: ConnectycubeUser =
                         result.data!!.first { it.id == session.getCallerId() }
-                    loadUserAvatar(context!!, callerUser, image_avatar)
-                    text_name.text = callerUser.fullName ?: callerUser.login
+                    loadUserAvatar(context!!, callerUser, binding!!.imageAvatar)
+                    binding!!.textName.text = callerUser.fullName ?: callerUser.login
                     val opponentsFiltered =
                         result.data.filterNot { it.id != session.getCallerId() || it.id != ConnectyCube.chat.userForLogin!!.id }
                     val names = opponentsFiltered.joinToString { it.fullName ?: it.login?: "" }
                     if (names.isNotEmpty()) {
-                        text_on_call.visibility = View.VISIBLE
-                        text_other_name.text = names
+                        binding!!.textOnCall.visibility = View.VISIBLE
+                        binding!!.textOtherName.text = names
                     }
                 }
             })
@@ -97,13 +115,13 @@ class IncomingCallFragment : Fragment(R.layout.fragment_incoming_call) {
 
     private fun setCallType() {
         val isVideoCall = conferenceType == CallType.VIDEO
-        text_call_type.text =
+        binding!!.textCallType.text =
             if (isVideoCall) getString(R.string.incoming_video_call_title) else getString(R.string.incoming_audio_call_title)
     }
 
     private fun initButtons() {
-        button_reject_call.setOnClickListener { reject() }
-        button_accept_call.setOnClickListener { accept() }
+        binding!!.buttonRejectCall.setOnClickListener { reject() }
+        binding!!.buttonAcceptCall.setOnClickListener { accept() }
     }
 
     private fun reject() {
