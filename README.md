@@ -35,7 +35,7 @@ This project contains a chat and voice / video calling app for Android written i
 
 1. Register new account and application at <https://admin.connectycube.com>
 
-2. Put Application credentials from Overview page from <https://admin.connectycube.com/account/settings> to **app/src/main/java/com/connectycube/messenger/utilities/SettingsProvider.kt** class
+2. Put **App ID** and **Authorization Key** from Credentials tab to **app/src/main/java/com/connectycube/messenger/utilities/SettingsProvider.kt** class
 
 3. Follow to <https://admin.connectycube.com> and create users in **Users** module. Then put to the **app/src/main/assets/user_configiration.json** file at least 2 and max 5 users with format *[\"login\":{\"password\":userId}]*, for ex. *"userchatLogin1":{"userchatPassword1":310}*.
 
