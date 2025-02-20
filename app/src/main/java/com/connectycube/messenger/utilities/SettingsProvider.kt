@@ -10,8 +10,8 @@ object SettingsProvider {
 
     // ConnectyCube Application credentials
     //
-    private val applicationId = "REPLACE_APP_ID"
-    private val authKey = "REPLACE_APP_AUTH_KEY"
+    private val appID = "8160"
+    private val authKey = "89096191-4555-42B6-BE6D-021F22DD86B5"
 
     fun initConnectycubeCredentials(applicationContext: Context) {
         checkConfigJson(applicationContext)
@@ -20,17 +20,17 @@ object SettingsProvider {
     }
 
     private fun initCredentials(applicationContext: Context) {
-        ConnectyCubeAndroid.init(applicationId, authKey, context = applicationContext)
+        ConnectyCubeAndroid.init(appID, authKey, context = applicationContext)
         ConnectycubeSettings.isDebugEnabled = true
 
         // Uncomment and put your Api and Chat servers endpoints if you want to point the sample
         // against your own server.
 //        val connectycubeConfig: ConnectycubeConfig = ConnectycubeConfig("https://your_api_endpoint.com", "your_chat_endpoint")
-//        ConnectyCubeAndroid.init(applicationId, authKey, connectycubeConfig, context = applicationContext)
+//        ConnectyCubeAndroid.init(appID, authKey, connectycubeConfig, context = applicationContext)
     }
 
     private fun checkConfigJson(applicationContext: Context) {
-        if (applicationId.isEmpty() || authKey.isEmpty()) {
+        if (appID.isEmpty() || authKey.isEmpty()) {
             throw AssertionError(applicationContext.getString(R.string.error_credentials_empty))
         }
     }
