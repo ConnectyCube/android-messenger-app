@@ -52,12 +52,15 @@ class UserRepository private constructor(
                     appExecutors.diskIO().execute { userDao.insert(response.body) }
                     result.value = Resource.success(response.body.conUser)
                 }
+
                 is ApiEmptyResponse -> {
                     result.value = Resource.success(null)
                 }
+
                 is ApiProgressResponse -> {
                     result.value = Resource.loadingProgress(null, response.progress)
                 }
+
                 is ApiErrorResponse -> {
                     result.value = Resource.error(response.errorMessage, null)
                 }
@@ -82,7 +85,10 @@ class UserRepository private constructor(
                 userDao.insertAll(item)
             }
 
-            override fun shouldFetch(data: List<User>?, newData: List<User>?) = data.isNullOrEmpty()
+            override fun shouldFetch(data: List<User>?, newData: List<User>?): Boolean {
+                val result = !(data?.map { user -> user.login }?.containsAll(usersLogins) ?: false)
+                return result
+            }
 
             override fun loadFromDb() = userDao.getUsers()
 

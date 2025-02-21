@@ -10,8 +10,8 @@ object SettingsProvider {
 
     // ConnectyCube Application credentials
     //
-    private val appID = "8160"
-    private val authKey = "89096191-4555-42B6-BE6D-021F22DD86B5"
+    private val appID = "REPLACE_APP_ID"
+    private val authKey = "REPLACE_APP_AUTH_KEY"
 
     fun initConnectycubeCredentials(applicationContext: Context) {
         checkConfigJson(applicationContext)
