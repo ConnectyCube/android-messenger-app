@@ -58,6 +58,8 @@ For more information look at <https://developers.connectycube.com/android/push-n
 
 ## Have an issue?
 
+Join our [Discord](https://discord.gg/wDwbvJmD) for quick answers to your questions!
+
 Got troubles with integration? Create an issue at [Issues page](https://github.com/ConnectyCube/android-messenger-app/issues)
 
 **Want to support our team**:<br>
