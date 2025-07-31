@@ -156,9 +156,8 @@ class ConnectycubeService {
 
     fun updateDialogDescription(dialogId: String, newGroupDescription: String): LiveData<ApiResponse<Chat>> {
         val chatDialog = ConnectycubeDialog(dialogId = dialogId)
-        chatDialog.description = newGroupDescription
 
-        return updateChatDialog(chatDialog)
+        return updateChatDialog(chatDialog, mapOf("description" to newGroupDescription))
     }
 
     fun updateDialogDescription(dialogId: String,
@@ -166,16 +165,14 @@ class ConnectycubeService {
                                 callback: ResponsePerformer.Callback<Chat>
     ) {
         val chatDialog = ConnectycubeDialog(dialogId = dialogId)
-        chatDialog.description = newGroupDescription
 
-        updateChatDialogSync(chatDialog, callback)
+        updateChatDialogSync(chatDialog, mapOf("description" to newGroupDescription), callback)
     }
 
     fun updateDialogName(dialogId: String, newGroupName: String): LiveData<ApiResponse<Chat>> {
         val chatDialog = ConnectycubeDialog(dialogId = dialogId)
-        chatDialog.name = newGroupName
 
-        return updateChatDialog(chatDialog)
+        return updateChatDialog(chatDialog, mapOf("name" to newGroupName))
     }
 
     fun updateDialogName(dialogId: String,
@@ -183,9 +180,8 @@ class ConnectycubeService {
                          callback: ResponsePerformer.Callback<Chat>
     ) {
         val chatDialog = ConnectycubeDialog(dialogId = dialogId)
-        chatDialog.name = newGroupName
 
-        updateChatDialogSync(chatDialog, callback)
+        updateChatDialogSync(chatDialog, mapOf("name" to newGroupName), callback)
     }
 
     fun updateDialogPhoto(dialogId: String, newGroupPhotoUrl: String): LiveData<ApiResponse<Chat>> {

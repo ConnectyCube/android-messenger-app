@@ -18,7 +18,7 @@ fun convertToUsers(list: List<ConnectycubeUser>): List<User> {
 }
 
 fun convertToUser(user: ConnectycubeUser): User {
-    return User(user.id, user.login!!, user.fullName!!, user)
+    return User(user.id, user.login!!, user.fullName ?: "fullName", user)
 }
 
 fun convertToChats(list: List<ConnectycubeDialog>): List<Chat> {

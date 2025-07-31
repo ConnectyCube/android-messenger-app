@@ -22,7 +22,7 @@ open class LiveDataResponsePerformer<T, R> {
                                 val wrapped = converter.convertTo(performer.invoke())
                                 postValue(ApiResponse.create(wrapped, null))
                             } catch (ex: Exception) {
-                                Timber.d("loadFileAsAttachment Exception= $ex")
+                                Timber.d("LiveDataResponsePerformer Exception= $ex")
                                 postValue(ApiResponse.create(ex))
                             }
                         }
