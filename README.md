@@ -56,7 +56,7 @@ For more information look at <https://developers.connectycube.com/android/push-n
 
 ## Have an issue?
 
-Join our [Discord](https://discord.com/invite/zqbBWNCCFJ) community to get real-time help from our team
+Join our [Discord](https://discord.com/invite/zqbBWNCCFJ) community to get real-time help from our team or create an issue at [GitHub issues page](https://github.com/ConnectyCube/android-messenger-app/issues).
 
 ## Community
 
